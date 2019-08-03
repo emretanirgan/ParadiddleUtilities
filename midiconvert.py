@@ -3,23 +3,6 @@ import json
 import os
 
 out_dict = {}  
-# data['people'] = []  
-# data['people'].append({  
-#     'name': 'Scott',
-#     'website': 'stackabuse.com',
-#     'from': 'Nebraska'
-# })
-# data['people'].append({  
-#     'name': 'Larry',
-#     'website': 'google.com',
-#     'from': 'Michigan'
-# })
-# data['people'].append({  
-#     'name': 'Tim',
-#     'website': 'apple.com',
-#     'from': 'Alabama'
-# })
-
 # TODO set up GUI for input midi, input drum set, output recording file names with file dialogs for each
 
 # TODO user should specify drum set file path, if not use default set file
@@ -53,7 +36,10 @@ class_to_default_notes = {
     "BP_Tom1_C"     : 48,
     "BP_Tom2_C"     : 49
 }
-# note_to_drums_map = {57:["BP_Snare_Default"]}
+
+rhythm_midi_notes = {
+
+}
 note_to_drums_map = {}
 
 if drum_set_dict is None:
@@ -66,12 +52,20 @@ else:
     out_dict["DrumLayout"] = drum_set_dict["DrumLayout"]
 
 out_dict["DrumHits"] = []
-mid = MidiFile('C:/Users/Emre/Documents/ParadiddleMidiConverter/midi_files/MIDI_sample.midi')
+midi_file_name = 'C:/Users/Emre/Perforce/ParadiddleUtilities/midi_files/notes.mid'
+mid = MidiFile(midi_file_name)
 print(note_to_drums_map)
 
 tempo = 50000
 total_time = 0.0
 longest_time = 0.0
+
+#TODO Pick track to convert to rlrr
+#TODO need default midi mappings for rhythm game midi format - get difficulties, map from those midi notes
+#https://rockband.scorehero.com/forum/viewtopic.php?t=1711
+#https://www.scorehero.com/forum/viewtopic.php?t=1179
+#TODO convert from .chart
+#TODO don't hard code midi and rlrr file paths
 
 for i, track in enumerate(mid.tracks):
     print('Track {}: {}'.format(i, track.name))
@@ -95,9 +89,11 @@ for i, track in enumerate(mid.tracks):
                 drum_name = "Test"
                 if msg.note in note_to_drums_map:
                     drum_name = note_to_drums_map[msg.note][0]
-                drum_hit = {"DrumName" : drum_name, "Vel" : msg.velocity, "Loc": 1, "Time": '%.3f'%total_time}
+                    drum_hit = {"DrumName" : drum_name, "Vel" : msg.velocity, "Loc": 1, "Time": '%.3f'%total_time}
+                    out_dict["DrumHits"].append(drum_hit)
+                #else:
+                    #print(msg.note)
                 # print(json.dumps(drum_hit))
-                out_dict["DrumHits"].append(drum_hit)
                 # print(msg)
             # print(msg.velocity)
                 # print("hello")
@@ -109,6 +105,6 @@ print("Our totaled file length " + str(longest_time))
 
 # TODO pretty print
 
-with open('C:/Users/Emre/Documents/ParadiddleMidiConverter/rlrr_files/converted.json', 'w') as outfile:  
+with open(script_dir + '/rlrr_files/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.json', 'w') as outfile:  
     json.dump(out_dict, outfile)
 
