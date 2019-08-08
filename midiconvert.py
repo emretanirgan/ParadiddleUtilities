@@ -1,8 +1,12 @@
 from mido import MidiFile
 from mido import tempo2bpm
+from PyQt5.QtWidgets import *
 import mido
 import json
 import os
+from PyQt5 import QtWidgets
+from ParadiddleUtilities import *
+import sys
 
 out_dict = {}  
 # TODO set up GUI for input midi, input drum set, output recording file names with file dialogs for each
@@ -26,6 +30,8 @@ with open(drum_set_file) as f:
     print(len(drum_set_dict["DrumLayout"]))
 
 # TODO put in actual default notes
+# TODO support for drum types with more than 1 hit zone - can map from midi note to
+# a tuple of (drum class, location) instead (or just drum class if we want to use a default location value of 0)
 class_to_default_notes = {}
 rlrr_default_notes = {
     "BP_HiHat_C"    : 60,
@@ -79,11 +85,11 @@ total_time = 0.0
 total_ticks = 0.0
 longest_time = 0.0
 
-#TODO Pick track to convert to rlrr
+#TODO Pick track from a GUI (file dialog) to convert to rlrr
 #TODO need default midi mappings for rhythm game midi format - get difficulties, map from those midi notes
 #https://rockband.scorehero.com/forum/viewtopic.php?t=1711
 #https://www.scorehero.com/forum/viewtopic.php?t=1179
-#TODO convert from .chart
+#TODO convert from .chart? eventually
 #TODO don't hard code midi and rlrr file paths
 
 is_rhythm_game_midi = False
@@ -96,7 +102,6 @@ for i, track in enumerate(mid.tracks):
         is_rhythm_game_midi = True
         class_to_default_notes = rhythm_midi_note_to_drums
         track_to_convert = track
-
 
 if drum_set_dict is None:
     for drum_class in class_to_default_notes:
@@ -117,19 +122,14 @@ for i, track in enumerate(mid.tracks):
         if msg.is_meta:
             if msg.type == "set_tempo":
                 tempo = msg.tempo
-                # print(msg.tempo)
-                # print("TEMPO")
-                # print(msg.time)
                 tempo_total_ticks += msg.time
                 tempo_events.append((tempo_total_ticks, msg.tempo))
 
 print("Tempo Changes: " + str(tempo_events))
 for msg in track_to_convert:
     total_ticks += msg.time
-    # print(msg.time)
     while (tempo_index+1 < len(tempo_events)) and (total_ticks > tempo_events[tempo_index+1][0]):
         tempo_index += 1
-        print(tempo_index)
     tempo = tempo_events[tempo_index][1]
     # total_time = total_ticks * (tempo / (1000000.0 * mid.ticks_per_beat))
     total_time = total_time + mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
@@ -141,24 +141,42 @@ for msg in track_to_convert:
             note = msg.note
             # if is_rhythm_game_midi:
                 # note = msg.note 
-            #ignore velocity 0 notes here? Seem to be getting a lot of these in the rhythm game midis 
-            # print(msg.velocity)
-            # print(msg.type)
+            #ignore velocity 0 notes here? Seem to be getting a lot of these in the rhythm game midis, almost like note off events are showing up here
             if note in note_to_drums_map and msg.velocity > 0:
                 drum_name = note_to_drums_map[note][0]
                 drum_hit = {"DrumName" : drum_name, "Vel" : msg.velocity, "Loc": 0, "Time": '%.4f'%total_time}
                 out_dict["DrumHits"].append(drum_hit)
-            #else:
-                #print(msg.note)
-            # print(json.dumps(drum_hit))
-            # print(msg)
 print(tempo_index)
 print("Ticks Per Beat " + str(mid.ticks_per_beat) + ", Tempo " + str(tempo) + ", BPM " + '%.2f'%tempo2bpm(tempo))
 print("Midi File Length " + str(mid.length))
 print("Our totaled file length " + str(longest_time))
 
 
-# TODO pretty print
 with open(script_dir + '/rlrr_files/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.json', 'w') as outfile:  
-    json.dump(out_dict, outfile)
+    json.dump(out_dict, outfile, indent=4)
+ 
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_ParadiddleUtilities()
+        self.ui.setupUi(self)
+        self.ui.selectMidiButton.clicked.connect(self.select_midi_clicked)
+        self.ui.selectDrumSetButton.clicked.connect(self.select_drum_set_clicked)
 
+    def select_midi_clicked(self):
+        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), ".", ("Midi Files (*.mid *.midi)"))
+        print(midi_file)
+        self.ui.midiLabel.setText("Selected Midi File: " + midi_file[0].split('/')[-1])
+
+    def select_drum_set_clicked(self):
+        drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), ".", ("PD Drum Set Files (*.rlrr)"))
+        print(drum_set_file)
+        self.ui.selectedSetLabel.setText("Selected Drum Set: " + drum_set_file[0].split('/')[-1])
+
+app = QtWidgets.QApplication([])
+application = MainWindow()
+application.show()
+sys.exit(app.exec())
+
+# def selectFile():
+#     lineEdit.setText(QFileDialog.getOpenFileName())

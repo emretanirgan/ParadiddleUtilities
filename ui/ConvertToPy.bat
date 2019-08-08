@@ -1,0 +1,1 @@
+pyuic5 .\ParadiddleUtilities.ui -o ../ParadiddleUtilities.py
