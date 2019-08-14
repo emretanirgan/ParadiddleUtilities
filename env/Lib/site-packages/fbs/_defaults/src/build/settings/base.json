@@ -1,0 +1,37 @@
+{
+    "freeze_dir": "target/${app_name}",
+    "test_dirs": [
+        "src/unittest/python",
+        "src/integrationtest/python"
+    ],
+    "files_to_filter": [
+        "src/build/docker/ubuntu/.bashrc", "src/build/docker/ubuntu/Dockerfile",
+        "src/build/docker/arch/.bashrc", "src/build/docker/arch/Dockerfile",
+        "src/build/docker/fedora/.bashrc", "src/build/docker/fedora/Dockerfile",
+        "src/build/docker/fedora/.rpmmacros"
+    ],
+    "hidden_imports": [],
+    "public_settings": ["app_name", "author", "version", "environment"],
+    "docker_images": {
+        "ubuntu": {
+            "build_files": ["requirements/", "src/sign/linux/"],
+            "build_args": {
+                "requirements": "ubuntu.txt"
+            }
+        },
+        "arch": {
+            "build_files": ["requirements/", "src/sign/linux/"],
+            "build_args": {
+                "requirements": "arch.txt"
+            }
+        },
+        "fedora": {
+            "build_files": ["requirements/", "src/sign/linux/"],
+            "build_args": {
+                "requirements": "fedora.txt"
+            }
+        }
+    },
+    "release": false,
+    "environment": "local"
+}

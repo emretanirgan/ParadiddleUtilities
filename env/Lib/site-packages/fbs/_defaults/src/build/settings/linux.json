@@ -1,0 +1,11 @@
+{
+    "categories": "Utility;",
+    "description": "",
+    "author_email": "",
+    "url": "",
+    "depends": [],
+    "files_to_filter": [
+        "src/installer/linux/usr/share/applications/AppName.desktop"
+    ],
+    "public_settings": ["categories", "description", "author_email", "url"]
+}

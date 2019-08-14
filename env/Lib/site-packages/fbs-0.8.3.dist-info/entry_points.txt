@@ -1,0 +1,3 @@
+[console_scripts]
+fbs = fbs.__main__:_main
+

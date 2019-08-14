@@ -39,6 +39,9 @@
     <property name="text">
      <string>No Midi File Selected</string>
     </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QPushButton" name="selectDrumSetButton">
     <property name="geometry">
