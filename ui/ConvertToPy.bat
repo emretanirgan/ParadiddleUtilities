@@ -1,1 +1,1 @@
-pyuic5 .\ParadiddleUtilities.ui -o ../ParadiddleUtilities.py
+pyuic5 .\ParadiddleUtilities.ui -o ../src/main/python/ParadiddleUtilities.py
