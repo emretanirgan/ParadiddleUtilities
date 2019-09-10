@@ -6,12 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
-    <height>617</height>
+    <width>600</width>
+    <height>517</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Paradiddle Utilities</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLabel {
+  font-size: 12px
+}
+
+QPushButton {
+  font-size: 12px
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="autoFillBackground">
@@ -23,8 +32,8 @@
    <widget class="QPushButton" name="selectMidiButton">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>190</y>
+      <x>450</x>
+      <y>70</y>
       <width>121</width>
       <height>23</height>
      </rect>
@@ -33,27 +42,11 @@
      <string>Select Midi File</string>
     </property>
    </widget>
-   <widget class="QLabel" name="midiLabel">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>170</y>
-      <width>191</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>No midi file selected</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="selectDrumSetButton">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>80</y>
+      <x>450</x>
+      <y>30</y>
       <width>121</width>
       <height>23</height>
      </rect>
@@ -62,24 +55,11 @@
      <string>Select Drum Set</string>
     </property>
    </widget>
-   <widget class="QLabel" name="selectedSetLabel">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>60</y>
-      <width>201</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Selected Drum Set: default.rlrr</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="convertButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>530</y>
+      <x>240</x>
+      <y>430</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -88,84 +68,71 @@
      <string>Convert to .rlrr!</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="drumSetLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>30</y>
       <width>61</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Drum Set</string>
+     <string>Drum Set:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="midiFileLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>140</y>
+      <y>70</y>
       <width>61</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Midi File</string>
+     <string>Midi File:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="audioFileLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>250</y>
+      <y>110</y>
       <width>61</width>
-      <height>16</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Audio File</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="selectedAudioFileLabel">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>280</y>
-      <width>191</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>No audio file selected</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
+     <string>Audio File:</string>
     </property>
    </widget>
    <widget class="QPushButton" name="selectAudioFileButton">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>300</y>
+      <x>450</x>
+      <y>110</y>
       <width>121</width>
       <height>23</height>
      </rect>
@@ -174,53 +141,21 @@
      <string>Select Audio File</string>
     </property>
    </widget>
-   <widget class="Line" name="line">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>110</y>
-      <width>421</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="line_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>220</y>
-      <width>421</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="line_3">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>370</y>
-      <width>421</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QLabel" name="songPlaybackOffsetLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>340</y>
+      <y>150</y>
       <width>191</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
     </property>
     <property name="text">
      <string>Song playback offset:</string>
@@ -229,30 +164,34 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="doubleSpinBox">
+   <widget class="QDoubleSpinBox" name="calibrationSpinBox">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>340</y>
+      <x>180</x>
+      <y>150</y>
       <width>62</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="decimals">
+     <number>3</number>
     </property>
     <property name="singleStep">
      <double>0.010000000000000</double>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="metadataLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>400</y>
+      <y>220</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <pointsize>-1</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -261,19 +200,265 @@
      <string>Metadata</string>
     </property>
    </widget>
+   <widget class="Line" name="separator">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>190</y>
+      <width>541</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="songName">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>250</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Song Name:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="artistNameLabel">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>280</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Artist Name:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="authorNameLabel">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>250</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Author Name:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="coverImageLabel">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>280</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Cover Image:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="description">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>310</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Description:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="drumSetLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>30</y>
+      <width>321</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="midiFileLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>70</y>
+      <width>321</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="audioFileLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>110</y>
+      <width>321</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="descriptionTextEdit">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>340</y>
+      <width>541</width>
+      <height>71</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="songNameLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>250</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="artistNameLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>280</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="coverImageLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>280</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="authorNameLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>250</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="selectCoverImageButton">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>280</y>
+      <width>31</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>...</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>484</width>
-     <height>26</height>
+     <width>600</width>
+     <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
+ <tabstops>
+  <tabstop>drumSetLineEdit</tabstop>
+  <tabstop>selectDrumSetButton</tabstop>
+  <tabstop>midiFileLineEdit</tabstop>
+  <tabstop>selectMidiButton</tabstop>
+  <tabstop>audioFileLineEdit</tabstop>
+  <tabstop>selectAudioFileButton</tabstop>
+  <tabstop>calibrationSpinBox</tabstop>
+  <tabstop>songNameLineEdit</tabstop>
+  <tabstop>artistNameLineEdit</tabstop>
+  <tabstop>authorNameLineEdit</tabstop>
+  <tabstop>coverImageLineEdit</tabstop>
+  <tabstop>selectCoverImageButton</tabstop>
+  <tabstop>descriptionTextEdit</tabstop>
+  <tabstop>convertButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

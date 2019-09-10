@@ -7,6 +7,7 @@ import os
 from PyQt5 import QtWidgets
 from ParadiddleUtilities import *
 import sys
+from shutil import copyfile
 
 out_dict = {}  
 # TODO set up GUI for input midi, input drum set, output recording file names with file dialogs for each
@@ -17,6 +18,27 @@ out_dict = {}
 drum_set_file = ''
 drum_set_dict = None
 midi_file_name = ''
+audio_file = ''
+
+audio_file_data = {
+    'Path' : '',
+    'CalibrationOffset' : 0
+}
+
+recording_metadata = {
+    'Title': '',
+    'Description': '',
+    'CoverImagePath': '',
+    'Artist': '',
+    'Author': ''
+}
+
+song_name = ''
+artist_name = ''
+cover_image_path = ''
+author_name = ''
+recording_description = ''
+calibration_offset = 0.0
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -159,8 +181,25 @@ def analyze_midi_file():
     print("Our totaled file length " + str(longest_time))
 
 def convert_to_rlrr():
-    print("Converting to rlrr")
-    with open(script_dir + '/../resources/base/rlrr_files/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.json', 'w') as outfile:  
+    print("Converting to rlrr...")
+    audio_file_short = audio_file.split('/')[-1]
+    cover_image_short = cover_image_path.split('/')[-1]
+    audio_file_data['Path'] = audio_file_short
+    audio_file_data['CalibrationOffset'] = calibration_offset
+    out_dict["AudioFileData"] = audio_file_data
+
+    recording_metadata['Title'] = song_name
+    recording_metadata['Description'] = recording_description
+    recording_metadata['CoverImagePath'] = cover_image_short
+    recording_metadata['Artist'] = artist_name
+    recording_metadata['Author'] = author_name
+    out_dict["RecordingMetadata"] = recording_metadata
+
+    output_folder_path = script_dir + '/../resources/base/rlrr_files/'+ song_name
+    os.mkdir(output_folder_path)
+    copyfile(audio_file, output_folder_path + '/' + audio_file_short)
+    copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
+    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.json', 'w') as outfile:  
         json.dump(out_dict, outfile, indent=4)
     print("Conversion done!")
  
@@ -173,26 +212,48 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.selectDrumSetButton.clicked.connect(self.select_drum_set_clicked)
         self.ui.selectAudioFileButton.clicked.connect(self.select_audio_file_clicked)
         self.ui.convertButton.clicked.connect(self.convert_clicked)
-
+        self.ui.calibrationSpinBox.valueChanged.connect(self.calibration_offset_changed)
+        self.ui.selectCoverImageButton.clicked.connect(self.select_cover_image_clicked)
+		
         analyze_drum_set('')
         # self.midi_converter = MidiConverter()
 
     def select_midi_clicked(self):
-        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), ".", ("Midi Files (*.mid *.midi)"))
+        global midi_file
+        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), ".", ("Midi Files (*.mid *.midi)"))[0]
         print(midi_file)
         analyze_midi_file()
-        self.ui.midiLabel.setText("Selected Midi File: " + midi_file[0].split('/')[-1])
+        self.ui.midiFileLineEdit.setText(midi_file.split('/')[-1])
 
     def select_drum_set_clicked(self):
-        drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), ".", ("PD Drum Set Files (*.rlrr)"))
+        global drum_set_file
+        drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), ".", ("PD Drum Set Files (*.rlrr)"))[0]
         print(drum_set_file)
         analyze_drum_set(drum_set_file)
-        self.ui.selectedSetLabel.setText("Selected Drum Set: " + drum_set_file[0].split('/')[-1])
+        self.ui.drumSetLineEdit.setText(drum_set_file.split('/')[-1])
 
     def select_audio_file_clicked(self):
-        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), ".", ("Audio Files (*.mp3 *.wav *.ogg)"))
+        global audio_file
+        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), ".", ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
         print(audio_file)
-        self.ui.selectedAudioFileLabel.setText("Selected Audio File: " + drum_set_file[0].split('/')[-1])
+        self.ui.audioFileLineEdit.setText(audio_file.split('/')[-1])
+
+    def select_cover_image_clicked(self):
+        global cover_image_path
+        cover_image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), ".", ("Image Files (*.png *.jpg)"))[0]
+        print(cover_image_path)
+        self.ui.coverImageLineEdit.setText(cover_image_path.split('/')[-1])
+
+    def calibration_offset_changed(self):
+        global calibration_offset
+        calibration_offset = self.ui.calibrationSpinBox.value()
+        # print(self.ui.calibrationSpinBox.value())
 
     def convert_clicked(self):
+        global song_name, recording_description, artist_name, author_name
+        song_name = self.ui.songNameLineEdit.text()
+        # TODO check if we need to escape the \n newline characters ('\n' to '\\n')
+        recording_description = self.ui.descriptionTextEdit.toPlainText() 
+        artist_name = self.ui.artistNameLineEdit.text()
+        author_name = self.ui.authorNameLineEdit.text()
         convert_to_rlrr()
