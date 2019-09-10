@@ -145,7 +145,7 @@
      <string>Audio File</string>
     </property>
    </widget>
-   <widget class="QLabel" name="midiLabel_2">
+   <widget class="QLabel" name="selectedAudioFileLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -161,7 +161,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="selectMidiButton_2">
+   <widget class="QPushButton" name="selectAudioFileButton">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -213,7 +213,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="midiLabel_3">
+   <widget class="QLabel" name="songPlaybackOffsetLabel">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -237,6 +237,9 @@
       <width>62</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.010000000000000</double>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
