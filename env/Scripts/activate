@@ -46,7 +46,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="$(if [ "$OSTYPE" "==" "cygwin" ]; then cygpath -u 'C:\Users\Emre\Perforce\ParadiddleUtilities\PDUtilEnv'; else echo '/C/Users/Emre/Perforce/ParadiddleUtilities/PDUtilEnv'; fi;)"
+VIRTUAL_ENV='C:\Users\tanir\GitHub\ParadiddleUtilities\env'
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

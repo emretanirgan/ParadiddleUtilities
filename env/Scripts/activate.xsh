@@ -28,7 +28,7 @@ def _deactivate(args):
 _deactivate(["nondestructive"])
 aliases["deactivate"] = _deactivate
 
-$VIRTUAL_ENV = r"C:\Users\Emre\Perforce\ParadiddleUtilities\PDUtilEnv"
+$VIRTUAL_ENV = r"C:\Users\tanir\GitHub\ParadiddleUtilities\env"
 
 $_OLD_VIRTUAL_PATH = $PATH
 $PATH = $PATH[:]

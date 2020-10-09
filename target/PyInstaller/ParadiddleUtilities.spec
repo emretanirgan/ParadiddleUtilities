@@ -1,15 +1,15 @@
-# -*- mode: python ; coding: utf-8 -*-
+# -*- mode: python -*-
 
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\Emre\\Perforce\\ParadiddleUtilities\\src\\main\\python\\main.py'],
-             pathex=['C:\\Users\\Emre\\Perforce\\ParadiddleUtilities\\target\\PyInstaller'],
+a = Analysis(['C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\python\\main.py'],
+             pathex=['C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\target\\PyInstaller'],
              binaries=[],
              datas=[],
              hiddenimports=[],
-             hookspath=['c:\\users\\emre\\perforce\\paradiddleutilities\\pdutilenv\\lib\\site-packages\\fbs\\freeze\\hooks'],
-             runtime_hooks=['C:\\Users\\Emre\\AppData\\Local\\Temp\\tmpuphkxxc1\\fbs_pyinstaller_hook.py'],
+             hookspath=['c:\\users\\tanir\\github\\paradiddleutilities\\env\\lib\\site-packages\\fbs\\freeze\\hooks'],
+             runtime_hooks=['C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\target\\PyInstaller\\fbs_pyinstaller_hook.py'],
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
@@ -26,12 +26,11 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=False,
-          console=False , icon='C:\\Users\\Emre\\Perforce\\ParadiddleUtilities\\src\\main\\icons\\Icon.ico')
+          console=False , icon='C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\icons\\Icon.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=False,
-               upx_exclude=[],
                name='ParadiddleUtilities')

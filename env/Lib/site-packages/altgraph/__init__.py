@@ -1,4 +1,4 @@
-'''
+"""
 altgraph - a python graph library
 =================================
 
@@ -138,9 +138,10 @@ To display the graph we can use the GraphViz backend::
   @newfield contributor: Contributors:
   @contributor: U{Reka Albert <http://www.phys.psu.edu/~ralbert/>}
 
-'''
+"""
 import pkg_resources
-__version__ = pkg_resources.require('altgraph')[0].version
+
+__version__ = pkg_resources.require("altgraph")[0].version
 
 
 class GraphError(ValueError):

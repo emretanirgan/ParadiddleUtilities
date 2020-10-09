@@ -9,7 +9,14 @@ from ParadiddleUtilities import *
 import sys
 from shutil import copyfile
 
-out_dict = {}  
+out_dict = {
+    'version' : 0.5,
+    'recordingMetaData' : [],
+    'audioFileData' : [],
+    'instruments' : [],
+    'events' : []
+}  
+
 # TODO set up GUI for input midi, input drum set, output recording file names with file dialogs for each
 
 # TODO user should specify drum set file path, if not use default set file
@@ -21,16 +28,16 @@ midi_file_name = ''
 audio_file = ''
 
 audio_file_data = {
-    'Path' : '',
-    'CalibrationOffset' : 0
+    'path' : '',
+    'calibrationOffset' : 0
 }
 
 recording_metadata = {
-    'Title': '',
-    'Description': '',
-    'CoverImagePath': '',
-    'Artist': '',
-    'Author': ''
+    'title': '',
+    'description': '',
+    'coverImagePath': '',
+    'artist': '',
+    'author': ''
 }
 
 song_name = ''
@@ -43,6 +50,8 @@ calibration_offset = 0.0
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 # TODO put in actual default notes
+# TODO support for mallet instruments, or instruments that can have a lot of midi notes. might have to specify a range of notes
+# for some of them like '48-102' etc
 # TODO support for drum types with more than 1 hit zone - can map from midi note to
 # a tuple of (drum class, location) instead (or just drum class if we want to use a default location value of 0)
 class_to_default_notes = {}
@@ -88,6 +97,7 @@ rhythm_midi_note_to_drums = {
 note_to_drums_map = {}
 
 def analyze_drum_set(drum_set_filename):
+    global drum_set_dict
     default_set_name = "../resources/base/drum_sets/defaultset.rlrr"
     default_set_full_path = os.path.join(script_dir, default_set_name)
     print(default_set_full_path)
@@ -98,12 +108,18 @@ def analyze_drum_set(drum_set_filename):
 
     with open(drum_set_filename) as f:
         drum_set_dict = json.load(f)
-        print(len(drum_set_dict["DrumLayout"]))
+        print("Kit Length: " + str(len(drum_set_dict["instruments"])))
+        #TODO handle drum layout formats with version 0 and 0.5 here
+        # need to go throuh all instruments, see if their midi notes have been changed or set
+        # for mallets, need to check the first key index and number of notes?
 
     
 
 def analyze_midi_file():
-    out_dict["DrumHits"] = []
+    global out_dict
+    out_dict["version"] = 0.5
+    out_dict["instruments"] = []
+    out_dict["events"] = []
     midi_file_name = script_dir + '/../resources/base/midi_files/notes.mid'
     mid = MidiFile(midi_file_name)
 
@@ -132,15 +148,16 @@ def analyze_midi_file():
             class_to_default_notes = rhythm_midi_note_to_drums
             track_to_convert = track
 
+    print("Kit layout again: " + str(drum_set_dict["instruments"]))
     if drum_set_dict is None:
         for drum_class in class_to_default_notes:
             print(drum_class)
             note_to_drums_map[class_to_default_notes[drum_class]]= [str(drum_class)+"Default"]
     else:
-        for drum_obj in drum_set_dict["DrumLayout"]:
-            if drum_obj["Class"] in class_to_default_notes:
-                note_to_drums_map[class_to_default_notes[drum_obj["Class"]]] = [str(drum_obj["DrumName"])]
-        out_dict["DrumLayout"] = drum_set_dict["DrumLayout"] 
+        for drum_obj in drum_set_dict["instruments"]:
+            if drum_obj["class"] in class_to_default_notes:
+                note_to_drums_map[class_to_default_notes[drum_obj["class"]]] = [str(drum_obj["name"])]
+        out_dict["instruments"] = drum_set_dict["instruments"]
 
     print(note_to_drums_map)
     tempo_total_ticks = 0
@@ -168,38 +185,41 @@ def analyze_midi_file():
             if msg.type == "note_on":
                 drum_name = "Test"
                 note = msg.note
+                #TODO are note lengths relevant here? maybe incorporate that when checking total midi file length?
                 # if is_rhythm_game_midi:
                     # note = msg.note 
                 #ignore velocity 0 notes here? Seem to be getting a lot of these in the rhythm game midis, almost like note off events are showing up here
                 if note in note_to_drums_map and msg.velocity > 0:
                     drum_name = note_to_drums_map[note][0]
-                    drum_hit = {"DrumName" : drum_name, "Vel" : msg.velocity, "Loc": 0, "Time": '%.4f'%total_time}
-                    out_dict["DrumHits"].append(drum_hit)
+                    drum_hit = {"name" : drum_name, "vel" : msg.velocity, "loc": 0, "time": '%.4f'%total_time}
+                    out_dict["events"].append(drum_hit)
     print(tempo_index)
     print("Ticks Per Beat " + str(mid.ticks_per_beat) + ", Tempo " + str(tempo) + ", BPM " + '%.2f'%tempo2bpm(tempo))
     print("Midi File Length " + str(mid.length))
     print("Our totaled file length " + str(longest_time))
+    # print(out_dict)
 
 def convert_to_rlrr():
     print("Converting to rlrr...")
     audio_file_short = audio_file.split('/')[-1]
     cover_image_short = cover_image_path.split('/')[-1]
-    audio_file_data['Path'] = audio_file_short
-    audio_file_data['CalibrationOffset'] = calibration_offset
-    out_dict["AudioFileData"] = audio_file_data
+    audio_file_data['path'] = audio_file_short
+    audio_file_data['calibrationOffset'] = calibration_offset
+    out_dict["audioFileData"] = audio_file_data
 
-    recording_metadata['Title'] = song_name
-    recording_metadata['Description'] = recording_description
-    recording_metadata['CoverImagePath'] = cover_image_short
-    recording_metadata['Artist'] = artist_name
-    recording_metadata['Author'] = author_name
-    out_dict["RecordingMetadata"] = recording_metadata
+    recording_metadata['title'] = song_name
+    recording_metadata['description'] = recording_description
+    recording_metadata['coverImagePath'] = cover_image_short
+    recording_metadata['artist'] = artist_name
+    recording_metadata['creator'] = author_name
+    out_dict["recordingMetadata"] = recording_metadata
 
     output_folder_path = script_dir + '/../resources/base/rlrr_files/'+ song_name
     os.mkdir(output_folder_path)
-    copyfile(audio_file, output_folder_path + '/' + audio_file_short)
+    if audio_file:
+        copyfile(audio_file, output_folder_path + '/' + audio_file_short)
     copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
-    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.json', 'w') as outfile:  
+    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.rlrr', 'w') as outfile:  
         json.dump(out_dict, outfile, indent=4)
     print("Conversion done!")
  
@@ -214,34 +234,39 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.convertButton.clicked.connect(self.convert_clicked)
         self.ui.calibrationSpinBox.valueChanged.connect(self.calibration_offset_changed)
         self.ui.selectCoverImageButton.clicked.connect(self.select_cover_image_clicked)
+        self.lastOpenFolder = "."
 		
         analyze_drum_set('')
         # self.midi_converter = MidiConverter()
 
     def select_midi_clicked(self):
         global midi_file
-        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), ".", ("Midi Files (*.mid *.midi)"))[0]
+        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi)"))[0]
         print(midi_file)
         analyze_midi_file()
+        self.lastOpenFolder = midi_file.rsplit('/', 1)[0]
         self.ui.midiFileLineEdit.setText(midi_file.split('/')[-1])
 
     def select_drum_set_clicked(self):
         global drum_set_file
-        drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), ".", ("PD Drum Set Files (*.rlrr)"))[0]
+        drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
         print(drum_set_file)
         analyze_drum_set(drum_set_file)
+        self.lastOpenFolder = drum_set_file.rsplit('/', 1)[0]
         self.ui.drumSetLineEdit.setText(drum_set_file.split('/')[-1])
 
     def select_audio_file_clicked(self):
         global audio_file
-        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), ".", ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
+        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
         print(audio_file)
+        self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
         self.ui.audioFileLineEdit.setText(audio_file.split('/')[-1])
 
     def select_cover_image_clicked(self):
         global cover_image_path
-        cover_image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), ".", ("Image Files (*.png *.jpg)"))[0]
+        cover_image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
         print(cover_image_path)
+        self.lastOpenFolder = cover_image_path.rsplit('/', 1)[0]
         self.ui.coverImageLineEdit.setText(cover_image_path.split('/')[-1])
 
     def calibration_offset_changed(self):
