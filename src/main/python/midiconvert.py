@@ -11,8 +11,8 @@ from shutil import copyfile
 
 out_dict = {
     'version' : 0.5,
-    'recordingMetaData' : [],
-    'audioFileData' : [],
+    'recordingMetadata' : {},
+    'audioFileData' : {},
     'instruments' : [],
     'events' : []
 }  
@@ -68,6 +68,47 @@ rlrr_default_notes = {
     "BP_Tom2_C"     : 49
 }
 
+# pdtracks_notes = {
+#     "BP_HiHat_C"    : 45,
+#     "BP_Snare_C"    : 26,
+#     "BP_Kick_C"     : 24,
+#     "BP_Crash15_C"  : 62,
+#     "BP_Crash17_C"  : 67,
+#     "BP_FloorTom_C" : 39,
+#     "BP_Ride17_C"   : 75,
+#     "BP_Tom1_C"     : 35,
+#     "BP_Tom2_C"     : 37
+# }
+
+pdtracks_notes = {
+    24 : {"drum": "BP_Kick_C"},
+    26 : {"drum": "BP_Snare_C"},
+    30 : {"drum": "BP_Snare_C"},
+    45 : {"drum": "BP_HiHat_C"},
+    48 : {"drum": "BP_HiHat_C"},
+    35 : {"drum": "BP_Tom1_C"},
+    37 : {"drum": "BP_Tom2_C"},
+    39 : {"drum": "BP_FloorTom_C"},
+    62 : {"drum": "BP_Crash15_C"},
+    67 : {"drum": "BP_Crash17_C"},
+    75 : {"drum": "BP_Ride17_C"}
+}
+
+
+pdtracks_notes_easy = {
+    24 : {"drum": "BP_Kick_C"},
+    26 : {"drum": "BP_Snare_C"},
+    30 : {"drum": "BP_Snare_C"},
+    45 : {"drum": "BP_HiHat_C"},
+    48 : {"drum": "BP_HiHat_C"},
+    35 : {"drum": "BP_Tom1_C"},
+    37 : {"drum": "BP_Tom1_C"},
+    39 : {"drum": "BP_Tom1_C"},
+    62 : {"drum": "BP_Crash15_C"},
+    67 : {"drum": "BP_Crash17_C"},
+    75 : {"drum": "BP_Crash15_C"}
+}
+
 # red, (Snare Drum)
 # yellow, (Hi-Hat)
 # blue, (Tom-Tom)
@@ -117,15 +158,16 @@ def analyze_drum_set(drum_set_filename):
 
 def analyze_midi_file():
     global out_dict
-    out_dict["version"] = 0.5
+    out_dict["version"] = 0.6
     out_dict["instruments"] = []
     out_dict["events"] = []
-    midi_file_name = script_dir + '/../resources/base/midi_files/notes.mid'
-    mid = MidiFile(midi_file_name)
+    out_dict["bpmEvents"] = []
+    # midi_file_name = script_dir + '/../resources/base/midi_files/notes.mid'
+    mid = MidiFile(midi_file)
 
     tempo = 500000
-    #list of tuples in the form of (total_ticks, new_tempo)
-    tempo_events = [(0.0, tempo)]
+    #list of tuples in the form of (total_ticks, total_seconds, new_tempo)
+    tempo_events = [(0.0, 0.0, tempo)]
     total_time = 0.0
     total_ticks = 0.0
     longest_time = 0.0
@@ -137,9 +179,15 @@ def analyze_midi_file():
     #TODO convert from .chart? eventually
     #TODO don't hard code midi and rlrr file paths
 
+    print('Midi file type: ' + str(mid.type))
     is_rhythm_game_midi = False
-    class_to_default_notes = rlrr_default_notes
-    track_to_convert = mid.tracks[0]
+    # class_to_default_notes = rlrr_default_notes
+    # class_to_default_notes = pdtracks_notes
+    convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
+    # note_to_drums_map = pdtracks_notes
+    note_to_drums_map = pdtracks_notes_easy
+    track_to_convert = mid.tracks[convert_track_index]
+    #  TODO pick midi track to convert
 
     for i, track in enumerate(mid.tracks):
         print('Track {}: {}'.format(i, track.name))
@@ -149,36 +197,57 @@ def analyze_midi_file():
             track_to_convert = track
 
     print("Kit layout again: " + str(drum_set_dict["instruments"]))
-    if drum_set_dict is None:
-        for drum_class in class_to_default_notes:
-            print(drum_class)
-            note_to_drums_map[class_to_default_notes[drum_class]]= [str(drum_class)+"Default"]
-    else:
-        for drum_obj in drum_set_dict["instruments"]:
-            if drum_obj["class"] in class_to_default_notes:
-                note_to_drums_map[class_to_default_notes[drum_obj["class"]]] = [str(drum_obj["name"])]
-        out_dict["instruments"] = drum_set_dict["instruments"]
+    # if drum_set_dict is None:
+    #     for drum_class in class_to_default_notes:
+    #         print(drum_class)
+    #         note_to_drums_map[class_to_default_notes[drum_class]]= [str(drum_class)+"Default"]
+    # else:
+    # TODO for now assume all drums will be in the drum kit file
+    kit_instruments = drum_set_dict["instruments"]
+    # for drum_obj in drum_set_dict["instruments"]:
+        # if drum_obj["class"] in class_to_default_notes:
+            # note_to_drums_map[class_to_default_notes[drum_obj["class"]]] = [str(drum_obj["name"])]
+    for note in note_to_drums_map:
+        drum_class = note_to_drums_map[note]["drum"]
+        drums = [d for d in kit_instruments if d["class"] == drum_class]
+        if(len(drums) > 0):
+            note_to_drums_map[note]["drum"] = drums[0]["name"]
+        else:
+            note_to_drums_map[note]["drum"] =  drum_class+"Default"
+
+    out_dict["instruments"] = drum_set_dict["instruments"]
 
     print(note_to_drums_map)
     tempo_total_ticks = 0
+    tempo_total_seconds = 0
     tempo_index = 0
-
+    tempo = 500000
+    default_tempo = 500000
+    #TODO bpm changes might have to be saved in rlrr file as well
     for i, track in enumerate(mid.tracks): 
         for msg in track:
             if msg.is_meta:
+                # print(msg.type)
                 if msg.type == "set_tempo":
+                    tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
                     tempo = msg.tempo
                     tempo_total_ticks += msg.time
-                    tempo_events.append((tempo_total_ticks, msg.tempo))
+                    tempo_events.append((tempo_total_ticks, tempo_total_seconds, msg.tempo))
+                    out_dict["bpmEvents"].append({"bpm" : tempo2bpm(msg.tempo), "time" : tempo_total_seconds})
+    if len(tempo_events) == 0:
+        tempo_events = [(0.0, 0.0, default_tempo)]
+        out_dict["bpmEvents"].append({"bpm" : default_tempo, "time" : 0})
 
-    print("Tempo Changes: " + str(tempo_events))
+
+    # print("Ticks per beat: " + str(mid.ticks_per_beat))
+    # print("Tempo Changes: " + str(tempo_events))
     for msg in track_to_convert:
         total_ticks += msg.time
         while (tempo_index+1 < len(tempo_events)) and (total_ticks > tempo_events[tempo_index+1][0]):
             tempo_index += 1
-        tempo = tempo_events[tempo_index][1]
-        # total_time = total_ticks * (tempo / (1000000.0 * mid.ticks_per_beat))
-        total_time = total_time + mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
+        tempo = tempo_events[tempo_index][2]
+        # total_time = total_time + mido.tick2second(msg.time, mid.ticks_per_beat, tempo) # old method of computing time, was slightly off
+        total_time = tempo_events[tempo_index][1] + mido.tick2second(total_ticks - tempo_events[tempo_index][0], mid.ticks_per_beat, tempo)
         if(total_time > longest_time):
             longest_time = total_time
         if not msg.is_meta:
@@ -190,8 +259,10 @@ def analyze_midi_file():
                     # note = msg.note 
                 #ignore velocity 0 notes here? Seem to be getting a lot of these in the rhythm game midis, almost like note off events are showing up here
                 if note in note_to_drums_map and msg.velocity > 0:
-                    drum_name = note_to_drums_map[note][0]
+                    drum_name = note_to_drums_map[note]["drum"]
+
                     drum_hit = {"name" : drum_name, "vel" : msg.velocity, "loc": 0, "time": '%.4f'%total_time}
+                    # print(str(drum_hit) + " tempo: " + str(tempo) + " total ticks: " + str(total_ticks))
                     out_dict["events"].append(drum_hit)
     print(tempo_index)
     print("Ticks Per Beat " + str(mid.ticks_per_beat) + ", Tempo " + str(tempo) + ", BPM " + '%.2f'%tempo2bpm(tempo))
@@ -218,8 +289,9 @@ def convert_to_rlrr():
     os.mkdir(output_folder_path)
     if audio_file:
         copyfile(audio_file, output_folder_path + '/' + audio_file_short)
-    copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
-    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + midi_file_name.split('/')[-1].split('.')[0] + '_converted.rlrr', 'w') as outfile:  
+    if cover_image_path:
+        copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
+    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '_converted.rlrr', 'w') as outfile:  
         json.dump(out_dict, outfile, indent=4)
     print("Conversion done!")
  
