@@ -1,140 +1,140 @@
 {
-    "DrumLayout": [
-        {"DrumName": "BP_HiHat_C_1","Class": "BP_HiHat_C","Loc": [
+    "instruments": [
+        {"name": "BP_HiHat_C_1","class": "BP_HiHat_C","location": [
                 17.22353,
                 -34.08699,
                 94.211975
-            ],"Rot": [
+            ],"rotation": [
                 15.416171,
                 19.771341,
                 6.125736
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Kick_C_1","Class": "BP_Kick_C","Loc": [
+        {"name": "BP_Kick_C_1","class": "BP_Kick_C","location": [
                 -69.758492,
                 60.319191,
                 34.294422
-            ],"Rot": [
+            ],"rotation": [
                 -96.766594,
                 2.265444,
                 38.000126
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Crash15_C_1","Class": "BP_Crash15_C","Loc": [
+        {"name": "BP_Crash15_C_1","class": "BP_Crash15_C","location": [
                 27.7938,
                 -37.487892,
                 132.343323
-            ],"Rot": [
+            ],"rotation": [
                 17.085356,
                 39.032425,
                 -19.564053
-            ],"Scale": [
+            ],"scale": [
                 1.000001,
                 1.000001,
                 1.0
             ]
         },
-        {"DrumName": "BP_Crash17_C_1","Class": "BP_Crash17_C","Loc": [
+        {"name": "BP_Crash17_C_1","class": "BP_Crash17_C","location": [
                 26.813931,
                 52.215088,
                 135.513931
-            ],"Rot": [
+            ],"rotation": [
                 -10.405132,
                 44.075054,
                 25.513369
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_FloorTom_C_1","Class": "BP_FloorTom_C","Loc": [
+        {"name": "BP_FloorTom_C_1","class": "BP_FloorTom_C","location": [
                 -1.75137,
                 42.720551,
                 61.630424
-            ],"Rot": [
+            ],"rotation": [
                 1.261108,
                 28.997799,
                 73.703827
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Ride17_C_1","Class": "BP_Ride17_C","Loc": [
+        {"name": "BP_Ride17_C_1","class": "BP_Ride17_C","location": [
                 -14.226593,
                 61.129753,
                 105.472443
-            ],"Rot": [
+            ],"rotation": [
                 -27.074295,
                 19.200071,
                 15.730481
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Ride20_C_1","Class": "BP_Ride20_C","Loc": [
+        {"name": "BP_Ride20_C_1","class": "BP_Ride20_C","location": [
                 -13.356556,
                 77.818153,
                 138.67569
-            ],"Rot": [
+            ],"rotation": [
                 18.895599,
                 42.784584,
                 101.073982
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Snare_C_1","Class": "BP_Snare_C","Loc": [
+        {"name": "BP_Snare_C_1","class": "BP_Snare_C","location": [
                 17.106194,
                 -1.370838,
                 68.553436
-            ],"Rot": [
+            ],"rotation": [
                 3.194685,
                 15.114579,
                 1.082093
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Tom1_C_1","Class": "BP_Tom1_C","Loc": [
+        {"name": "BP_Tom1_C_1","class": "BP_Tom1_C","location": [
                 40.340771,
                 -2.559204,
                 95.154297
-            ],"Rot": [
+            ],"rotation": [
                 -40.931034,
                 37.27087,
                 -55.179005
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0
             ]
         },
-        {"DrumName": "BP_Tom2_C_2","Class": "BP_Tom2_C","Loc": [
+        {"name": "BP_Tom2_C_2","class": "BP_Tom2_C","location": [
                 30.543972,
                 33.849445,
                 93.909325
-            ],"Rot": [
+            ],"rotation": [
                 14.762558,
                 52.847816,
                 50.355915
-            ],"Scale": [
+            ],"scale": [
                 1.0,
                 1.0,
                 1.0

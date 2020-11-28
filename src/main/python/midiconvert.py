@@ -8,6 +8,7 @@ from PyQt5 import QtWidgets
 from ParadiddleUtilities import *
 import sys
 from shutil import copyfile
+import copy
 
 out_dict = {
     'version' : 0.5,
@@ -22,13 +23,18 @@ out_dict = {
 # TODO user should specify drum set file path, if not use default set file
 # If this file is not fed in, then use default
 # drum_set_file = '/Users/etanirgan/test.json'
-drum_set_file = ''
+script_dir = os.path.dirname(os.path.realpath(__file__))
+# drum_set_file = ''
+drum_set_file = os.path.join(script_dir,'resources','base','drum_sets','defaultset.rlrr')
 drum_set_dict = None
 midi_file_name = ''
-audio_file = ''
+output_rlrr_dir = ''
+song_tracks = [""] * 5
+drum_tracks = [""] * 4
 
 audio_file_data = {
-    'path' : '',
+    'songTracks' : [],
+    'drumTracks' : [],
     'calibrationOffset' : 0
 }
 
@@ -47,7 +53,6 @@ author_name = ''
 recording_description = ''
 calibration_offset = 0.0
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
 
 # TODO put in actual default notes
 # TODO support for mallet instruments, or instruments that can have a lot of midi notes. might have to specify a range of notes
@@ -84,6 +89,7 @@ pdtracks_notes = {
     24 : {"drum": "BP_Kick_C"},
     26 : {"drum": "BP_Snare_C"},
     30 : {"drum": "BP_Snare_C"},
+    43 : {"drum": "BP_HiHat_C"},
     45 : {"drum": "BP_HiHat_C"},
     48 : {"drum": "BP_HiHat_C"},
     35 : {"drum": "BP_Tom1_C"},
@@ -99,11 +105,12 @@ pdtracks_notes_easy = {
     24 : {"drum": "BP_Kick_C"},
     26 : {"drum": "BP_Snare_C"},
     30 : {"drum": "BP_Snare_C"},
+    43 : {"drum": "BP_HiHat_C"},
     45 : {"drum": "BP_HiHat_C"},
     48 : {"drum": "BP_HiHat_C"},
-    35 : {"drum": "BP_Tom1_C"},
-    37 : {"drum": "BP_Tom1_C"},
-    39 : {"drum": "BP_Tom1_C"},
+    35 : {"drum": "BP_FloorTom_C"},
+    37 : {"drum": "BP_FloorTom_C"},
+    39 : {"drum": "BP_FloorTom_C"},
     62 : {"drum": "BP_Crash15_C"},
     67 : {"drum": "BP_Crash17_C"},
     75 : {"drum": "BP_Crash15_C"}
@@ -185,7 +192,7 @@ def analyze_midi_file():
     # class_to_default_notes = pdtracks_notes
     convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
     # note_to_drums_map = pdtracks_notes
-    note_to_drums_map = pdtracks_notes_easy
+    note_to_drums_map = copy.deepcopy(pdtracks_notes_easy)
     track_to_convert = mid.tracks[convert_track_index]
     #  TODO pick midi track to convert
 
@@ -204,26 +211,26 @@ def analyze_midi_file():
     # else:
     # TODO for now assume all drums will be in the drum kit file
     kit_instruments = drum_set_dict["instruments"]
-    # for drum_obj in drum_set_dict["instruments"]:
-        # if drum_obj["class"] in class_to_default_notes:
-            # note_to_drums_map[class_to_default_notes[drum_obj["class"]]] = [str(drum_obj["name"])]
     for note in note_to_drums_map:
         drum_class = note_to_drums_map[note]["drum"]
+        print("Drum class: " + drum_class)
         drums = [d for d in kit_instruments if d["class"] == drum_class]
         if(len(drums) > 0):
             note_to_drums_map[note]["drum"] = drums[0]["name"]
         else:
             note_to_drums_map[note]["drum"] =  drum_class+"Default"
+            print(drum_class+"Default")
 
     out_dict["instruments"] = drum_set_dict["instruments"]
 
     print(note_to_drums_map)
+
+    # Tempo changes
     tempo_total_ticks = 0
     tempo_total_seconds = 0
     tempo_index = 0
     tempo = 500000
     default_tempo = 500000
-    #TODO bpm changes might have to be saved in rlrr file as well
     for i, track in enumerate(mid.tracks): 
         for msg in track:
             if msg.is_meta:
@@ -272,9 +279,17 @@ def analyze_midi_file():
 
 def convert_to_rlrr():
     print("Converting to rlrr...")
-    audio_file_short = audio_file.split('/')[-1]
+    # Filter out empty strings from track lists
+    flt_drum_tracks = [x for x in drum_tracks if x.strip()]
+    flt_song_tracks = [x for x in song_tracks if x.strip()]
+
+    short_dtracks = [x.split('/')[-1] for x in flt_drum_tracks]
+    short_stracks = [x.split('/')[-1] for x in flt_song_tracks]
+
+    # audio_file_short = audio_file.split('/')[-1]
     cover_image_short = cover_image_path.split('/')[-1]
-    audio_file_data['path'] = audio_file_short
+    audio_file_data['songTracks'] = short_stracks
+    audio_file_data['drumTracks'] = short_dtracks
     audio_file_data['calibrationOffset'] = calibration_offset
     out_dict["audioFileData"] = audio_file_data
 
@@ -285,15 +300,24 @@ def convert_to_rlrr():
     recording_metadata['creator'] = author_name
     out_dict["recordingMetadata"] = recording_metadata
 
-    output_folder_path = script_dir + '/../resources/base/rlrr_files/'+ song_name
-    os.mkdir(output_folder_path)
-    if audio_file:
-        copyfile(audio_file, output_folder_path + '/' + audio_file_short)
+    # output_folder_path = script_dir + '/../resources/base/rlrr_files/'+ song_name
+    output_folder_path = os.path.join(output_rlrr_dir, song_name)
+    if not os.path.isdir(output_folder_path):
+        os.makedirs(output_folder_path)
+    
+    all_tracks = flt_drum_tracks + flt_song_tracks
+    for track in all_tracks:
+        copyfile(track, output_folder_path + '/' + track.split('/')[-1])
     if cover_image_path:
         copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
-    with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '_converted.rlrr', 'w') as outfile:  
+    
+    # with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '_converted.rlrr', 'w') as outfile:  
+    # with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '.rlrr', 'w') as outfile:  
+    with open(os.path.join(output_rlrr_dir,song_name) + '/' + song_name + '.rlrr', 'w') as outfile:  
         json.dump(out_dict, outfile, indent=4)
-    print("Conversion done!")
+        print("Conversion done!")
+        return True
+    
  
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -302,13 +326,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.ui.selectMidiButton.clicked.connect(self.select_midi_clicked)
         self.ui.selectDrumSetButton.clicked.connect(self.select_drum_set_clicked)
-        self.ui.selectAudioFileButton.clicked.connect(self.select_audio_file_clicked)
+        self.ui.selectDrumTrackButton_1.clicked.connect(self.select_audio_file_clicked)
+        self.ui.selectDrumTrackButton_2.clicked.connect(self.select_audio_file_clicked)
+        self.ui.selectSongTrackButton_1.clicked.connect(self.select_audio_file_clicked)
         self.ui.convertButton.clicked.connect(self.convert_clicked)
         self.ui.calibrationSpinBox.valueChanged.connect(self.calibration_offset_changed)
         self.ui.selectCoverImageButton.clicked.connect(self.select_cover_image_clicked)
         self.lastOpenFolder = "."
 		
-        analyze_drum_set('')
+    def set_default_set(self, default_set):
+        analyze_drum_set(default_set)
+        print(os.path.join(os.path.join(os.path.dirname(default_set), '..'), 'rlrr_files'))
+        global output_rlrr_dir
+        output_rlrr_dir = os.path.join(os.path.join(os.path.dirname(default_set), '..'), 'rlrr_files')
+        # output_rlrr_dir = default_set.split('/')
         # self.midi_converter = MidiConverter()
 
     def select_midi_clicked(self):
@@ -328,11 +359,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.drumSetLineEdit.setText(drum_set_file.split('/')[-1])
 
     def select_audio_file_clicked(self):
-        global audio_file
+        sender_name = self.sender().objectName()
+        is_drum_track = "Drum" in sender_name
+        track_index = int(sender_name.split('_')[-1]) - 1
+        global song_tracks
+        global drum_tracks
         audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
         print(audio_file)
+        if is_drum_track:
+            drum_tracks[track_index] = audio_file
+            print(drum_tracks)
+        else:
+            song_tracks[track_index] = audio_file
+            print(song_tracks)
         self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
-        self.ui.audioFileLineEdit.setText(audio_file.split('/')[-1])
+        line_edit = getattr(self.ui, ('drum' if is_drum_track else 'song') + 'TrackLineEdit_' + str(track_index+1))
+        print(line_edit)
+        line_edit.setText(audio_file.split('/')[-1])
 
     def select_cover_image_clicked(self):
         global cover_image_path
@@ -353,4 +396,5 @@ class MainWindow(QtWidgets.QMainWindow):
         recording_description = self.ui.descriptionTextEdit.toPlainText() 
         artist_name = self.ui.artistNameLineEdit.text()
         author_name = self.ui.authorNameLineEdit.text()
-        convert_to_rlrr()
+        if convert_to_rlrr():
+            self.ui.statusLabel.setText("Conversion successful!")
