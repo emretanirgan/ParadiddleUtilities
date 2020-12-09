@@ -125,7 +125,7 @@ StatusLabel {
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="drumSetTab">
      <attribute name="title">
@@ -245,17 +245,22 @@ StatusLabel {
        </rect>
       </property>
       <property name="text">
-       <string>MIDI Track:</string>
+       <string>Midi Track:</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="midiTrackComboBox">
       <property name="geometry">
        <rect>
         <x>90</x>
         <y>40</y>
-        <width>69</width>
+        <width>181</width>
         <height>22</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <underline>false</underline>
+       </font>
       </property>
       <property name="editable">
        <bool>false</bool>
@@ -320,7 +325,7 @@ StatusLabel {
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QPushButton" name="selectAudioTrackButton_1">
+      <widget class="QPushButton" name="selectSongTrackButton_1">
        <property name="text">
         <string>Select Audio File</string>
        </property>
@@ -616,7 +621,7 @@ StatusLabel {
   <tabstop>midiFileLineEdit</tabstop>
   <tabstop>selectMidiButton</tabstop>
   <tabstop>audioTrackLineEdit_1</tabstop>
-  <tabstop>selectAudioTrackButton_1</tabstop>
+  <tabstop>selectSongTrackButton_1</tabstop>
   <tabstop>calibrationSpinBox</tabstop>
   <tabstop>songNameLineEdit</tabstop>
   <tabstop>artistNameLineEdit</tabstop>

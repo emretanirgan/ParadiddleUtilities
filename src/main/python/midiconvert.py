@@ -32,6 +32,10 @@ output_rlrr_dir = ''
 song_tracks = [""] * 5
 drum_tracks = [""] * 4
 
+# MIDI
+midi_track_names = []
+convert_track_index = 0
+
 audio_file_data = {
     'songTracks' : [],
     'drumTracks' : [],
@@ -52,7 +56,6 @@ cover_image_path = ''
 author_name = ''
 recording_description = ''
 calibration_offset = 0.0
-
 
 # TODO put in actual default notes
 # TODO support for mallet instruments, or instruments that can have a lot of midi notes. might have to specify a range of notes
@@ -99,7 +102,6 @@ pdtracks_notes = {
     67 : {"drum": "BP_Crash17_C"},
     75 : {"drum": "BP_Ride17_C"}
 }
-
 
 pdtracks_notes_easy = {
     24 : {"drum": "BP_Kick_C"},
@@ -163,13 +165,12 @@ def analyze_drum_set(drum_set_filename):
 
     
 
-def analyze_midi_file():
-    global out_dict
+def analyze_midi_file(track_index=-1):
+    global out_dict, convert_track_index
     out_dict["version"] = 0.6
     out_dict["instruments"] = []
     out_dict["events"] = []
     out_dict["bpmEvents"] = []
-    # midi_file_name = script_dir + '/../resources/base/midi_files/notes.mid'
     mid = MidiFile(midi_file)
 
     tempo = 500000
@@ -190,18 +191,24 @@ def analyze_midi_file():
     is_rhythm_game_midi = False
     # class_to_default_notes = rlrr_default_notes
     # class_to_default_notes = pdtracks_notes
-    convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
+    if track_index == -1:
+        convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
+    else:
+        convert_track_index = track_index
+        
     # note_to_drums_map = pdtracks_notes
     note_to_drums_map = copy.deepcopy(pdtracks_notes_easy)
     track_to_convert = mid.tracks[convert_track_index]
-    #  TODO pick midi track to convert
 
     for i, track in enumerate(mid.tracks):
         print('Track {}: {}'.format(i, track.name))
+        midi_track_names.append(track.name)
         if (track.name == "PART DRUMS"):
             is_rhythm_game_midi = True
             class_to_default_notes = rhythm_midi_note_to_drums
             track_to_convert = track
+            convert_track_index = i
+            print("PART DRUMS: " + str(i))
 
     print("Kit layout again: " + str(drum_set_dict["instruments"]))
     # if drum_set_dict is None:
@@ -244,7 +251,6 @@ def analyze_midi_file():
     if len(tempo_events) == 0:
         tempo_events = [(0.0, 0.0, default_tempo)]
         out_dict["bpmEvents"].append({"bpm" : default_tempo, "time" : 0})
-
 
     # print("Ticks per beat: " + str(mid.ticks_per_beat))
     # print("Tempo Changes: " + str(tempo_events))
@@ -300,7 +306,6 @@ def convert_to_rlrr():
     recording_metadata['creator'] = author_name
     out_dict["recordingMetadata"] = recording_metadata
 
-    # output_folder_path = script_dir + '/../resources/base/rlrr_files/'+ song_name
     output_folder_path = os.path.join(output_rlrr_dir, song_name)
     if not os.path.isdir(output_folder_path):
         os.makedirs(output_folder_path)
@@ -311,8 +316,6 @@ def convert_to_rlrr():
     if cover_image_path:
         copyfile(cover_image_path, output_folder_path + '/' + cover_image_short)    
     
-    # with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '_converted.rlrr', 'w') as outfile:  
-    # with open(script_dir + '/../resources/base/rlrr_files/' + song_name + '/' + song_name + '.rlrr', 'w') as outfile:  
     with open(os.path.join(output_rlrr_dir,song_name) + '/' + song_name + '.rlrr', 'w') as outfile:  
         json.dump(out_dict, outfile, indent=4)
         print("Conversion done!")
@@ -332,6 +335,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.convertButton.clicked.connect(self.convert_clicked)
         self.ui.calibrationSpinBox.valueChanged.connect(self.calibration_offset_changed)
         self.ui.selectCoverImageButton.clicked.connect(self.select_cover_image_clicked)
+        # self.ui.midiTrackComboBox.currentIndexChanged.connect(self.midi_track_index_changed)
         self.lastOpenFolder = "."
 		
     def set_default_set(self, default_set):
@@ -344,11 +348,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def select_midi_clicked(self):
         global midi_file
+        global midi_track_names
+        global convert_track_index
         midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi)"))[0]
         print(midi_file)
         analyze_midi_file()
         self.lastOpenFolder = midi_file.rsplit('/', 1)[0]
         self.ui.midiFileLineEdit.setText(midi_file.split('/')[-1])
+        for i in range(len(midi_track_names)):
+            item_name = 'Track ' + str(i) + ': ' + midi_track_names[i]
+            if i >= (self.ui.midiTrackComboBox.count()):
+                self.ui.midiTrackComboBox.addItem(item_name)
+            else:
+                self.ui.midiTrackComboBox.setItemText(i,item_name)
+        # self.ui.midiTrackComboBox.currentIndexChanged.disconnect(self.midi_track_index_changed)
+        self.ui.midiTrackComboBox.setCurrentIndex(convert_track_index)
+        # self.ui.midiTrackComboBox.currentIndexChanged.connect(self.midi_track_index_changed)
+
+    def midi_track_index_changed(self, index):
+        print("new index: " + str(index))
+        analyze_midi_file(index)
 
     def select_drum_set_clicked(self):
         global drum_set_file
@@ -387,7 +406,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def calibration_offset_changed(self):
         global calibration_offset
         calibration_offset = self.ui.calibrationSpinBox.value()
-        # print(self.ui.calibrationSpinBox.value())
 
     def convert_clicked(self):
         global song_name, recording_description, artist_name, author_name
