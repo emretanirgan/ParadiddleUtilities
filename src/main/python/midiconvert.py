@@ -1,3 +1,18 @@
+# Copyright (C) 2020 Emre Tanirgan <emre@paradiddleapp.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from mido import MidiFile
 from mido import tempo2bpm
 from PyQt5.QtWidgets import *
@@ -87,18 +102,14 @@ def get_default_midi_track():
     midi_track_names.clear()
 
     print('Midi file type: ' + str(mid.type))
-    is_rhythm_game_midi = False
     convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
 
     for i, track in enumerate(mid.tracks):
         print('Track {}: {}'.format(i, track.name))
         midi_track_names.append(track.name)
         if ("drum" in track.name.lower()): # default to a midi track if it has 'drum' in the name
-            is_rhythm_game_midi = True
-            class_to_default_notes = rhythm_midi_note_to_drums
             track_to_convert = track
             convert_track_index = i
-            # print("PART DRUMS: " + str(i))
 
 def analyze_midi_file():
     global out_dict, convert_track_index
@@ -187,10 +198,7 @@ def analyze_midi_file():
             if msg.type == "note_on":
                 drum_name = "Test"
                 note = msg.note
-                #TODO are note lengths relevant here? maybe incorporate that when checking total midi file length?
-                # if is_rhythm_game_midi:
-                    # note = msg.note 
-                #ignore velocity 0 notes here? Seem to be getting a lot of these in the rhythm game midis, almost like note off events are showing up here
+                #TODO should we ignore velocity 0 notes here? 
                 if note in note_map and msg.velocity > 0:
                     drum_name = note_map[note]["drum"]
 

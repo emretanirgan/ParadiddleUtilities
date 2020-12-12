@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://paradiddleapp.com/schemas/rlrrschema_v0.5.json",
-    "$comment": "TODO - Add optional values here such as MIDI notes etc.",
+    "$comment": "TODO - Update to latest, Add optional values here such as MIDI notes etc.",
     "title": "Paradiddle RLRR Schema",
     "description": "Json schema for .rlrr format used in Paradiddle instrument kit and recording save files.",
     "type": "object",
