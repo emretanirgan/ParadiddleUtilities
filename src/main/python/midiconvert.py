@@ -23,7 +23,7 @@ from PyQt5 import QtWidgets
 from ParadiddleUtilities import *
 import sys
 from shutil import copyfile
-import audio_metadata
+import soundfile as sf
 import copy
 import yaml
 
@@ -388,14 +388,17 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             song_tracks[track_index] = audio_file
             print(song_tracks)
-        track_metadata = audio_metadata.load(audio_file)
-        print(track_metadata)       
-        if track_metadata and 'streaminfo' in track_metadata:
-            if 'duration' in track_metadata['streaminfo']:
-                track_len = track_metadata['streaminfo']['duration']
-                if(length < track_len):
-                    # print("New length: " + str(track_len)) 
-                    length = track_len
+
+        # Get audio file length
+        try:
+            track_sf = sf.SoundFile(audio_file)
+            track_len = len(track_sf) / track_sf.samplerate
+            print('audio track seconds = {}'.format(track_len))
+            if length < track_len:
+                length = track_len
+        except:
+            print("Error trying to open audio file!")
+
         self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
         line_edit = getattr(self.ui, ('drum' if is_drum_track else 'song') + 'TrackLineEdit_' + str(track_index+1))
         print(line_edit)

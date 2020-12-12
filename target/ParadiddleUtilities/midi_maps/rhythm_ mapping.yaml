@@ -1,0 +1,69 @@
+#TODO need default midi mappings for rhythm game midi format - get difficulties, map from those midi notes
+#https://rockband.scorehero.com/forum/viewtopic.php?t=1711
+#https://www.scorehero.com/forum/viewtopic.php?t=1179
+# red, (Snare Drum)
+# yellow, (Hi-Hat)
+# blue, (Tom-Tom)
+# green (Crash Cymbols).
+# The kick pedal is colored orange (Bass Drum).
+# 60: guitar note GREEN, easy (C) 
+# 61: guitar note RED, easy (C#) 
+# 62: guitar note YELLOW, easy (D) 
+# 63: guitar note BLUE, easy (D#) 
+# 64: guitar note ORANGE, easy (E) 
+# 67: star power group, easy (G) 
+# 69: player 1 section, easy (A) 
+# 70: player 2 section, easy (A#) 
+# 72: guitar note GREEN, medium (C) 
+# 73: guitar note RED, medium (C#) 
+# 74: guitar note YELLOW, medium (D) 
+# 75: guitar note BLUE, medium (D#) 
+# 76: guitar note ORANGE, medium (E) and so on (60 + difficulty*12)
+
+easy:
+    HiHat          : [62]
+    Snare          : [61]
+    Kick           : [64]
+    Crash15        : [60]
+    Crash17        : []
+    FloorTom       : []
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [63]
+    Tom2           : []
+
+medium:
+    HiHat          : [74]
+    Snare          : [73]
+    Kick           : [76]
+    Crash15        : [72]
+    Crash17        : []
+    FloorTom       : []
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [75]
+    Tom2           : []
+
+hard:
+    HiHat          : [86]
+    Snare          : [85]
+    Kick           : [88]
+    Crash15        : [84]
+    Crash17        : []
+    FloorTom       : []]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [87]
+    Tom2           : []
+
+expert:
+    HiHat          : [98]
+    Snare          : [97]
+    Kick           : [100]
+    Crash15        : [96]
+    Crash17        : []
+    FloorTom       : []
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [99]
+    Tom2           : []
