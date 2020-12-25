@@ -8,7 +8,7 @@ a = Analysis(['C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\python\
              binaries=[],
              datas=[],
              hiddenimports=[],
-             hookspath=['src/build/extra-hooks', 'C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\env\\lib\\site-packages\\fbs\\freeze\\hooks'],
+             hookspath=['src/build/extra-hooks', 'c:\\users\\tanir\\github\\paradiddleutilities\\env\\lib\\site-packages\\fbs\\freeze\\hooks'],
              runtime_hooks=['C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\target\\PyInstaller\\fbs_pyinstaller_hook.py'],
              excludes=[],
              win_no_prefer_redirects=False,
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=False,
-          console=True , icon='C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\icons\\Icon.ico')
+          console=False , icon='C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\icons\\Icon.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

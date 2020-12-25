@@ -65,10 +65,12 @@ recording_metadata = {
     'coverImagePath': '',
     'artist': '',
     'creator': '',
-    'length': 0
+    'length': 0,
+    'complexity': 1
 }
 
 song_name = ''
+song_complexity = 1
 artist_name = ''
 cover_image_path = ''
 author_name = ''
@@ -268,6 +270,7 @@ def convert_to_rlrr():
     recording_metadata['coverImagePath'] = cover_image_short
     recording_metadata['artist'] = artist_name
     recording_metadata['creator'] = author_name
+    recording_metadata['complexity'] = song_complexity
     if length > 0:
         recording_metadata['length'] = length
     out_dict["recordingMetadata"] = recording_metadata
@@ -309,6 +312,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.selectCoverImageButton.clicked.connect(self.select_cover_image_clicked)
         self.ui.midiTrackComboBox.currentIndexChanged.connect(self.midi_track_index_changed)
         self.ui.difficultyComboBox.currentTextChanged.connect(self.difficulty_text_changed)
+        self.ui.complexityComboBox.currentTextChanged.connect(self.complexity_text_changed)
         self.lastOpenFolder = "."
 		
     def set_default_set(self, default_set):
@@ -328,6 +332,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def difficulty_text_changed(self, text):
         global difficulty
         difficulty = text
+
+    def complexity_text_changed(self, text):
+        global song_complexity
+        song_complexity = int(text)
 
     def select_midi_clicked(self):
         global midi_file

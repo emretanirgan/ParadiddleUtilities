@@ -1,5 +1,5 @@
 ('C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\target\\PyInstaller\\ParadiddleUtilities\\ParadiddleUtilities.exe',
- True,
+ False,
  False,
  True,
  'C:\\Users\\tanir\\GitHub\\ParadiddleUtilities\\src\\main\\icons\\Icon.ico',
@@ -51,7 +51,7 @@
  [],
  False,
  False,
- 1607766266,
- [('run.exe',
-   'c:\\users\\tanir\\github\\paradiddleutilities\\env\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run.exe',
+ 1608929355,
+ [('runw.exe',
+   'c:\\users\\tanir\\github\\paradiddleutilities\\env\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\runw.exe',
    'EXECUTABLE')])
