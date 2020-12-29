@@ -140,7 +140,9 @@ def analyze_midi_file():
     # note_to_drums_map = pdtracks_notes
     diff_index = difficulty_names.index(difficulty)
     # fall back to highest difficulty map if our difficulty isn't in the map
+    # print(note_to_drum_maps)
     note_map = copy.deepcopy(note_to_drum_maps[min(len(note_to_drum_maps)-1, diff_index)])
+    # print(note_map)
     track_to_convert = mid.tracks[convert_track_index]
 
     print("Kit layout again: " + str(drum_set_dict["instruments"]))
@@ -200,10 +202,11 @@ def analyze_midi_file():
             if msg.type == "note_on":
                 drum_name = "Test"
                 note = msg.note
+                # print(msg.note)
                 #TODO should we ignore velocity 0 notes here? 
                 if note in note_map and msg.velocity > 0:
                     drum_name = note_map[note]["drum"]
-
+                    # print(drum_name)
                     drum_hit = {"name" : drum_name, "vel" : msg.velocity, "loc": 0, "time": '%.4f'%total_time}
                     # print(str(drum_hit) + " tempo: " + str(tempo) + " total ticks: " + str(total_ticks))
                     out_dict["events"].append(drum_hit)
@@ -220,6 +223,7 @@ def create_midi_map(midi_yaml):
     This makes lookups easier later on when we analyze the midi file.'''
     # print(midi_yaml)
     global note_to_drum_maps
+    note_to_drum_maps.clear()
     for diff in difficulty_names:
         note_map = {}
         print(midi_yaml[diff.lower()])
