@@ -7,10 +7,26 @@
 # For example:
 # 
 # hard:
-#   - HiHat : [12, 14]
+#     HiHat : [12, 14]
 # expert:
 # 
 # In this scenario, the expert mapping will just use the hard mapping.
+
+# Toggle Notes
+# Some rhythm game midi formats use special toggle notes to change the
+# meaning of a given midi note. For example, a toggle note can change a
+# midi note's meaning from a cymbal to a non-cymbal note. 
+# Toggle notes are supported in this midi mapping yaml format.
+# To specify one, you can define your mapping like this:
+#
+#     HiHat          : [98]
+#     Tom1           : 
+#         notes: [98]
+#         toggle_note: 110
+#
+# In this scenario, midi note 98 will trigger Tom1 only if midi note 110
+# is also actively playing. If midi note 110 isn't actively playing, midi
+# note 98 will trigger the HiHat by default instead.
 
 # Important: Don't change the names of the difficulties or the instruments!
 # Only modify the note numbers the list when creating your custom mapping.

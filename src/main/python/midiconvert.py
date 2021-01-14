@@ -52,6 +52,7 @@ length = 0
 midi_track_names = []
 convert_track_index = 0
 note_to_drum_maps = [] # in order of difficulty
+toggle_to_drum_maps = [] # example: [{111: Snare, 110: HiHat}, {100: Kick}] 
 
 audio_file_data = {
     'songTracks' : [],
@@ -142,8 +143,11 @@ def analyze_midi_file():
     # fall back to highest difficulty map if our difficulty isn't in the map
     # print(note_to_drum_maps)
     note_map = copy.deepcopy(note_to_drum_maps[min(len(note_to_drum_maps)-1, diff_index)])
+    toggle_map = copy.deepcopy(toggle_to_drum_maps[min(len(toggle_to_drum_maps)-1, diff_index)])
+
     # print(note_map)
     track_to_convert = mid.tracks[convert_track_index]
+    # print(track_to_convert)
 
     print("Kit layout again: " + str(drum_set_dict["instruments"]))
     # if drum_set_dict is None:
@@ -154,18 +158,29 @@ def analyze_midi_file():
     # TODO for now assume all drums will be in the drum kit file
     kit_instruments = drum_set_dict["instruments"]
     for note in note_map:
-        drum_class = note_map[note]["drum"]
-        print("Drum class: " + drum_class)
+        for drum in note_map[note]:
+            drum_class = drum["drum"]
+            print("Drum class: " + drum_class)
+            drums = [d for d in kit_instruments if d["class"] == drum_class]
+            if(len(drums) > 0):
+                drum["drum"] = drums[0]["name"]
+            else:
+                drum["drum"] =  drum_class+"Default"
+                print(drum_class+"Default")
+    # print(toggle_map)
+    toggle_map_rev = {}
+    for toggle in toggle_map:
+        drum_class = toggle_map[toggle]
         drums = [d for d in kit_instruments if d["class"] == drum_class]
         if(len(drums) > 0):
-            note_map[note]["drum"] = drums[0]["name"]
+            toggle_map[toggle] = drums[0]["name"]
         else:
-            note_map[note]["drum"] =  drum_class+"Default"
-            print(drum_class+"Default")
-
+            toggle_map[toggle] =  drum_class+"Default"
+        toggle_map_rev[toggle_map[toggle]] = toggle
+    # print('Updated toggle map: ' + str(toggle_map))
+    # print('toggle map rev: ' + str(toggle_map_rev))
     out_dict["instruments"] = drum_set_dict["instruments"]
-
-    print(note_map)
+    # print(note_map)
 
     # Tempo changes
     tempo_total_ticks = 0
@@ -173,6 +188,7 @@ def analyze_midi_file():
     tempo_index = 0
     tempo = 500000
     default_tempo = 500000
+    active_toggles = []
     for i, track in enumerate(mid.tracks): 
         for msg in track:
             if msg.is_meta:
@@ -189,27 +205,74 @@ def analyze_midi_file():
 
     # print("Ticks per beat: " + str(mid.ticks_per_beat))
     # print("Tempo Changes: " + str(tempo_events))
+    queued_msgs = []
+    total_time = 0
+    print('Track len: ' + str(len(track_to_convert)))
     for msg in track_to_convert:
+        if msg.time > 0:
+            for queued_msg in queued_msgs:
+                note = queued_msg.note
+                print(queued_msg.note)
+                toggle_active = False
+                notoggle_hits = []
+                for drum in note_map[note]:
+                    drum_name = drum["drum"]
+                    drum_hit = {"name" : drum_name, "vel" : queued_msg.velocity, "loc": 0, "time": '%.4f'%total_time}
+                    if drum_name in toggle_map_rev and toggle_map_rev[drum_name] in active_toggles:
+                        toggle_active = True
+                        out_dict["events"].append(drum_hit)
+                    if drum_name not in toggle_map_rev:
+                        notoggle_hits.append(drum_hit)
+                if not toggle_active:
+                    for hit in notoggle_hits:
+                        out_dict["events"].append(hit)
+            queued_msgs.clear()
+
         total_ticks += msg.time
+        # print('Total ticks: ' + str(total_ticks) + ' Msg time: ' + str(msg.time))
         while (tempo_index+1 < len(tempo_events)) and (total_ticks > tempo_events[tempo_index+1][0]):
             tempo_index += 1
         tempo = tempo_events[tempo_index][2]
+        # print('Tempo: ' + str(tempo))
         # total_time = total_time + mido.tick2second(msg.time, mid.ticks_per_beat, tempo) # old method of computing time, was slightly off
         total_time = tempo_events[tempo_index][1] + mido.tick2second(total_ticks - tempo_events[tempo_index][0], mid.ticks_per_beat, tempo)
         if(total_time > longest_time):
             longest_time = total_time
         if not msg.is_meta:
+            # print('msg note: ' + str(msg.note) + ' msg time: ' + str(msg.time))
+
+            note = msg.note
+            # print(total_time)
             if msg.type == "note_on":
-                drum_name = "Test"
-                note = msg.note
                 # print(msg.note)
                 #TODO should we ignore velocity 0 notes here? 
+                if note in toggle_map:
+                    if note not in active_toggles:
+                        active_toggles.append(note)
                 if note in note_map and msg.velocity > 0:
-                    drum_name = note_map[note]["drum"]
-                    # print(drum_name)
-                    drum_hit = {"name" : drum_name, "vel" : msg.velocity, "loc": 0, "time": '%.4f'%total_time}
-                    # print(str(drum_hit) + " tempo: " + str(tempo) + " total ticks: " + str(total_ticks))
-                    out_dict["events"].append(drum_hit)
+                    hits = []
+                    has_toggle = False
+                    for drum in note_map[note]:
+                        # if this drum has to be toggled on by a note, 
+                        # check to see if the toggle note is active right now.
+                        # might have to go ahead and look at all the other notes
+                        # at this tick first before doing this
+                        drum_name = drum["drum"]
+                        # print(drum_name)
+                        if drum_name in toggle_map_rev:
+                            has_toggle = True
+                            if msg not in queued_msgs:
+                                queued_msgs.append(copy.deepcopy(msg))
+                        else:
+                            drum_hit = {"name" : drum_name, "vel" : msg.velocity, "loc": 0, "time": '%.4f'%total_time}
+                            hits.append(drum_hit)
+                        # print(str(drum_hit) + " tempo: " + str(tempo) + " total ticks: " + str(total_ticks))
+                    if not has_toggle:
+                        for hit in hits:
+                            out_dict["events"].append(hit)
+            if msg.type == "note_off":
+                if note in toggle_map:
+                    active_toggles.remove(note)
     print(tempo_index)
     print("Ticks Per Beat " + str(mid.ticks_per_beat) + ", Tempo " + str(tempo) + ", BPM " + '%.2f'%tempo2bpm(tempo))
     print("Midi File Length " + str(mid.length))
@@ -221,36 +284,53 @@ def create_midi_map(midi_yaml):
     '''Construct dicts for each difficulty that
     are in the form [note] : {'drum': [drum_class]}
     This makes lookups easier later on when we analyze the midi file.'''
-    # print(midi_yaml)
     global note_to_drum_maps
     note_to_drum_maps.clear()
+    toggle_to_drum_maps.clear()
     for diff in difficulty_names:
         note_map = {}
+        toggle_map = {}
         print(midi_yaml[diff.lower()])
         diff_map = midi_yaml[diff.lower()]
         if not diff_map or len(diff_map) == 0:
             continue
         for drum in diff_map:
-            for note in diff_map[drum]:
-                if type(note) == str:
-                    note.replace(' ', '')
-                    if len(note.split('-')) > 1:
-                        min_note = note.split('-')[0]
-                        max_note = note.split('-')[1]
-                        for range_note in range(min_note, max_note+1):
-                            note_map[range_note] = {'drum': 'BP_%s_C' % (drum)}
-                    else:
-                        try:
-                            str_note = int(note)
-                            note_map[str_note] = {'drum' : 'BP_%s_C' % drum}
-                        except ValueError:
-                            print("Not a valid number!")
-                else:
-                    note_map[note] = {'drum' : 'BP_%s_C' % drum}
+            if type(diff_map[drum]) == list:
+                extract_midi_notes(note_map, diff_map[drum], drum)
+            else:
+                print(diff_map[drum])
+                drum_map = diff_map[drum]
+                if 'toggle_note' in drum_map:
+                    toggle_map[drum_map['toggle_note']] = 'BP_%s_C' % drum
+                if 'notes' in drum_map:
+                    extract_midi_notes(note_map, drum_map['notes'], drum)
         note_to_drum_maps.append(note_map)
-        # print("Note map for: " + diff + " = " + str(note_map))
-    # print(note_to_drum_maps)
+        toggle_to_drum_maps.append(toggle_map)
 
+def extract_midi_notes(note_map, note_list, drum_name):
+    for note in note_list:
+        if type(note) == str:
+            note.replace(' ', '')
+            if len(note.split('-')) > 1:
+                min_note = note.split('-')[0]
+                max_note = note.split('-')[1]
+                for range_note in range(min_note, max_note+1):
+                    if range_note not in note_map:
+                        note_map[range_note] = []
+                    note_map[range_note].append({'drum': 'BP_%s_C' % (drum_name)})
+            else:
+                try:
+                    str_note = int(note)
+                    if str_note not in note_map:
+                        note_map[str_note] = []
+                    note_map[str_note].append({'drum' : 'BP_%s_C' % drum_name})
+                except ValueError:
+                    print("Not a valid number!")
+        else:
+            print('key: ' + str(note))
+            if note not in note_map:
+                note_map[note] = []
+            note_map[note].append({'drum' : 'BP_%s_C' % drum_name})
 
 def convert_to_rlrr():
     print("Converting to rlrr...")
@@ -427,6 +507,8 @@ class MainWindow(QtWidgets.QMainWindow):
         global song_name, recording_description, artist_name, author_name
         song_name = self.ui.songNameLineEdit.text()
         # TODO check if we need to escape the \n newline characters ('\n' to '\\n')
+        self.ui.statusLabel.setText("Converting...")
+        self.ui.statusLabel.repaint()
         recording_description = self.ui.descriptionTextEdit.toPlainText() 
         artist_name = self.ui.artistNameLineEdit.text()
         author_name = self.ui.authorNameLineEdit.text()
