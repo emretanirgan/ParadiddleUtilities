@@ -212,7 +212,8 @@ def analyze_midi_file():
         if msg.time > 0:
             for queued_msg in queued_msgs:
                 note = queued_msg.note
-                print(queued_msg.note)
+                # print('queued')
+                # print(queued_msg.note)
                 toggle_active = False
                 notoggle_hits = []
                 for drum in note_map[note]:
@@ -245,7 +246,7 @@ def analyze_midi_file():
             # print(total_time)
             if msg.type == "note_on":
                 # print(msg.note)
-                #TODO should we ignore velocity 0 notes here? 
+                #we ignore velocity 0 notes here? 
                 if note in toggle_map:
                     if note not in active_toggles:
                         active_toggles.append(note)
@@ -270,7 +271,7 @@ def analyze_midi_file():
                     if not has_toggle:
                         for hit in hits:
                             out_dict["events"].append(hit)
-            if msg.type == "note_off":
+            if msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
                 if note in toggle_map:
                     active_toggles.remove(note)
     print(tempo_index)
