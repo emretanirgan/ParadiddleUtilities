@@ -242,9 +242,9 @@ def analyze_midi_file():
         if not msg.is_meta:
             # print('msg note: ' + str(msg.note) + ' msg time: ' + str(msg.time))
 
-            note = msg.note
             # print(total_time)
             if msg.type == "note_on":
+                note = msg.note
                 # print(msg.note)
                 #we ignore velocity 0 notes here? 
                 if note in toggle_map:
@@ -272,6 +272,7 @@ def analyze_midi_file():
                         for hit in hits:
                             out_dict["events"].append(hit)
             if msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
+                note = msg.note
                 if note in toggle_map:
                     active_toggles.remove(note)
     print(tempo_index)
