@@ -51,7 +51,7 @@
  [],
  False,
  False,
- 1610752236,
+ 1611972578,
  [('runw.exe',
    'c:\\users\\tanir\\github\\paradiddleutilities\\env\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\runw.exe',
    'EXECUTABLE')])

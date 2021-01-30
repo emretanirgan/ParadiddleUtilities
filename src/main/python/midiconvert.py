@@ -193,11 +193,12 @@ def analyze_midi_file():
         for msg in track:
             if msg.is_meta:
                 # print(msg.type)
+                tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
+                tempo_total_ticks += msg.time
                 if msg.type == "set_tempo":
-                    tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
                     tempo = msg.tempo
-                    tempo_total_ticks += msg.time
                     tempo_events.append((tempo_total_ticks, tempo_total_seconds, msg.tempo))
+                    print('Tempo change: ' + str(tempo2bpm(msg.tempo)) + ' time: ' + str(tempo_total_seconds))
                     out_dict["bpmEvents"].append({"bpm" : tempo2bpm(msg.tempo), "time" : tempo_total_seconds})
     if len(tempo_events) == 0:
         tempo_events = [(0.0, 0.0, default_tempo)]
@@ -240,9 +241,6 @@ def analyze_midi_file():
         if(total_time > longest_time):
             longest_time = total_time
         if not msg.is_meta:
-            # print('msg note: ' + str(msg.note) + ' msg time: ' + str(msg.time))
-
-            # print(total_time)
             if msg.type == "note_on":
                 note = msg.note
                 # print(msg.note)
@@ -275,7 +273,7 @@ def analyze_midi_file():
                 note = msg.note
                 if note in toggle_map:
                     active_toggles.remove(note)
-    print(tempo_index)
+    # print(tempo_index)
     print("Ticks Per Beat " + str(mid.ticks_per_beat) + ", Tempo " + str(tempo) + ", BPM " + '%.2f'%tempo2bpm(tempo))
     print("Midi File Length " + str(mid.length))
     print("Our totaled file length " + str(longest_time))
@@ -300,7 +298,6 @@ def create_midi_map(midi_yaml):
             if type(diff_map[drum]) == list:
                 extract_midi_notes(note_map, diff_map[drum], drum)
             else:
-                print(diff_map[drum])
                 drum_map = diff_map[drum]
                 if 'toggle_note' in drum_map:
                     toggle_map[drum_map['toggle_note']] = 'BP_%s_C' % drum
@@ -329,7 +326,6 @@ def extract_midi_notes(note_map, note_list, drum_name):
                 except ValueError:
                     print("Not a valid number!")
         else:
-            print('key: ' + str(note))
             if note not in note_map:
                 note_map[note] = []
             note_map[note].append({'drum' : 'BP_%s_C' % drum_name})
