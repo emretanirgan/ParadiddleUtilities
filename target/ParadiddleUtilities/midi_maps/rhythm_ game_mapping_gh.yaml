@@ -1,0 +1,55 @@
+# Guitar Hero Style Midi File Mapping
+# 101 - Green
+# 100 - Orange
+# 99 - Blue
+# 98 - Yellow
+# 97 - Red
+# 96 - Kick 1
+# 95  - Kick 2 (Expert + only)
+easy:
+    HiHat          : [62]
+    Snare          : [61]
+    Kick           : [60]
+    Crash15        : []
+    Crash17        : [64]
+    FloorTom       : [65]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [63]
+    Tom2           : []
+
+medium:
+    HiHat          : [74]
+    Snare          : [73]
+    Kick           : [72]
+    Crash15        : []
+    Crash17        : [76]
+    FloorTom       : [77]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [75]
+    Tom2           : []
+
+hard:
+    HiHat          : [86]
+    Snare          : [85]
+    Kick           : [84]
+    Crash15        : []
+    Crash17        : [88]
+    FloorTom       : [89]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [87]
+    Tom2           : []
+
+expert:
+    HiHat          : [98]
+    Snare          : [97]
+    Kick           : [96, 95]
+    Crash15        : []
+    Crash17        : [100]
+    FloorTom       : [101]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [99]
+    Tom2           : []

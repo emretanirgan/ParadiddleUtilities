@@ -99,7 +99,7 @@ def analyze_drum_set(drum_set_filename):
         # for mallets, need to check the first key index and number of notes?
 
 def get_default_midi_track():
-    mid = MidiFile(midi_file)
+    mid = MidiFile(midi_file, clip=True)
     global midi_track_names
     global convert_track_index
     midi_track_names.clear()
@@ -121,7 +121,7 @@ def analyze_midi_file():
     out_dict["instruments"] = []
     out_dict["events"] = []
     out_dict["bpmEvents"] = []
-    mid = MidiFile(midi_file)
+    mid = MidiFile(midi_file, clip=True)
 
     try:
         # print("Mid length: " + str(mid.length))
