@@ -46,6 +46,9 @@ midi_file_name = ''
 output_rlrr_dir = ''
 song_tracks = [""] * 5
 drum_tracks = [""] * 4
+
+midi_lenth = 0
+song_length = 0
 length = 0
 
 # MIDI
@@ -98,25 +101,30 @@ def analyze_drum_set(drum_set_filename):
         # need to go throuh all instruments, see if their midi notes have been changed or set
         # for mallets, need to check the first key index and number of notes?
 
+# Returns a tuple of the default midi track we want to use in the form of
+# (midi track object, track index)
 def get_default_midi_track():
+    global midi_file
     mid = MidiFile(midi_file, clip=True)
     global midi_track_names
-    global convert_track_index
     midi_track_names.clear()
 
     print('Midi file type: ' + str(mid.type))
-    convert_track_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
+    default_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
 
     for i, track in enumerate(mid.tracks):
         print('Track {}: {}'.format(i, track.name))
         midi_track_names.append(track.name)
         if ("drum" in track.name.lower()): # default to a midi track if it has 'drum' in the name
             track_to_convert = track
-            convert_track_index = i
+            default_index = i
+            print("found drum in " + str(track_to_convert) + " " + str(default_index))
+    return (track_to_convert, default_index)
 
 def analyze_midi_file():
     global out_dict, convert_track_index
     global length
+    global midi_length
     out_dict["version"] = 0.6
     out_dict["instruments"] = []
     out_dict["events"] = []
@@ -198,7 +206,7 @@ def analyze_midi_file():
                 if msg.type == "set_tempo":
                     tempo = msg.tempo
                     tempo_events.append((tempo_total_ticks, tempo_total_seconds, msg.tempo))
-                    print('Tempo change: ' + str(tempo2bpm(msg.tempo)) + ' time: ' + str(tempo_total_seconds))
+                    print('Tempo change: ' + str(tempo2bpm(msg.tempo)) + ' time: ' + str(tempo_total_seconds) + ' ticks: ' + str(tempo_total_ticks))
                     out_dict["bpmEvents"].append({"bpm" : tempo2bpm(msg.tempo), "time" : tempo_total_seconds})
     if len(tempo_events) == 0:
         tempo_events = [(0.0, 0.0, default_tempo)]
@@ -238,6 +246,7 @@ def analyze_midi_file():
         # print('Tempo: ' + str(tempo))
         # total_time = total_time + mido.tick2second(msg.time, mid.ticks_per_beat, tempo) # old method of computing time, was slightly off
         total_time = tempo_events[tempo_index][1] + mido.tick2second(total_ticks - tempo_events[tempo_index][0], mid.ticks_per_beat, tempo)
+        # print(str(msg.type) + " " + str(msg.time) + " total ticks: " + str(total_ticks) + " total time: " + str(total_time))
         if(total_time > longest_time):
             longest_time = total_time
         if not msg.is_meta:
@@ -337,8 +346,25 @@ def convert_to_rlrr():
     flt_drum_tracks = [x for x in drum_tracks if x.strip()]
     flt_song_tracks = [x for x in song_tracks if x.strip()]
 
+    # use whichever is longer for our overall song length
+    last_event_time = 0
+    if "events" in out_dict and len(out_dict["events"]):
+        last_event_time = float(out_dict["events"][-1]["time"])
+    track_to_load = flt_song_tracks[0] if len(flt_song_tracks) else (flt_drum_tracks[0] if len(flt_drum_tracks) else None)        
+    if track_to_load:
+        print("Track to load: " + track_to_load)
+        track_sf = sf.SoundFile(track_to_load)
+        track_len = len(track_sf) / track_sf.samplerate
+        print('audio track seconds = {}'.format(track_len))
+        length = track_len if last_event_time < track_len else last_event_time
+    else:
+        length = last_event_time
+    print("last event time: " + str(last_event_time) + " length: " + str(length))
+
     short_dtracks = [x.split('/')[-1] for x in flt_drum_tracks]
     short_stracks = [x.split('/')[-1] for x in flt_song_tracks]
+
+    # check the length of one of the audio files vs the last event's timestamp in rlrr
 
     # audio_file_short = audio_file.split('/')[-1]
     cover_image_short = cover_image_path.split('/')[-1]
@@ -423,10 +449,11 @@ class MainWindow(QtWidgets.QMainWindow):
         global midi_file
         global midi_track_names
         global convert_track_index
+        self.ui.midiTrackComboBox.clear()
         midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi)"))[0]
         # print(midi_file)
         # analyze_midi_file()
-        get_default_midi_track()
+        (default_track, default_index) = get_default_midi_track()
         self.lastOpenFolder = midi_file.rsplit('/', 1)[0]
         self.ui.midiFileLineEdit.setText(midi_file.split('/')[-1])
         for i in range(len(midi_track_names)):
@@ -435,6 +462,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.midiTrackComboBox.addItem(item_name)
             else:
                 self.ui.midiTrackComboBox.setItemText(i,item_name)
+        convert_track_index = default_index
+        print("Convert track index: " + str(convert_track_index))
         self.ui.midiTrackComboBox.setCurrentIndex(convert_track_index)
 
     def select_midi_map_clicked(self):
@@ -478,16 +507,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             song_tracks[track_index] = audio_file
             print(song_tracks)
-
-        # Get audio file length
-        try:
-            track_sf = sf.SoundFile(audio_file)
-            track_len = len(track_sf) / track_sf.samplerate
-            print('audio track seconds = {}'.format(track_len))
-            if length < track_len:
-                length = track_len
-        except:
-            print("Error trying to open audio file!")
 
         self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
         line_edit = getattr(self.ui, ('drum' if is_drum_track else 'song') + 'TrackLineEdit_' + str(track_index+1))
