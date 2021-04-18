@@ -450,7 +450,7 @@ class MainWindow(QtWidgets.QMainWindow):
         global midi_track_names
         global convert_track_index
         self.ui.midiTrackComboBox.clear()
-        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi)"))[0]
+        midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi *.kar)"))[0]
         # print(midi_file)
         # analyze_midi_file()
         (default_track, default_index) = get_default_midi_track()
