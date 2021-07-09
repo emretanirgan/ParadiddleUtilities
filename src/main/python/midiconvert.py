@@ -111,6 +111,7 @@ def get_default_midi_track():
 
     print('Midi file type: ' + str(mid.type))
     default_index = 0 if mid.type == 0 else (1 if len(mid.tracks) > 1 else 0)
+    track_to_convert = mid.tracks[default_index]
 
     for i, track in enumerate(mid.tracks):
         print('Track {}: {}'.format(i, track.name))
@@ -351,14 +352,16 @@ def convert_to_rlrr():
     if "events" in out_dict and len(out_dict["events"]):
         last_event_time = float(out_dict["events"][-1]["time"])
     track_to_load = flt_song_tracks[0] if len(flt_song_tracks) else (flt_drum_tracks[0] if len(flt_drum_tracks) else None)        
+    length = last_event_time
     if track_to_load:
-        print("Track to load: " + track_to_load)
-        track_sf = sf.SoundFile(track_to_load)
-        track_len = len(track_sf) / track_sf.samplerate
-        print('audio track seconds = {}'.format(track_len))
-        length = track_len if last_event_time < track_len else last_event_time
-    else:
-        length = last_event_time
+        try:
+            print("Track to load: " + track_to_load)
+            track_sf = sf.SoundFile(track_to_load)
+            track_len = len(track_sf) / track_sf.samplerate
+            print('audio track seconds = {}'.format(track_len))
+            length = track_len if last_event_time < track_len else last_event_time
+        except Exception as e:
+            print("Error loading audio track: " + str(e))
     print("last event time: " + str(last_event_time) + " length: " + str(length))
 
     short_dtracks = [x.split('/')[-1] for x in flt_drum_tracks]
