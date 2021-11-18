@@ -200,10 +200,10 @@ def analyze_midi_file():
     active_toggles = []
     for i, track in enumerate(mid.tracks): 
         for msg in track:
+            # print(msg.type + " " + str(msg.time))
+            tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
+            tempo_total_ticks += msg.time
             if msg.is_meta:
-                # print(msg.type)
-                tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
-                tempo_total_ticks += msg.time
                 if msg.type == "set_tempo":
                     tempo = msg.tempo
                     tempo_events.append((tempo_total_ticks, tempo_total_seconds, msg.tempo))
