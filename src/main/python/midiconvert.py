@@ -321,8 +321,8 @@ def extract_midi_notes(note_map, note_list, drum_name):
         if type(note) == str:
             note.replace(' ', '')
             if len(note.split('-')) > 1:
-                min_note = note.split('-')[0]
-                max_note = note.split('-')[1]
+                min_note = int(note.split('-')[0])
+                max_note = int(note.split('-')[1])
                 for range_note in range(min_note, max_note+1):
                     if range_note not in note_map:
                         note_map[range_note] = []
