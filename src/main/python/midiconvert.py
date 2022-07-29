@@ -31,6 +31,7 @@ out_dict = {
     'version' : 0.5,
     'recordingMetadata' : {},
     'audioFileData' : {},
+    'highwaySettings': {},
     'instruments' : [],
     'events' : []
 }  
@@ -73,6 +74,13 @@ recording_metadata = {
     'complexity': 1
 }
 
+highway_settings = {
+    'accentNotes': False,
+    'ghostNotes': False,
+    'accentNoteThreshold': 110,
+    'ghostNoteThreshold': 20
+}
+
 song_name = ''
 song_complexity = 1
 artist_name = ''
@@ -80,6 +88,11 @@ cover_image_path = ''
 author_name = ''
 recording_description = ''
 calibration_offset = 0.0
+
+accent_enabled = False
+ghost_enabled = False
+accent_vel_threshold = 110
+ghost_vel_threshold = 20
 
 # TODO support for drum types with more than 1 hit zone - can map from midi note to
 # a tuple of (drum class, location) instead (or just drum class if we want to use a default location value of 0)
@@ -386,6 +399,13 @@ def convert_to_rlrr():
         recording_metadata['length'] = length
     out_dict["recordingMetadata"] = recording_metadata
 
+
+    highway_settings['accentNotes'] = accent_enabled
+    highway_settings['accentNoteThreshold'] = accent_vel_threshold
+    highway_settings['ghostNotes'] = ghost_enabled
+    highway_settings['ghostNoteThreshold'] = ghost_vel_threshold
+    out_dict["highwaySettings"] = highway_settings
+
     output_folder_path = os.path.join(output_rlrr_dir, song_name)
     if not os.path.isdir(output_folder_path):
         os.makedirs(output_folder_path)
@@ -424,8 +444,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.midiTrackComboBox.currentIndexChanged.connect(self.midi_track_index_changed)
         self.ui.difficultyComboBox.currentTextChanged.connect(self.difficulty_text_changed)
         self.ui.complexityComboBox.currentTextChanged.connect(self.complexity_text_changed)
+        self.ui.accentCheckbox.toggled.connect(self.accent_toggled)
+        self.ui.ghostCheckbox.toggled.connect(self.ghost_toggled)
+        self.ui.accentThresholdSpinBox.valueChanged.connect(self.accent_threshold_changed)
+        self.ui.ghostThresholdSpinBox.valueChanged.connect(self.ghost_threshold_changed)
         self.lastOpenFolder = "."
-		
+
+    def accent_toggled(self):
+        checked = (self.ui.accentCheckbox).isChecked()
+        # print(checked)
+        self.ui.accentThresholdLabel.setEnabled(checked)
+        self.ui.accentThresholdSpinBox.setEnabled(checked)
+        global accent_enabled
+        accent_enabled = checked
+
+    def ghost_toggled(self, cb):
+        checked = (self.ui.ghostCheckbox).isChecked()
+        # print(checked)
+        global ghost_enabled
+        ghost_enabled = checked
+        self.ui.ghostThresholdLabel.setEnabled(checked)
+        self.ui.ghostThresholdSpinBox.setEnabled(checked)
+
+    def accent_threshold_changed(self):
+        global accent_vel_threshold
+        accent_vel_threshold = self.ui.accentThresholdSpinBox.value()
+        print(accent_vel_threshold)
+
+    def ghost_threshold_changed(self):
+        global ghost_vel_threshold
+        ghost_vel_threshold = self.ui.ghostThresholdSpinBox.value()
+
     def set_default_set(self, default_set):
         analyze_drum_set(default_set)
         print(os.path.join(os.path.join(os.path.dirname(default_set), '..'), 'rlrr_files'))
