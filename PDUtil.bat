@@ -1,5 +1,5 @@
 @ECHO OFF
-start /b /wait cmd /c env\Scripts\activate.bat || goto :init
+call :activate_env || goto :init
 goto :run
 
 :init
@@ -22,6 +22,8 @@ goto :run
 :activate_env
     :: Activates new environment
     start /b /wait cmd /c env\Scripts\activate.bat
+    :: The normal || used for checking ERRORLEVEL doesn't work with "start /wait" so I have to use this conditional
+    IF %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL% 
     exit /b 0
 
 :check_deps
