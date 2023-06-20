@@ -1,15 +1,22 @@
+from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from .midiconvert import *
 import yaml
 import os
 
+project_dir = os.path.dirname(os.path.realpath(__file__))    
+
 # Paradiddle GUI
 class PD_GUI(QtWidgets.QMainWindow):
     def __init__(self):
+        global project_dir
         super(PD_GUI, self).__init__()
 
+        # Sets the window icon
+        self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
+
         # Loads the .ui file
-        uic.loadUi(os.path.join(os.path.dirname(__file__), "pd_gui_layout.ui"), self)
+        uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
         
         # Connecting the Button's frontend to the Button's backend
         # I.E: Everytime button is clicked, call function
@@ -39,13 +46,13 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.lastOpenFolder = "."
         
         # Loads the default drum set that many custom songs will utilize 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        default_set_file = os.path.join(current_dir, "drum_sets", "defaultset.rlrr")
+        default_set_file = os.path.join(project_dir, "drum_sets", "defaultset.rlrr")
         self.set_default_set(default_set_file)
         
         self.show()
  
     def set_default_set(self, default_set):
+        global project_dir
         analyze_drum_set(default_set)
         
         global output_rlrr_dir
@@ -54,7 +61,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         # Sets the last open folder to drum_sets directory
         self.lastOpenFolder = os.path.dirname(default_set)
          
-        midi_yaml = os.path.join(os.path.dirname(__file__), 'midi_maps', 'pdtracks_mapping.yaml')
+        midi_yaml = os.path.join(project_dir, 'midi_maps', 'pdtracks_mapping.yaml')
         with open(midi_yaml) as file:
             midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
             create_midi_map(midi_yaml_dict)
