@@ -8,7 +8,7 @@ goto :run
     call :create_env
 :run
     :: Run ParadiddleUtilities application
-    python -m fbs run
+    python -m PDUtilities
     exit /b 0
 
 :create_env
@@ -21,8 +21,8 @@ goto :run
 
 :activate_env
     :: Activates new environment
-    start /b /wait cmd /c env\Scripts\activate.bat
-    :: The normal || used for checking ERRORLEVEL doesn't work with "start /wait" so I have to use this conditional
+    call env\Scripts\activate.bat
+    :: The normal || used for checking ERRORLEVEL doesn't work with virtualenv's "activate.bat" so I have to use this conditional
     IF %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL% 
     exit /b 0
 
