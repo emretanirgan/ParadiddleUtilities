@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from mido import MidiFile
-from mido import tempo2bpm
+from mido import MidiFile, tempo2bpm
 from PyQt5.QtWidgets import *
 import mido
 import json
