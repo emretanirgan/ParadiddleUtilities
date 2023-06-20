@@ -153,4 +153,4 @@ dmypy.json
 cython_debug/
 
 # Custom
-src/main/resources/base/rlrr_files/*
+PDUtilities/rlrr_files/
