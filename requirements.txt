@@ -4,7 +4,7 @@ audio-metadata==0.11.1
 bidict==0.21.2
 bitstruct==8.11.1
 fbs==0.8.9
-future==0.18.2
+future==0.18.3
 macholib==1.14
 mido==1.2.9
 more-itertools==8.6.0
