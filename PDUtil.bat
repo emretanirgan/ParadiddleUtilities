@@ -8,7 +8,7 @@ goto :run
     call :create_env
 :run
     :: Run ParadiddleUtilities application
-    python -m PDUtilities
+    python PDUtilities
     exit /b 0
 
 :create_env
