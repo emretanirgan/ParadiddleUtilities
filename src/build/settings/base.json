@@ -1,9 +1,0 @@
-{
-    "app_name": "ParadiddleUtilities",
-    "author": "Emre Tanirgan",
-    "main_module": "src/main/python/main.py",
-    "extra_pyinstaller_args": [
-        "--additional-hooks-dir", "src/build/extra-hooks"
-    ],
-    "version": "0.0.0"
-}

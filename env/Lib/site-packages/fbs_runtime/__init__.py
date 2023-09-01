@@ -1,2 +1,0 @@
-class FbsError(Exception):
-    pass
