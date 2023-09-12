@@ -2,7 +2,9 @@ from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
 from midiconvert import MidiConverter
+from midicompanion import MidiCompanion
 import yaml
+import json
 import os
 
 project_dir = os.path.dirname(os.path.realpath(__file__))    
@@ -12,11 +14,31 @@ class PD_GUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(PD_GUI, self).__init__()
         self.mc = MidiConverter()
+        self.midicompanion = MidiCompanion()
+        self.midicompanion.midi_msg_cb = self._midi_msg_callback
+        self.midicompanion.connection_cb = self._connection_callback
         # Sets the window icon
         self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
 
         # Loads the .ui file
         uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
+        self.songCreatorWidget.hide()
+
+        # Load IP address from save json file
+        try:
+            with open(os.path.join(project_dir, "pdsave.json")) as file:
+                pdsave = json.load(file)
+                if "ip" in pdsave:
+                    self.IPLineEdit.setText(pdsave["ip"])
+        except:
+            pass
+
+        # Midi Companion Buttons
+        self.connectButton.clicked.connect(self._connect_clicked)
+        self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
+        self.midiOutputComboBox.currentIndexChanged.connect(self._midi_output_index_changed)
+        self.midiInputComboBox.addItems(self.midicompanion.midi_inputs)
+        self.midiOutputComboBox.addItems(self.midicompanion.midi_outputs)
         
         # Connecting the Button's frontend to the Button's backend
         # I.E: Everytime button is clicked, call function
@@ -26,9 +48,10 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.convertButton.clicked.connect(self._convert_clicked)
         self.setOutputButton.clicked.connect(self._set_output_clicked)
         self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
+        self.songCreatorButton.clicked.connect(self._song_creator_clicked)
+        self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
         # self.selectDrumTrackButton_1.clicked.connect(self._select_audio_file_clicked)
         # self.calibrationSpinBox.valueChanged.connect(self._calibration_offset_changed)
-        
         
         # TODO: May not be an issue, but try to see if there is a better way of doing things
         for i in range(5):
@@ -50,6 +73,17 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.set_default_set(default_set_file)
         
         self.show()
+    
+    def closeEvent(self, event):
+        if self.midicompanion.connected_to_host:
+            self.midicompanion.stopEvent.set()
+            self.midicompanion.client_socket.close()
+        
+        # Save IP address to json file
+        with open(os.path.join(project_dir, "pdsave.json"), "w") as file:
+            json.dump({"ip": self.IPLineEdit.text()}, file)
+
+        event.accept()
  
     def set_default_set(self, default_set):
         self.mc.analyze_drum_set(default_set)
@@ -147,6 +181,40 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.mc.author_name = self.authorNameLineEdit.text()
         if self.mc.convert_to_rlrr():
             self.statusLabel.setText("Conversion successful!")
+
+    def _connect_clicked(self):
+        self.midicompanion.connect_to_host(self.IPLineEdit.text())
+
+    def _midi_input_index_changed(self, index):
+        self.midicompanion.midi_input_index = index
+
+    def _midi_output_index_changed(self, index):
+        print("index changed to " + str(index))
+        self.midicompanion.midi_output_index = index
+
+    def _midi_companion_clicked(self):
+        self.midiCompanionWidget.show()
+        self.songCreatorWidget.hide()
+
+    def _song_creator_clicked(self):
+        self.midiCompanionWidget.hide()
+        self.songCreatorWidget.show()
+
+    def _midi_msg_callback(self, msg):
+        self.midiMessageDebugLabel.setText(msg)
+
+    def _connection_callback(self, connected):
+        self.midiConnectionStatus.setText("Connected" if connected else "Disconnected")
+        # self.connectButton.setText("Disconnect" if connected else "Connect")
+        # self.midiInputComboBox.setEnabled(not connected)
+        # self.midiOutputComboBox.setEnabled(not connected)
+        # self.IPLineEdit.setEnabled(not connected)
+        # self.midiCompanionButton.setEnabled(not connected)
+        # self.midiCompanionWidget.setEnabled(not connected)
+        # self.midiCompanionWidget.hide()
+        # self.songCreatorButton.setEnabled(not connected)
+        # self.songCreatorWidget.setEnabled(not connected)
+        # self.songCreatorWidget.hide()
 
     # def calibration_offset_changed(self):
     #     calibration_offset = self.calibrationSpinBox.value()

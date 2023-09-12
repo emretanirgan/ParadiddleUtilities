@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Paradiddle Song Creator</string>
+   <string>Paradiddle Companion App</string>
   </property>
   <property name="styleSheet">
    <string notr="true">
@@ -48,7 +48,7 @@ QCheckBox {
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>0</width>
+      <width>591</width>
       <height>401</height>
      </rect>
     </property>
@@ -1720,6 +1720,9 @@ QCheckBox {
     </widget>
    </widget>
    <widget class="QWidget" name="midiCompanionWidget" native="true">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1848,6 +1851,19 @@ QCheckBox {
       <string>Connection Status</string>
      </property>
     </widget>
+    <widget class="QCommandLinkButton" name="commandLinkButton">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>780</y>
+       <width>185</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CommandLinkButton</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -1867,7 +1883,7 @@ QCheckBox {
     <property name="flat">
      <bool>true</bool>
     </property>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="midiCompanionButton">
      <property name="geometry">
       <rect>
        <x>300</x>
@@ -1879,15 +1895,13 @@ QCheckBox {
      <property name="font">
       <font>
        <pointsize>-1</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
       </font>
      </property>
      <property name="text">
       <string>MIDI Companion</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="songCreatorButton">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -1898,11 +1912,7 @@ QCheckBox {
      </property>
      <property name="font">
       <font>
-       <family>MS Shell Dlg 2</family>
        <pointsize>-1</pointsize>
-       <weight>75</weight>
-       <italic>false</italic>
-       <bold>true</bold>
       </font>
      </property>
      <property name="text">
