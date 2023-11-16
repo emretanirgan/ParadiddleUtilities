@@ -35,7 +35,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Midi Companion Buttons
         self.connectButton.clicked.connect(self._connect_clicked)
-        self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
+        # self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
         self.midiOutputComboBox.currentIndexChanged.connect(self._midi_output_index_changed)
         self.midiInputComboBox.addItems(self.midicompanion.midi_inputs)
         self.midiOutputComboBox.addItems(self.midicompanion.midi_outputs)
@@ -183,7 +183,11 @@ class PD_GUI(QtWidgets.QMainWindow):
             self.statusLabel.setText("Conversion successful!")
 
     def _connect_clicked(self):
-        self.midicompanion.connect_to_host(self.IPLineEdit.text())
+        if self.midicompanion.connected_to_host:
+            self.midicompanion.disconnect_from_host()
+        else:
+            self.midicompanion.connect_to_host(self.IPLineEdit.text())
+        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
 
     def _midi_input_index_changed(self, index):
         self.midicompanion.midi_input_index = index

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>519</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1735,18 +1735,21 @@ QCheckBox {
      <property name="geometry">
       <rect>
        <x>120</x>
-       <y>100</y>
-       <width>301</width>
+       <y>120</y>
+       <width>0</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
     <widget class="QLabel" name="inputLabel">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>100</y>
-       <width>61</width>
+       <y>120</y>
+       <width>0</width>
        <height>16</height>
       </rect>
      </property>
@@ -1758,7 +1761,7 @@ QCheckBox {
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>140</y>
+       <y>80</y>
        <width>71</width>
        <height>16</height>
       </rect>
@@ -1771,9 +1774,9 @@ QCheckBox {
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>290</y>
+       <y>150</y>
        <width>511</width>
-       <height>71</height>
+       <height>51</height>
       </rect>
      </property>
      <property name="text">
@@ -1784,8 +1787,8 @@ QCheckBox {
      <property name="geometry">
       <rect>
        <x>120</x>
-       <y>140</y>
-       <width>301</width>
+       <y>80</y>
+       <width>291</width>
        <height>22</height>
       </rect>
      </property>
@@ -1886,8 +1889,8 @@ QCheckBox {
     <widget class="QPushButton" name="midiCompanionButton">
      <property name="geometry">
       <rect>
-       <x>300</x>
-       <y>20</y>
+       <x>120</x>
+       <y>10</y>
        <width>130</width>
        <height>41</height>
       </rect>
@@ -1904,8 +1907,8 @@ QCheckBox {
     <widget class="QPushButton" name="songCreatorButton">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>20</y>
+       <x>300</x>
+       <y>10</y>
        <width>130</width>
        <height>41</height>
       </rect>

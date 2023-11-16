@@ -43,6 +43,7 @@ class MidiConverter:
         self.output_rlrr_dir = ''
         self.song_tracks = [""] * 5
         self.drum_tracks = [""] * 4
+        self.calibration_offset = 0
 
         self.midi_lenth = 0
         self.song_length = 0
