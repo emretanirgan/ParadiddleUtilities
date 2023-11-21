@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['PDUtilities\\__main__.py'],
+    ['PDUtilities/__main__.py'],
     pathex=['myenv39/Lib/site-packages/'],
     binaries=[],
     datas=[('PDUtilities/pd_gui_layout.ui', '.'), ('PDUtilities/midi_maps/*', 'midi_maps'), ('PDUtilities/drum_sets', 'drum_sets'), ('PDUtilities/assets/*', 'assets')],
