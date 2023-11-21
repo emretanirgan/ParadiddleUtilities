@@ -20,4 +20,4 @@ jobs:
           # Path on runner-os, where generated executable files are stored
           #exe_path: # optional, default is ./dist
           # If passed, uploads executable artifact  with this name. Else, artifact won't be uploaded.
-          #upload_exe_with_name: # optional, default is 
+          upload_exe_with_name: 'test_executable'
