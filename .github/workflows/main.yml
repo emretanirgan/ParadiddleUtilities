@@ -1,3 +1,4 @@
+on: workflow_dispatch
 jobs:
   pyinstaller-build:
     runs-on: windows-latest
@@ -11,12 +12,12 @@ jobs:
           # path of your requirements.txt file
           requirements: 'requirements.txt'
           # Options to set for pyinstaller command Ex: options: '--onedir, -F'       (seperated by comma and space)
-          options: # optional, default is 
+          #options: # optional, default is 
           # specific python version you want to use
-          python_ver: # optional, default is 3.10
+          #python_ver: # optional, default is 3.10
           # specific python architecture you want to use
-          python_arch: # optional, default is x64
+          #python_arch: # optional, default is x64
           # Path on runner-os, where generated executable files are stored
-          exe_path: # optional, default is ./dist
+          #exe_path: # optional, default is ./dist
           # If passed, uploads executable artifact  with this name. Else, artifact won't be uploaded.
-          upload_exe_with_name: # optional, default is 
+          #upload_exe_with_name: # optional, default is 
