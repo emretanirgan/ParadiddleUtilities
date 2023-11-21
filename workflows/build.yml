@@ -1,0 +1,2 @@
+- name: Versatile PyInstaller
+  uses: sayyid5416/pyinstaller@v1.3.0
