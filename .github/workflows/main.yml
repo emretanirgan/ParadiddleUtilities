@@ -1,7 +1,10 @@
 on: workflow_dispatch
 jobs:
   pyinstaller-build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - name: Versatile PyInstaller
