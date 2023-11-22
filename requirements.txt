@@ -1,7 +1,11 @@
+altgraph==0.17.4
 cffi==1.16.0
+macholib==1.16.3
 mido==1.3.0
 packaging==23.2
 pycparser==2.21
+pyinstaller==6.2.0
+pyinstaller-hooks-contrib==2023.10
 PyQt5==5.15.9
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.12.1
