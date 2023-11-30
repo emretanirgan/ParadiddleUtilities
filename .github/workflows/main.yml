@@ -4,7 +4,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
-            os: [windows-latest, macos-latest]
+            # os: [windows-latest, macos-latest]
+            os: [macos-latest]
     steps:
       - uses: actions/checkout@v4
       - name: Versatile PyInstaller
