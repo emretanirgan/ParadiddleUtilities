@@ -7,6 +7,7 @@ CODE:
 - Should midicompanion go into PyRLRR?
 - Redo pd_gui.py
 - Reduce number of libraries we are using
+- Rename all functions
 
 GUI:
 - convertButton doesn't work
