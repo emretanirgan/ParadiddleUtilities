@@ -12,19 +12,5 @@ GUI:
 - convertButton doesn't work
 - Files Menu doesn't do anything
 
-- MIDI Companion
--- Cancel and Save do nothing
--- Random labels showing
--- Don't even know if it works
-
-- Metadata
--- No difficulties
--- No complexity
--- Output path doesn't display
-
-- Audio
--- Song and Drum Tracks don't work
-
 - MIDI
--- Selecting file doesn't work
 -- Advanced settings doesn't enable velocity

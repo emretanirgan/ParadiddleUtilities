@@ -1,9 +1,11 @@
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
-from PyRLRR.rlrr import PyRLRR
-from PyRLRR.midiconvert import MidiConverter
+from PyRLRR.rlrr import RLRR
+from PyRLRR.midiconvert import MidiConverter, Difficulties
 from midicompanion import MidiCompanion
+from mido import MidiFile
+from mido.messages import Message
 import yaml
 import json
 import os
@@ -96,6 +98,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         super(PD_GUI, self).__init__()
         self.mc = MidiConverter()
         self.mcGUI = MIDICompanion_GUI()
+        self.chartDirs = []
         self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
 
         # Loads the .ui file
@@ -108,12 +111,14 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         self.drumsetButton.clicked.connect(self._select_drum_set_clicked)
 
-        self.convertButton.clicked.connect(self._convert_clicked)
+        self.convertButton.clicked.connect(self._convert_button_clicked)
 
         self.outputButton.clicked.connect(self._set_output_clicked)
         self.coverImageButton.clicked.connect(self._select_cover_image_clicked)
 
         self.midiCompanionAction.triggered.connect(self.mcGUI._midi_companion_clicked)
+        self.openChartAction.triggered.connect(self._open_charts_clicked)
+        self.importChartAction.triggered.connect(self._import_charts_clicked)
 
         for i in range(5):
             songTrackBtn = getattr(self, ('song' + str(i+1) + 'Button'), None)
@@ -125,7 +130,9 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
         self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
+        self.difficultyComboBox.addItems(["Easy", "Medium", "Hard", "Expert"])
         self.complexityComboBox.currentTextChanged.connect(self._complexity_text_changed)
+        self.complexityComboBox.addItems(["1", "2", "3", "4", "5"])
         
         self.lastOpenFolder = "."
         
@@ -156,25 +163,78 @@ class PD_GUI(QtWidgets.QMainWindow):
     def _difficulty_text_changed(self, text):
         self.mc.difficulty = text
 
+    def _convert_button_clicked(self):
+        pass
+    
+    def _open_charts_clicked(self):
+        self.chartDirs = []
+        
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
+        for directory in subdirectories:
+            baseDir = os.path.basename(directory)
+            convertedChart = RLRR(directory)
+            filePath = ""
+            for file in os.listdir(directory):
+                if file.endswith(".mid"):
+                    filePath = file
+                    break
+            if (filePath == ""):
+                continue
+            
+            outputDir = os.path.join(os.getcwd(), baseDir)
+            for comp in Difficulties:
+                convertedChart.metadata.complexity = comp.value
+                convertedChart.parse_midi(os.path.join(directory, filePath))
+                # Add to editable list
+            self.chartDirs.append(directory)
+        
+        # Update everything!!!!
+        pass
+    
+    def _import_charts_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
+        for directory in subdirectories:
+            baseDir = os.path.basename(directory)
+            convertedChart = RLRR(directory)
+            filePath = ""
+            for file in os.listdir(directory):
+                if file.endswith(".mid"):
+                    filePath = file
+                    break
+            if (filePath == ""):
+                continue
+            
+            outputDir = os.path.join(os.getcwd(), baseDir)
+            for comp in Difficulties:
+                convertedChart.metadata.complexity = comp.value
+                convertedChart.parse_midi(os.path.join(directory, filePath))
+                # Add to editable list
+            self.chartDirs.append(directory)
+        
+        # Update everything!!!!
+
     def _complexity_text_changed(self, text):
         self.mc.song_complexity = int(text)
 
     def _select_midi_clicked(self):
-        self.midiTrackComboBox.clear()
         self.mc.midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi *.kar)"))[0]
         # print(midi_file)
         
-        (default_track, default_index) = self.mc.get_default_midi_track()
+        if (self.mc.midi_file == ""):
+            return
+        self.midiTrackComboBox.clear()
+
+        self.mc.get_tracks()
+        (default_track, default_index) = self.mc.get_drum_track()
         self.lastOpenFolder = self.mc.midi_file.rsplit('/', 1)[0]
-        self.midiFileLineEdit.setText(self.mc.midi_file.split('/')[-1])
-        for i in range(len(self.mc.midi_track_names)):
-            item_name = 'Track ' + str(i) + ': ' + self.mc.midi_track_names[i]
-            if i >= (self.midiTrackComboBox.count()):
-                self.midiTrackComboBox.addItem(item_name)
-            else:
-                self.midiTrackComboBox.setItemText(i,item_name)
+        self.midiFileTextBox.setText(self.mc.midi_file.split('/')[-1])
+        
+        for track in self.mc.tracks:
+            item_name = 'Track ' + str(track)
+            self.midiTrackComboBox.addItem(item_name)
         self.mc.convert_track_index = default_index
-        print("Convert track index: " + str(self.mc.convert_track_index))
         self.midiTrackComboBox.setCurrentIndex(self.mc.convert_track_index)
 
     def _select_midi_map_clicked(self):
@@ -189,6 +249,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
         print(output_folder)
         self.mc.output_rlrr_dir = output_folder
+        self.outputTextBox.setPlainText(output_folder)
 
     def _midi_track_index_changed(self, index):
         self.mc.convert_track_index = index
@@ -203,7 +264,7 @@ class PD_GUI(QtWidgets.QMainWindow):
     def _select_audio_file_clicked(self):
         sender_name = self.sender().objectName()
         is_drum_track = "Drum" in sender_name
-        track_index = int(sender_name.split('_')[-1]) - 1
+        track_index = int(sender_name[4]) - 1
         audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
         print(audio_file)
         if is_drum_track:
@@ -223,15 +284,3 @@ class PD_GUI(QtWidgets.QMainWindow):
         print(self.mc.cover_image_path)
         self.lastOpenFolder = self.mc.cover_image_path.rsplit('/', 1)[0]
         self.coverImageTextBox.setPlainText(self.mc.cover_image_path.split('/')[-1])
-
-    def _convert_clicked(self):
-        self.mc.song_name = self.songNameTextBox.text()
-        # TODO check if we need to escape the \n newline characters ('\n' to '\\n')
-
-        self.mc.recording_description = self.descriptionTextBox.toPlainText() 
-        self.mc.artist_name = self.artistNameTextBox.text()
-        self.mc.author_name = self.charterNameTextBox.text()
-
-        # TODO: Fix this
-        if self.mc.convert_to_rlrr():
-            pass

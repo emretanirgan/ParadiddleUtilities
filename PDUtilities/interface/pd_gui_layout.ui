@@ -933,7 +933,7 @@
      <x>0</x>
      <y>0</y>
      <width>668</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
@@ -941,10 +941,8 @@
      <string>Files</string>
     </property>
     <addaction name="openChartAction"/>
-    <addaction name="openFolderAction"/>
     <addaction name="separator"/>
-    <addaction name="actionImport_Chart"/>
-    <addaction name="actionImport_Folder_of_Charts"/>
+    <addaction name="importChartAction"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -957,7 +955,7 @@
   </widget>
   <action name="openChartAction">
    <property name="text">
-    <string>Open Chart</string>
+    <string>Open Charts</string>
    </property>
   </action>
   <action name="openFolderAction">
@@ -973,9 +971,9 @@
     <enum>Qt::WindowShortcut</enum>
    </property>
   </action>
-  <action name="actionImport_Chart">
+  <action name="importChartAction">
    <property name="text">
-    <string>Import Chart</string>
+    <string>Import Charts</string>
    </property>
   </action>
   <action name="actionImport_Folder_of_Charts">
