@@ -60,7 +60,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="midiTab">
      <attribute name="title">
@@ -87,6 +87,9 @@
         <width>161</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="midiFileLabel">
@@ -378,6 +381,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="song2TextBox">
       <property name="geometry">
@@ -387,6 +393,9 @@
         <width>111</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLineEdit" name="song3TextBox">
@@ -398,6 +407,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="song4TextBox">
       <property name="geometry">
@@ -407,6 +419,9 @@
         <width>111</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLineEdit" name="song5TextBox">
@@ -418,6 +433,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="drum1TextBox">
       <property name="geometry">
@@ -427,6 +445,9 @@
         <width>111</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLineEdit" name="drum2TextBox">
@@ -438,6 +459,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="drum4TextBox">
       <property name="geometry">
@@ -448,6 +472,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="drum3TextBox">
       <property name="geometry">
@@ -457,6 +484,9 @@
         <width>111</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QToolButton" name="song1Button">
@@ -598,6 +628,9 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QLineEdit" name="yamlTextBox">
       <property name="geometry">
@@ -607,6 +640,9 @@
         <width>111</width>
         <height>21</height>
        </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QToolButton" name="yamlButton">
@@ -785,6 +821,9 @@
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QTextEdit" name="descriptionTextBox">
       <property name="geometry">
@@ -886,6 +925,9 @@
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QToolButton" name="outputButton">
       <property name="geometry">
@@ -933,7 +975,7 @@
      <x>0</x>
      <y>0</y>
      <width>668</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">

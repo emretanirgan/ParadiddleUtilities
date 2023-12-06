@@ -2,21 +2,22 @@ from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
 from PyRLRR.rlrr import RLRR
-from PyRLRR.midiconvert import MidiConverter, Difficulties
+from PyRLRR.midiconvert import MidiConverter
 from midicompanion import MidiCompanion
 from mido import MidiFile
 from mido.messages import Message
+from copy import deepcopy
 import yaml
 import json
 import os
 
 project_dir = os.path.dirname(os.path.realpath(__file__))    
+difficulties = ["Easy", "Medium", "Hard", "Expert"]
 
 class MIDICompanion_GUI(QtWidgets.QDialog):
     def __init__(self):
         super(MIDICompanion_GUI, self).__init__()
         self.midicompanion = MidiCompanion()
-        # TODO: Figure out what these are
         self.midicompanion.midi_msg_cb = self._midi_msg_callback
         self.midicompanion.connection_cb = self._connection_callback
 
@@ -65,7 +66,6 @@ class MIDICompanion_GUI(QtWidgets.QDialog):
             self.midicompanion.disconnect_from_host()
         else:
             self.midicompanion.connect_to_host(self.IPTextBox.text())
-        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
 
     # ???
     # def _midi_input_index_changed(self, index):
@@ -81,24 +81,9 @@ class MIDICompanion_GUI(QtWidgets.QDialog):
     def _midi_msg_callback(self, msg):
         self.midiDebugLabel.setText(msg)
 
-
-    # TODO: Either remove this or add loading text for when it's still connecting
     def _connection_callback(self, connected):
+        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
         self.connectionStatusLabel.setText("Connected" if connected else "Disconnected")
-        # self.connectButton.setText("Disconnect" if connected else "Connect")
-        # self.midiInputComboBox.setEnabled(not connected)
-        # self.midiOutputComboBox.setEnabled(not connected)
-        # self.IPLineEdit.setEnabled(not connected)
-        # self.midiCompanionButton.setEnabled(not connected)
-        # self.midiCompanionWidget.setEnabled(not connected)
-        # self.midiCompanionWidget.hide()
-        # self.songCreatorButton.setEnabled(not connected)
-        # self.songCreatorWidget.setEnabled(not connected)
-        # self.songCreatorWidget.hide()
-
-    # def calibration_offset_changed(self):
-    #     calibration_offset = self.calibrationSpinBox.value()
-
 
 # Paradiddle GUI
 class PD_GUI(QtWidgets.QMainWindow):
@@ -110,7 +95,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.mc = MidiConverter()
 
         self.mcGUI = MIDICompanion_GUI()
-        self.chartDirs = []
+        self.chartList = [RLRR("")] # Will contain RLRR classes
+        self.chartListIndex = 0
         self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
 
         # Loads the .ui file
@@ -123,8 +109,9 @@ class PD_GUI(QtWidgets.QMainWindow):
         # TODO: We are missing the ghost notes and accent notes buttons
 
         self.convertButton.clicked.connect(self._convert_button_clicked)
-        # We are missing the functionality for the chart list
-
+        self.conversionList.addItem(self.chartList[0].metadata.title)
+        self.conversionList.setCurrentRow(0)
+        self.conversionList.currentItemChanged.connect(self._convert_list_item_change)
 
         # Menu Bar
         self.midiCompanionAction.triggered.connect(self.mcGUI._midi_companion_clicked)
@@ -140,85 +127,151 @@ class PD_GUI(QtWidgets.QMainWindow):
             if songTrackBtn:
                 songTrackBtn.clicked.connect(self._select_audio_file_clicked)
 
-        self.yamlButton.clicked.connect(self._select_midi_map_clicked)
+        self.yamlButton.clicked.connect(self._select_yaml_file_clicked)
         self.drumsetButton.clicked.connect(self._select_drum_set_clicked)
+        
+        drumset_file = os.path.join(project_dir, "drum_sets", "defaultset.rlrr")
+        self.drumsetTextBox.setText(drumset_file)
+
+        midi_yaml = os.path.join(project_dir, 'midi_maps', 'pdtracks_mapping.yaml')
+        self.yamlTextBox.setText(midi_yaml)
 
         # Metadata Tab
+        self.songNameTextBox.textChanged.connect(self._song_name_change)
+        self.charterNameTextBox.textChanged.connect(self._chart_name_text_change)
+        self.artistNameTextBox.textChanged.connect(self._artist_name_text_change)
+        self.albumNameTextBox.textChanged.connect(self._album_name_text_change)
+        self.descriptionTextBox.textChanged.connect(self._description_text_change)
         self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
         self.difficultyComboBox.addItems(["Easy", "Medium", "Hard", "Expert"])
-        self.complexityComboBox.currentTextChanged.connect(self._complexity_text_changed)
+        self.complexityComboBox.currentIndexChanged.connect(self._complexity_changed)
         self.complexityComboBox.addItems(["1", "2", "3", "4", "5"])
         
         self.outputButton.clicked.connect(self._set_output_clicked)
         self.coverImageButton.clicked.connect(self._select_cover_image_clicked)
-        
-        # Loads the default drum set that many custom songs will utilize 
-        # TODO: Why tf does the drum has an arg but the yaml doesn't??
-        default_set_file = os.path.join(project_dir, "drum_sets", "defaultset.rlrr")
-        self.set_default_set(default_set_file)
-        
+
         # TODO: Should we put this within main??
         self.show()
- 
-    def set_default_set(self, default_set):
-        # TODO: We dont need this before conversion
-        self.mc.analyze_drum_set(default_set)
-        
-        # TODO: We either don't need this or PyRLRR should contain this
-        self.mc.output_rlrr_dir = "rlrr_files"
-
-        self.lastOpenFolder = os.path.dirname(default_set)
-         
-        # TODO: We don't need this before conversion
-        midi_yaml = os.path.join(project_dir, 'midi_maps', 'pdtracks_mapping.yaml')
-        with open(midi_yaml) as file:
-            midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
-            self.mc.create_midi_map(midi_yaml_dict)
-
-        # TODO: Drumset textbox doesn't have setText function in here
-        
-        self.yamlTextBox.setText(os.path.basename(midi_yaml))
-
-
 
 
     # LOCAL GUI FUNCTIONS
+    def _song_name_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.title = self.songNameTextBox.toPlainText()
+        self.conversionList.currentItem().setText(self.songNameTextBox.toPlainText() + ' (' + self.chartList[self.chartListIndex].metadata.difficulty + ')')
+
+    def _chart_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.creator = self.charterNameTextBox.toPlainText()
+    def _artist_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.artist = self.artistNameTextBox.toPlainText()
+        
+    def _album_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.album = self.albumNameTextBox.toPlainText()
+        
+    def _description_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.description = self.descriptionTextBox.toPlainText()
+        
+
+    def _convert_list_item_change(self):
+        self.chartListIndex = self.conversionList.currentRow()
+        self._update_gui_with_item()
+
     def _difficulty_text_changed(self, text):
         self.mc.difficulty = text
+        self.chartList[self.chartListIndex].metadata.difficulty = text
+        if (self.conversionList.currentItem() == None):
+                return
+        self.conversionList.currentItem().setText(self.songNameTextBox.toPlainText() + ' (' + text + ')')
+
+    def _show_error(self, text):
+        errMsg = QtWidgets.QMessageBox()
+        errMsg.setIcon(QtWidgets.QMessageBox.Critical)
+        errMsg.setWindowTitle("Error has occurred")
+        errMsg.setText("Error: Wrong Info")
+        errMsg.setInformativeText(text)
+        errMsg.exec_()
+        return
 
     def _convert_button_clicked(self):
-        pass
-    
-    # FIXME: This is a mess
-    def _open_charts_clicked(self):
-        self.chartDirs = []
-        
-        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
-        subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
-        for directory in subdirectories:
-            baseDir = os.path.basename(directory)
-            convertedChart = RLRR(directory)
-            filePath = ""
-            for file in os.listdir(directory):
-                if file.endswith(".mid"):
-                    filePath = file
-                    break
-            if (filePath == ""):
+        self.conversionProgress.setValue(0)
+        for i, rlrr in enumerate(self.chartList):
+            # Verify that required elements have properties
+            rlrr.metadata.complexity = self.complexityComboBox.va
+            songName = self.songNameTextBox.toPlainText() 
+            if (songName == ""):
+                self._show_error("This chart needs a song name")
+                return
+            outputDir = os.path.join(self.outputTextBox.toPlainText(), songName)
+            os.makedirs(outputDir, exist_ok=True)
+            if (outputDir == ""):
+                self._show_error("Output directory not set")
+                return
+            elif (self.midiFileTextBox.text() == ""):
+                self._show_error("MIDI File couldn't be found")
+                return
+            elif (self.midiTrackComboBox.currentIndex() == -1):
+                self._show_error("MIDI Track not selected")
+                return
+
+            # Run
+            res = rlrr.parse_midi(self.mc.midi_file)
+            if (res != 0):
+                print("Error when parsing MIDI")
                 continue
+            rlrr.output_rlrr(outputDir)
+            rlrr.copy_files(outputDir)
+            self.conversionProgress.setValue(int((i/len(self.chartList))*100))
             
-            outputDir = os.path.join(os.getcwd(), baseDir)
-            for comp in Difficulties:
-                convertedChart.metadata.complexity = comp.value
-                convertedChart.parse_midi(os.path.join(directory, filePath))
-                # Add to editable list
-            self.chartDirs.append(directory)
+            
+
+
+    def _open_charts_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        #print(folder)
+        if (folder == ""):
+            return
         
-        # Update everything!!!!
-        pass
-    
-    # FIXME: This is a mess
+        self.chartList = []
+        self._append_charts(folder)
+        if (len(self.chartList) == 0):
+            return
+
+        # Needs to update chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+
     def _import_charts_clicked(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        if (folder == ""):
+            return
+        self._append_charts(folder)
+        if (len(self.chartList) == 0):
+            return
+
+        # Needs to update chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+
+    def _append_charts(self, folder):
         subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
         for directory in subdirectories:
             baseDir = os.path.basename(directory)
@@ -230,20 +283,52 @@ class PD_GUI(QtWidgets.QMainWindow):
                     break
             if (filePath == ""):
                 continue
-            
-            outputDir = os.path.join(os.getcwd(), baseDir)
-            for comp in Difficulties:
-                convertedChart.metadata.complexity = comp.value
-                convertedChart.parse_midi(os.path.join(directory, filePath))
-                # Add to editable list
-            self.chartDirs.append(directory)
-        
-        # Update everything!!!!
+            for diff in difficulties:
+                convertedChart.metadata.difficulty = diff
+                self.chartList.append(deepcopy(convertedChart))
 
-    # TODO: What???
-    # So other things can have different indexes, but this needs different text?
-    def _complexity_text_changed(self, text):
-        self.mc.song_complexity = int(text)
+    def _update_gui_with_item(self):
+        item = self.chartList[self.chartListIndex]
+
+        # Metadata
+        self.songNameTextBox.setPlainText(item.metadata.title)
+        self.charterNameTextBox.setPlainText(item.metadata.creator)
+        self.artistNameTextBox.setPlainText(item.metadata.artist)
+        self.albumNameTextBox.setPlainText(item.metadata.album)
+        self.coverImageTextBox.setPlainText(item.metadata.coverImagePath)
+        self.difficultyComboBox.setCurrentIndex(difficulties.index(item.metadata.difficulty))
+        self.complexityComboBox.setCurrentIndex(item.metadata.complexity-1)
+        self.descriptionTextBox.setText(item.metadata.description)
+
+        # Audio     
+        # FIXME: This doesn't get any of the tracks  
+        # Set songTracks
+        for i, song in enumerate(item.songTracks):
+            if (os.path.isfile(os.path.join(item.metadata.chartDir, song))):
+                sTB = getattr(self, ('song' + str(i+1) + 'TextBox'), None)
+                sTB.setText(song)
+        # Set drumTracks
+        for i, drum in enumerate(item.drumTracks):
+            if (os.path.isfile(os.path.join(item.metadata.chartDir, drum))):
+                dTB = getattr(self, ('drum' + str(i+1) + 'TextBox'), None)
+                dTB.setText(drum)
+
+        # MIDI
+        # FIXME: This doesn't get default track correctly
+        if (os.path.exists(item.metadata.chartDir)):
+            for file in os.listdir(item.metadata.chartDir):
+                if file.endswith(".mid"):
+                    self.midiFileTextBox.setText(file)
+                    self.mc.midi_file = os.path.join(item.metadata.chartDir, file)
+                    self._set_midi_track_combo()
+                    break
+        
+        
+
+    def _complexity_changed(self, text):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.complexity = int(text)
 
     def _select_midi_clicked(self):
         self.mc.midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi *.kar)"))[0]
@@ -251,54 +336,70 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         if (self.mc.midi_file == ""):
             return
+        self.midiFileTextBox.setText(self.mc.midi_file)
+        self._set_midi_track_combo()
+
+    def _set_midi_track_combo(self):
         self.midiTrackComboBox.clear()
 
         self.mc.get_tracks()
         (default_track, default_index) = self.mc.get_drum_track()
         self.lastOpenFolder = self.mc.midi_file.rsplit('/', 1)[0]
-        self.midiFileTextBox.setText(self.mc.midi_file.split('/')[-1])
         
-        for track in self.mc.tracks:
-            item_name = 'Track ' + str(track)
+        for i, track in enumerate(self.mc.midi_tracks):
+            isMessage = (isinstance(track[i], Message))
+            hasName = (hasattr(track, 'name'))
+            trackName = ""
+            if (hasName):
+                trackName = track.name
+            elif (isMessage):
+                trackName = str(track[i].channel)
+
+            item_name = 'Track ' + trackName
             self.midiTrackComboBox.addItem(item_name)
         
-        # TODO: Do we need this right now?
         self.mc.convert_track_index = default_index
         
-        self.midiTrackComboBox.setCurrentIndex(self.mc.convert_track_index)
+        self.midiTrackComboBox.setCurrentIndex(default_index)
 
-    # TODO: rename this or the QtUI File
-    def _select_midi_map_clicked(self):
+    def _select_yaml_file_clicked(self):
         midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
-        
-        # TODO: Okay no, I absolutely know this doesn't need to be here before conversion.
-        with open(midi_yaml) as file:
-            midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
-            self.mc.create_midi_map(midi_yaml_dict)
 
-        self.yamlTextBox.setText(midi_yaml.split('/')[-1])
+        # with open(midi_yaml) as file:
+        #     midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
+        #     self.mc.create_midi_map(midi_yaml_dict)
+        if (midi_yaml == ""):
+            return
+        self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
+        self.yamlTextBox.setText(midi_yaml)
         
     def _set_output_clicked(self):
         output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
         #print(output_folder)
-        # TODO: So we set lastOpenFolder in other functions but not this one?
 
-        # TODO: Do we need to do this before conversion?
-        self.mc.output_rlrr_dir = output_folder
+        if (output_folder == ""):
+            return
+
+        self.lastOpenFolder = output_folder
+
+        #self.mc.output_rlrr_dir = output_folder
         self.outputTextBox.setPlainText(output_folder)
 
     def _midi_track_index_changed(self, index):
         self.mc.convert_track_index = index
 
     def _select_drum_set_clicked(self):
-        self.mc.drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
         #print(self.mc.drum_set_file)
 
-        # TODO: We don't need this until conversion?
-        self.mc.analyze_drum_set(self.mc.drum_set_file)
-        self.lastOpenFolder = self.mc.drum_set_file.rsplit('/', 1)[0]
-        # TODO: Do we need to split this?
-        self.drumsetTextBox.setText(self.mc.drum_set_file.split('/')[-1])
+        #self.mc.analyze_drum_set(self.mc.drum_set_file)
+
+        if (drumset == ""):
+            return
+        self.lastOpenFolder = drumset.rsplit('/', 1)[0]
+
+        self.chartList[chartListIndex].options["drumRLRR"] = drumset
+        self.drumsetTextBox.setText(drumset)
 
     def _select_audio_file_clicked(self):
         sender_name = self.sender().objectName().lower()
@@ -307,22 +408,31 @@ class PD_GUI(QtWidgets.QMainWindow):
         audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
         #print(audio_file)
 
-        if is_drum_track:
-            self.mc.drum_tracks[track_index] = audio_file
-            #print(self.mc.drum_tracks)
-        else:
-            self.mc.song_tracks[track_index] = audio_file
-            #print(self.mc.song_tracks)
+        # if is_drum_track:
+        #     self.mc.drum_tracks[track_index] = audio_file
+        #     #print(self.mc.drum_tracks)
+        # else:
+        #     self.mc.song_tracks[track_index] = audio_file
+        #     #print(self.mc.song_tracks)
+        if (audio_file == ""):
+            return
 
         self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
         line_edit = getattr(self, ('drum' if is_drum_track else 'song') + str(track_index+1) + 'TextBox')
         #print(line_edit)
-        line_edit.setText(audio_file.split('/')[-1])
+        if (is_drum_track):
+            self.chartList[self.chartListIndex].drumTracks[track_index] = audio_file
+        else:
+            self.chartList[self.chartListIndex].songTracks[track_index] = audio_file
+
+        line_edit.setText(audio_file)
 
     def _select_cover_image_clicked(self):
-        self.mc.cover_image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
+        image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
         #print(self.mc.cover_image_path)
-        self.lastOpenFolder = self.mc.cover_image_path.rsplit('/', 1)[0]
+        if (image_path == ""):
+            return
 
-        # TODO: Why are we splitting this?
-        self.coverImageTextBox.setPlainText(self.mc.cover_image_path.split('/')[-1])
+        self.lastOpenFolder = image_path.rsplit('/', 1)[0]
+        self.chartList[self.chartListIndex].metadata.coverImagePath = image_path
+        self.coverImageTextBox.setPlainText(image_path)
