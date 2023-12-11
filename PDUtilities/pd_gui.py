@@ -112,6 +112,8 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Menu Bar
         self.midiCompanionAction.triggered.connect(self.mcGUI._midi_companion_clicked)
+        self.actionOpen_Chart.triggered.connect(self._open_single_chart_clicked)
+        self.actionImport_a_Chart.triggered.connect(self._import_single_chart_clicked)
         self.openChartAction.triggered.connect(self._open_charts_clicked)
         self.importChartAction.triggered.connect(self._import_charts_clicked)
 
@@ -233,9 +235,37 @@ class PD_GUI(QtWidgets.QMainWindow):
             
             
 
+    def _open_single_chart_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart to open or dont idgaf you do you boo")
+        if (folder == ""):
+            return
+        
+        self.chartList = []
+
+        convertedChart = RLRR(folder)
+        filePath = ""
+        for file in os.listdir(folder):
+            if file.endswith(".mid"):
+                filePath = file
+                break
+        if (filePath == ""):
+            return
+        for diff in difficulties:
+            convertedChart.metadata.difficulty = diff
+            self.chartList.append(deepcopy(convertedChart))
+
+        # Needs to update chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+        
 
     def _open_charts_clicked(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        folder = QFileDialog.getExistingDirectory(self, "Select Directory that contains multiple charts ...Bruh...")
         #print(folder)
         if (folder == ""):
             return
@@ -246,6 +276,31 @@ class PD_GUI(QtWidgets.QMainWindow):
             return
 
         # Needs to update chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+
+    def _import_single_chart_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        if (folder == ""):
+            return
+        
+        convertedChart = RLRR(directory)
+        filePath = ""
+        for file in os.listdir(directory):
+            if file.endswith(".mid"):
+                filePath = file
+                break
+        if (filePath == ""):
+            continue
+        for diff in difficulties:
+            convertedChart.metadata.difficulty = diff
+            self.chartList.append(deepcopy(convertedChart))
+
         self.conversionList.clear()
         for chart in self.chartList:
             self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
