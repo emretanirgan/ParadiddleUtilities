@@ -2,14 +2,11 @@ from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
 from PyRLRR.rlrr import RLRR
-from PyRLRR.midiconvert import MidiConverter
 from midicompanion import MidiCompanion
-from mido import MidiFile
 from mido.messages import Message
 from copy import deepcopy
 from pathlib import Path
 import re
-import yaml
 import json
 import os
 
@@ -153,9 +150,6 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.outputButton.clicked.connect(self._set_output_clicked)
         self.coverImageButton.clicked.connect(self._select_cover_image_clicked)
 
-        # TODO: Should we put this within main??
-        self.show()
-
 
     # LOCAL GUI FUNCTIONS
     def _song_name_change(self):
@@ -168,6 +162,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         if (self.conversionList.currentItem() == None):
             return
         self.chartList[self.chartListIndex].metadata.creator = self.charterNameTextBox.toPlainText()
+    
     def _artist_name_text_change(self):
         if (self.conversionList.currentItem() == None):
             return
@@ -211,18 +206,19 @@ class PD_GUI(QtWidgets.QMainWindow):
             rlrr.metadata.complexity = self.complexityComboBox.currentIndex()+1
             songName = self.songNameTextBox.toPlainText() 
             if (songName == ""):
-                self._show_error("This chart needs a song name")
+                self._show_error("Row: " + str(i+1) + "\nThis chart needs a song name")
                 return
-            outputDir = Path(os.path.join(self.outputTextBox.toPlainText(), re.sub(r'[\\/*?:"<>|]', "", rlrr.metadata.artist + ' - ' + rlrr.metadata.title)))
+            outputName = rlrr.metadata.artist + ' - ' + rlrr.metadata.title
+            outputDir = Path(os.path.join(self.outputTextBox.toPlainText(), re.sub(r'[\\/*?:"<>|]', "", outputName)))
             os.makedirs(outputDir, exist_ok=True)
             if (outputDir == ""):
-                self._show_error("Output directory not set")
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nOutput directory not set")
                 return
             elif (self.midiFileTextBox.text() == ""):
-                self._show_error("MIDI File couldn't be found")
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nMIDI File couldn't be found")
                 return
             elif (self.midiTrackComboBox.currentIndex() == -1):
-                self._show_error("MIDI Track not selected")
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nMIDI Track not selected")
                 return
 
             # Run
@@ -232,9 +228,7 @@ class PD_GUI(QtWidgets.QMainWindow):
                 continue
             rlrr.output_rlrr(outputDir)
             rlrr.copy_files(outputDir)
-            self.conversionProgress.setValue(int((i+1/len(self.chartList))*100))
-            
-            
+            self.conversionProgress.setValue(int(((i+1)/len(self.chartList))*100))
             
 
     def _open_single_chart_clicked(self):
@@ -244,6 +238,20 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         self.chartList = []
 
+        self._append_chart(folder)
+        self._chartlist_update()
+
+    def _chartlist_update(self):
+        # Updates chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+        
+    def _append_chart(self, folder):
         convertedChart = RLRR(folder)
         filePath = ""
         for file in os.listdir(folder):
@@ -256,16 +264,6 @@ class PD_GUI(QtWidgets.QMainWindow):
             convertedChart.metadata.difficulty = diff
             self.chartList.append(deepcopy(convertedChart))
 
-        # Needs to update chart list on GUI
-        self.conversionList.clear()
-        for chart in self.chartList:
-            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
-        # Needs to index to 0
-        self.chartListIndex = 0
-        self.conversionList.setCurrentRow(self.chartListIndex)
-        self._update_gui_with_item()
-        
-
     def _open_charts_clicked(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Directory that contains multiple charts ...Bruh...")
         #print(folder)
@@ -276,40 +274,15 @@ class PD_GUI(QtWidgets.QMainWindow):
         self._append_charts(folder)
         if (len(self.chartList) == 0):
             return
-
-        # Needs to update chart list on GUI
-        self.conversionList.clear()
-        for chart in self.chartList:
-            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
-        # Needs to index to 0
-        self.chartListIndex = 0
-        self.conversionList.setCurrentRow(self.chartListIndex)
-        self._update_gui_with_item()
+        self._chartlist_update()
 
     def _import_single_chart_clicked(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
         if (folder == ""):
             return
         
-        convertedChart = RLRR(directory)
-        filePath = ""
-        for file in os.listdir(directory):
-            if file.endswith(".mid"):
-                filePath = file
-                break
-        if (filePath == ""):
-            return
-        for diff in difficulties:
-            convertedChart.metadata.difficulty = diff
-            self.chartList.append(deepcopy(convertedChart))
-
-        self.conversionList.clear()
-        for chart in self.chartList:
-            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
-        # Needs to index to 0
-        self.chartListIndex = 0
-        self.conversionList.setCurrentRow(self.chartListIndex)
-        self._update_gui_with_item()
+        self._append_chart(folder)
+        self._chartlist_update()
 
     def _import_charts_clicked(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
@@ -318,31 +291,12 @@ class PD_GUI(QtWidgets.QMainWindow):
         self._append_charts(folder)
         if (len(self.chartList) == 0):
             return
-
-        # Needs to update chart list on GUI
-        self.conversionList.clear()
-        for chart in self.chartList:
-            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
-        # Needs to index to 0
-        self.chartListIndex = 0
-        self.conversionList.setCurrentRow(self.chartListIndex)
-        self._update_gui_with_item()
+        self._chartlist_update()
 
     def _append_charts(self, folder):
         subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
         for directory in subdirectories:
-            baseDir = os.path.basename(directory)
-            convertedChart = RLRR(directory)
-            filePath = ""
-            for file in os.listdir(directory):
-                if file.endswith(".mid"):
-                    filePath = file
-                    break
-            if (filePath == ""):
-                continue
-            for diff in difficulties:
-                convertedChart.metadata.difficulty = diff
-                self.chartList.append(deepcopy(convertedChart))
+            self._append_chart(directory)
 
     def _update_gui_with_item(self):
         item = self.chartList[self.chartListIndex]
@@ -358,7 +312,6 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.descriptionTextBox.setText(item.metadata.description)
 
         # Audio     
-        # FIXME: This doesn't get any of the tracks  
         # Set songTracks
         for i, song in enumerate(item.songTracks):
             sTB = getattr(self, ('song' + str(i+1) + 'TextBox'), None)
@@ -397,7 +350,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.midiTrackComboBox.clear()
 
         self.chartList[self.chartListIndex]._mc.get_tracks()
-        (default_track, default_index) = self.chartList[self.chartListIndex]._mc.get_drum_track()
+        (_, default_index) = self.chartList[self.chartListIndex]._mc.get_drum_track()
         self.lastOpenFolder = self.chartList[self.chartListIndex]._mc.midi_file.rsplit('/', 1)[0]
         
         for i, track in enumerate(self.chartList[self.chartListIndex]._mc.midi_tracks):
@@ -419,10 +372,6 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _select_yaml_file_clicked(self):
         midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
-
-        # with open(midi_yaml) as file:
-        #     midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
-        #     self.mc.create_midi_map(midi_yaml_dict)
         if (midi_yaml == ""):
             return
         self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
@@ -430,14 +379,9 @@ class PD_GUI(QtWidgets.QMainWindow):
         
     def _set_output_clicked(self):
         output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
-        #print(output_folder)
-
         if (output_folder == ""):
             return
-
         self.lastOpenFolder = output_folder
-
-        #self.mc.output_rlrr_dir = output_folder
         self.outputTextBox.setPlainText(output_folder)
 
     def _midi_track_index_changed(self, index):
@@ -445,10 +389,6 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _select_drum_set_clicked(self):
         drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
-        #print(self.mc.drum_set_file)
-
-        #self.mc.analyze_drum_set(self.mc.drum_set_file)
-
         if (drumset == ""):
             return
         self.lastOpenFolder = drumset.rsplit('/', 1)[0]
@@ -461,20 +401,11 @@ class PD_GUI(QtWidgets.QMainWindow):
         is_drum_track = "drum" in sender_name
         track_index = int(sender_name[4]) - 1
         audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
-        #print(audio_file)
-
-        # if is_drum_track:
-        #     self.mc.drum_tracks[track_index] = audio_file
-        #     #print(self.mc.drum_tracks)
-        # else:
-        #     self.mc.song_tracks[track_index] = audio_file
-        #     #print(self.mc.song_tracks)
         if (audio_file == ""):
             return
 
         self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
         line_edit = getattr(self, ('drum' if is_drum_track else 'song') + str(track_index+1) + 'TextBox')
-        #print(line_edit)
         if (is_drum_track):
             self.chartList[self.chartListIndex].drumTracks[track_index] = audio_file
         else:
@@ -484,7 +415,6 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _select_cover_image_clicked(self):
         image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
-        #print(self.mc.cover_image_path)
         if (image_path == ""):
             return
 

@@ -7,4 +7,5 @@ if __name__ == '__main__':
     print("I havent seen my wife and kids in over 2 years")
     app = QtWidgets.QApplication(sys.argv)
     window = PD_GUI()
+    window.show()
     app.exec_()
