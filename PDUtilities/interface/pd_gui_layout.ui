@@ -981,7 +981,7 @@
      <x>0</x>
      <y>0</y>
      <width>668</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
@@ -989,22 +989,25 @@
      <string>Files</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionOpen_Chart"/>
-    <addaction name="openChartAction"/>
+    <addaction name="openSingleChartAction"/>
+    <addaction name="openManyChartsAction"/>
     <addaction name="separator"/>
-    <addaction name="actionImport_a_Chart"/>
-    <addaction name="importChartAction"/>
+    <addaction name="importSingleChartAction"/>
+    <addaction name="importManyChartsAction"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
     <addaction name="midiCompanionAction"/>
+    <addaction name="separator"/>
+    <addaction name="replaceYAMLAction"/>
+    <addaction name="replaceDrumsetAction"/>
    </widget>
    <addaction name="menuFiles"/>
    <addaction name="menuSettings"/>
   </widget>
-  <action name="openChartAction">
+  <action name="openManyChartsAction">
    <property name="text">
     <string>Open Multiple Charts</string>
    </property>
@@ -1022,7 +1025,7 @@
     <enum>Qt::WindowShortcut</enum>
    </property>
   </action>
-  <action name="importChartAction">
+  <action name="importManyChartsAction">
    <property name="text">
     <string>Import Multiple Charts</string>
    </property>
@@ -1032,14 +1035,24 @@
     <string>Import Folder of Charts</string>
    </property>
   </action>
-  <action name="actionImport_a_Chart">
+  <action name="importSingleChartAction">
    <property name="text">
     <string>Import Chart</string>
    </property>
   </action>
-  <action name="actionOpen_Chart">
+  <action name="openSingleChartAction">
    <property name="text">
     <string>Open Chart</string>
+   </property>
+  </action>
+  <action name="replaceYAMLAction">
+   <property name="text">
+    <string>Replace All with YAML</string>
+   </property>
+  </action>
+  <action name="replaceDrumsetAction">
+   <property name="text">
+    <string>Replace All with Drumset</string>
    </property>
   </action>
  </widget>

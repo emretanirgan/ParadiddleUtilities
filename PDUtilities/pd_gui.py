@@ -88,8 +88,7 @@ class MIDICompanion_GUI(QtWidgets.QDialog):
 class PD_GUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(PD_GUI, self).__init__()
-        self.lastOpenFolder = "."
-
+        self.lastOpenFolder = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
         self.mcGUI = MIDICompanion_GUI()
         self.chartList = [RLRR("")] # Will contain RLRR classes
         self.chartListIndex = 0
@@ -111,10 +110,12 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Menu Bar
         self.midiCompanionAction.triggered.connect(self.mcGUI._midi_companion_clicked)
-        self.actionOpen_Chart.triggered.connect(self._open_single_chart_clicked)
-        self.actionImport_a_Chart.triggered.connect(self._import_single_chart_clicked)
-        self.openChartAction.triggered.connect(self._open_charts_clicked)
-        self.importChartAction.triggered.connect(self._import_charts_clicked)
+        self.openSingleChartAction.triggered.connect(self._open_single_chart_clicked)
+        self.importSingleChartAction.triggered.connect(self._import_single_chart_clicked)
+        self.openManyChartsAction.triggered.connect(self._open_charts_clicked)
+        self.importManyChartsAction.triggered.connect(self._import_charts_clicked)
+        self.replaceYAMLAction.triggered.connect(self._replace_all_yaml)
+        self.replaceDrumsetAction.triggered.connect(self._replace_all_drumset)
 
         # Audio Tab
         for i in range(5):
@@ -152,6 +153,25 @@ class PD_GUI(QtWidgets.QMainWindow):
 
 
     # LOCAL GUI FUNCTIONS
+    def _replace_all_yaml(self):
+        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
+        if (midi_yaml == ""):
+            return
+        self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
+        for chart in self.chartList:
+            chart.options["yamlFilePath"] = midi_yaml
+        self.yamlTextBox.setText(midi_yaml)
+    
+    def _replace_all_drumset(self):
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
+        if (drumset == ""):
+            return
+        self.lastOpenFolder = drumset.rsplit('/', 1)[0]
+
+        for chart in self.chartList:
+            chart.options["drumRLRR"] = drumset
+        self.drumsetTextBox.setText(drumset)
+    
     def _song_name_change(self):
         if (self.conversionList.currentItem() == None):
             return
@@ -235,7 +255,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart to open or dont idgaf you do you boo")
         if (folder == ""):
             return
-        
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self.chartList = []
 
         self._append_chart(folder)
@@ -269,7 +289,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         #print(folder)
         if (folder == ""):
             return
-        
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self.chartList = []
         self._append_charts(folder)
         if (len(self.chartList) == 0):
@@ -280,7 +300,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
         if (folder == ""):
             return
-        
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self._append_chart(folder)
         self._chartlist_update()
 
@@ -288,6 +308,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
         if (folder == ""):
             return
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self._append_charts(folder)
         if (len(self.chartList) == 0):
             return
@@ -343,6 +364,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         if (self.chartList[self.chartListIndex]._mc.midi_file == ""):
             return
+        self.lastOpenFolder = self.chartList[self.chartListIndex]._mc.midi_file.rsplit('/', 1)[0]
         self.midiFileTextBox.setText(self.chartList[self.chartListIndex]._mc.midi_file)
         self._set_midi_track_combo()
 
@@ -374,6 +396,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
         if (midi_yaml == ""):
             return
+        self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
         self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
         self.yamlTextBox.setText(midi_yaml)
         
