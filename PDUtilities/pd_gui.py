@@ -8,6 +8,7 @@ from mido import MidiFile
 from mido.messages import Message
 from copy import deepcopy
 from pathlib import Path
+import re
 import yaml
 import json
 import os
@@ -212,7 +213,7 @@ class PD_GUI(QtWidgets.QMainWindow):
             if (songName == ""):
                 self._show_error("This chart needs a song name")
                 return
-            outputDir = Path(self.outputTextBox.toPlainText() + '/' + rlrr.metadata.artist + ' - ' + rlrr.metadata.title)
+            outputDir = Path(os.path.join(self.outputTextBox.toPlainText(), re.sub(r'[\\/*?:"<>|]', "", rlrr.metadata.artist + ' - ' + rlrr.metadata.title)))
             os.makedirs(outputDir, exist_ok=True)
             if (outputDir == ""):
                 self._show_error("Output directory not set")
