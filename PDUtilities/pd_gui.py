@@ -212,7 +212,7 @@ class PD_GUI(QtWidgets.QMainWindow):
             if (songName == ""):
                 self._show_error("This chart needs a song name")
                 return
-            outputDir = os.path.join(Path(self.outputTextBox.toPlainText()), rlrr.metadata.artist + ' - ' + rlrr.metadata.title)
+            outputDir = self.outputTextBox.toPlainText() + '/' + rlrr.metadata.artist + ' - ' + rlrr.metadata.title
             os.makedirs(outputDir, exist_ok=True)
             if (outputDir == ""):
                 self._show_error("Output directory not set")
