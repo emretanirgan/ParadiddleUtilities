@@ -1,4 +1,5 @@
 import sys
+import mido.backends.rtmidi # Legit is only here because PyInstaller requires it
 from PyQt5 import QtWidgets
 from pd_gui import PD_GUI
 
