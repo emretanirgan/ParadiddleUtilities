@@ -296,7 +296,7 @@ class PD_GUI(QtWidgets.QMainWindow):
                 filePath = file
                 break
         if (filePath == ""):
-            continue
+            return
         for diff in difficulties:
             convertedChart.metadata.difficulty = diff
             self.chartList.append(deepcopy(convertedChart))
