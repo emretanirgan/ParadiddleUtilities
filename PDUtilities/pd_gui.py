@@ -259,7 +259,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.chartList = []
 
         self._append_chart(folder)
-        self._chartlist_update()
+        if (len(self.chartList) > 0):
+            self._chartlist_update()
 
     def _chartlist_update(self):
         # Updates chart list on GUI
@@ -292,9 +293,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self.chartList = []
         self._append_charts(folder)
-        if (len(self.chartList) == 0):
-            return
-        self._chartlist_update()
+        if (len(self.chartList) > 0):
+            self._chartlist_update()
 
     def _import_single_chart_clicked(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
@@ -310,8 +310,6 @@ class PD_GUI(QtWidgets.QMainWindow):
             return
         self.lastOpenFolder = folder.rsplit('/', 1)[0]
         self._append_charts(folder)
-        if (len(self.chartList) == 0):
-            return
         self._chartlist_update()
 
     def _append_charts(self, folder):
