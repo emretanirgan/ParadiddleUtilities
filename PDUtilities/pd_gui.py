@@ -242,7 +242,7 @@ class PD_GUI(QtWidgets.QMainWindow):
                 return
 
             # Run
-            res = rlrr.parse_midi(self.chartList[self.chartListIndex]._mc.midi_file, self.midiTrackComboBox.currentIndex())
+            res = rlrr.parse_midi(rlrr._mc.midi_file, self.midiTrackComboBox.currentIndex())
             if (res != 0):
                 print("Error when parsing MIDI")
                 continue
@@ -278,6 +278,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         for file in os.listdir(folder):
             if file.endswith(".mid"):
                 filePath = file
+                convertedChart._mc.midi_file = os.path.join(folder, filePath)
                 break
         if (filePath == ""):
             return
@@ -345,7 +346,6 @@ class PD_GUI(QtWidgets.QMainWindow):
             for file in os.listdir(item.metadata.chartDir):
                 if file.endswith(".mid"):
                     self.midiFileTextBox.setText(file)
-                    self.chartList[self.chartListIndex]._mc.midi_file = os.path.join(item.metadata.chartDir, file)
                     self._set_midi_track_combo()
                     break
         
