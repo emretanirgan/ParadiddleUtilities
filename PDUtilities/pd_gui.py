@@ -242,7 +242,7 @@ class PD_GUI(QtWidgets.QMainWindow):
                 return
 
             # Run
-            res = rlrr.parse_midi(self.chartList[self.chartListIndex]._mc.midi_file)
+            res = rlrr.parse_midi(self.chartList[self.chartListIndex]._mc.midi_file, self.midiTrackComboBox.currentIndex())
             if (res != 0):
                 print("Error when parsing MIDI")
                 continue
