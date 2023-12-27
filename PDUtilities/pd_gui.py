@@ -375,6 +375,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         for i, track in enumerate(self.chartList[self.chartListIndex]._mc.midi_tracks):
             isMessage = (isinstance(track[i], Message))
+            if (isMessage):
+                isMessage = hasattr(track[i], "channel")
             hasName = (hasattr(track, 'name'))
             trackName = "Track "
             channel = "Channel "
