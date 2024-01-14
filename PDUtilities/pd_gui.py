@@ -1,224 +1,454 @@
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
-from midiconvert import MidiConverter
+from PyRLRR.rlrr import RLRR
 from midicompanion import MidiCompanion
-import yaml
+from mido.messages import Message
+from copy import deepcopy
+from pathlib import Path
+import re
 import json
 import os
 
 project_dir = os.path.dirname(os.path.realpath(__file__))    
+difficulties = ["Easy", "Medium", "Hard", "Expert"]
 
-# Paradiddle GUI
-class PD_GUI(QtWidgets.QMainWindow):
+class MIDICompanion_GUI(QtWidgets.QDialog):
     def __init__(self):
-        super(PD_GUI, self).__init__()
-        self.mc = MidiConverter()
+        super(MIDICompanion_GUI, self).__init__()
         self.midicompanion = MidiCompanion()
         self.midicompanion.midi_msg_cb = self._midi_msg_callback
         self.midicompanion.connection_cb = self._connection_callback
-        # Sets the window icon
-        self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
 
-        # Loads the .ui file
-        uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
-        self.songCreatorWidget.hide()
+        uic.loadUi(os.path.join(project_dir, "interface/midi_companion.ui"), self)
 
+
+        # TODO: Place this within PyRLRR
         # Load IP address from save json file
         try:
             with open(os.path.join(project_dir, "pdsave.json")) as file:
                 pdsave = json.load(file)
                 if "ip" in pdsave:
-                    self.IPLineEdit.setText(pdsave["ip"])
+                    self.IPTextBox.setText(pdsave["ip"])
         except:
             pass
 
+
         # Midi Companion Buttons
         self.connectButton.clicked.connect(self._connect_clicked)
+        
+        #???
         # self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
+        
         self.midiOutputComboBox.currentIndexChanged.connect(self._midi_output_index_changed)
-        self.midiInputComboBox.addItems(self.midicompanion.midi_inputs)
+        
+        #???
+        #self.midiInputComboBox.addItems(self.midicompanion.midi_inputs)
+
         self.midiOutputComboBox.addItems(self.midicompanion.midi_outputs)
-        
-        # Connecting the Button's frontend to the Button's backend
-        # I.E: Everytime button is clicked, call function
-        self.selectMidiButton.clicked.connect(self._select_midi_clicked)
-        self.selectMidiMappingButton.clicked.connect(self._select_midi_map_clicked)
-        self.selectDrumSetButton.clicked.connect(self._select_drum_set_clicked)
-        self.convertButton.clicked.connect(self._convert_clicked)
-        self.setOutputButton.clicked.connect(self._set_output_clicked)
-        self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
-        self.songCreatorButton.clicked.connect(self._song_creator_clicked)
-        self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
-        # self.selectDrumTrackButton_1.clicked.connect(self._select_audio_file_clicked)
-        # self.calibrationSpinBox.valueChanged.connect(self._calibration_offset_changed)
-        
-        # TODO: May not be an issue, but try to see if there is a better way of doing things
-        for i in range(5):
-            songTrackBtn = getattr(self, ('selectSongTrackButton_' + str(i+1)), None)
-            drumTrackBtn = getattr(self, ('selectDrumTrackButton_' + str(i+1)), None)
-            if drumTrackBtn:
-                drumTrackBtn.clicked.connect(self._select_audio_file_clicked)
-            if songTrackBtn:
-                songTrackBtn.clicked.connect(self._select_audio_file_clicked)
-        
-        self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
-        self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
-        self.complexityComboBox.currentTextChanged.connect(self._complexity_text_changed)
-        
-        self.lastOpenFolder = "."
-        
-        # Loads the default drum set that many custom songs will utilize 
-        default_set_file = os.path.join(project_dir, "drum_sets", "defaultset.rlrr")
-        self.set_default_set(default_set_file)
-        
-        self.show()
-    
+
     def closeEvent(self, event):
         if self.midicompanion.connected_to_host:
             self.midicompanion.stopEvent.set()
             self.midicompanion.client_socket.close()
         
+        # TODO: Replace with PyRLRR Function for MIDICompanion
         # Save IP address to json file
         with open(os.path.join(project_dir, "pdsave.json"), "w") as file:
-            json.dump({"ip": self.IPLineEdit.text()}, file)
+            json.dump({"ip": self.IPTextBox.text()}, file)
 
         event.accept()
- 
-    def set_default_set(self, default_set):
-        self.mc.analyze_drum_set(default_set)
-        
-        self.mc.output_rlrr_dir = "rlrr_files"
 
-        # Sets the last open folder to drum_sets directory
-        self.lastOpenFolder = os.path.dirname(default_set)
-         
-        midi_yaml = os.path.join(project_dir, 'midi_maps', 'pdtracks_mapping.yaml')
-        with open(midi_yaml) as file:
-            midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
-            self.mc.create_midi_map(midi_yaml_dict)
-            self.midiMappingLineEdit.setText(os.path.basename(midi_yaml))
-
-    # LOCAL GUI FUNCTIONS
-
-    def _difficulty_text_changed(self, text):
-        self.mc.difficulty = text
-
-    def _complexity_text_changed(self, text):
-        self.mc.song_complexity = int(text)
-
-    def _select_midi_clicked(self):
-        self.midiTrackComboBox.clear()
-        self.mc.midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi *.kar)"))[0]
-        # print(midi_file)
-        
-        (default_track, default_index) = self.mc.get_default_midi_track()
-        self.lastOpenFolder = self.mc.midi_file.rsplit('/', 1)[0]
-        self.midiFileLineEdit.setText(self.mc.midi_file.split('/')[-1])
-        for i in range(len(self.mc.midi_track_names)):
-            item_name = 'Track ' + str(i) + ': ' + self.mc.midi_track_names[i]
-            if i >= (self.midiTrackComboBox.count()):
-                self.midiTrackComboBox.addItem(item_name)
-            else:
-                self.midiTrackComboBox.setItemText(i,item_name)
-        self.mc.convert_track_index = default_index
-        print("Convert track index: " + str(self.mc.convert_track_index))
-        self.midiTrackComboBox.setCurrentIndex(self.mc.convert_track_index)
-
-    def _select_midi_map_clicked(self):
-        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
-        with open(midi_yaml) as file:
-            midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
-            self.mc.create_midi_map(midi_yaml_dict)
-            self.midiMappingLineEdit.setText(midi_yaml.split('/')[-1])
-        
-    def _set_output_clicked(self):
-        output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
-        print(output_folder)
-        self.mc.output_rlrr_dir = output_folder
-
-    def _midi_track_index_changed(self, index):
-        self.mc.convert_track_index = index
-
-    def _select_drum_set_clicked(self):
-        self.mc.drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
-        print(self.mc.drum_set_file)
-        self.mc.analyze_drum_set(self.mc.drum_set_file)
-        self.lastOpenFolder = self.mc.drum_set_file.rsplit('/', 1)[0]
-        self.drumSetLineEdit.setText(self.mc.drum_set_file.split('/')[-1])
-
-    def _select_audio_file_clicked(self):
-        sender_name = self.sender().objectName()
-        is_drum_track = "Drum" in sender_name
-        track_index = int(sender_name.split('_')[-1]) - 1
-        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
-        print(audio_file)
-        if is_drum_track:
-            self.mc.drum_tracks[track_index] = audio_file
-            print(self.mc.drum_tracks)
-        else:
-            self.mc.song_tracks[track_index] = audio_file
-            print(self.mc.song_tracks)
-
-        self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
-        line_edit = getattr(self, ('drum' if is_drum_track else 'song') + 'TrackLineEdit_' + str(track_index+1))
-        print(line_edit)
-        line_edit.setText(audio_file.split('/')[-1])
-
-    def _select_cover_image_clicked(self):
-        self.mc.cover_image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
-        print(self.mc.cover_image_path)
-        self.lastOpenFolder = self.mc.cover_image_path.rsplit('/', 1)[0]
-        self.coverImageLineEdit.setText(self.mc.cover_image_path.split('/')[-1])
-
-    def _convert_clicked(self):
-        self.mc.song_name = self.songNameLineEdit.text()
-        # TODO check if we need to escape the \n newline characters ('\n' to '\\n')
-        self.statusLabel.setText("Converting...")
-        self.statusLabel.repaint()
-        self.mc.recording_description = self.descriptionTextEdit.toPlainText() 
-        self.mc.artist_name = self.artistNameLineEdit.text()
-        self.mc.author_name = self.authorNameLineEdit.text()
-        if self.mc.convert_to_rlrr():
-            self.statusLabel.setText("Conversion successful!")
 
     def _connect_clicked(self):
         if self.midicompanion.connected_to_host:
             self.midicompanion.disconnect_from_host()
         else:
-            self.midicompanion.connect_to_host(self.IPLineEdit.text())
-        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
+            self.midicompanion.connect_to_host(self.IPTextBox.text())
 
-    def _midi_input_index_changed(self, index):
-        self.midicompanion.midi_input_index = index
+    # ???
+    # def _midi_input_index_changed(self, index):
+    #     self.midicompanion.midi_input_index = index
 
     def _midi_output_index_changed(self, index):
-        print("index changed to " + str(index))
+        # print("index changed to " + str(index))
         self.midicompanion.midi_output_index = index
 
     def _midi_companion_clicked(self):
-        self.midiCompanionWidget.show()
-        self.songCreatorWidget.hide()
-
-    def _song_creator_clicked(self):
-        self.midiCompanionWidget.hide()
-        self.songCreatorWidget.show()
+        self.show()
 
     def _midi_msg_callback(self, msg):
-        self.midiMessageDebugLabel.setText(msg)
+        self.midiDebugLabel.setText(msg)
 
     def _connection_callback(self, connected):
-        self.midiConnectionStatus.setText("Connected" if connected else "Disconnected")
-        # self.connectButton.setText("Disconnect" if connected else "Connect")
-        # self.midiInputComboBox.setEnabled(not connected)
-        # self.midiOutputComboBox.setEnabled(not connected)
-        # self.IPLineEdit.setEnabled(not connected)
-        # self.midiCompanionButton.setEnabled(not connected)
-        # self.midiCompanionWidget.setEnabled(not connected)
-        # self.midiCompanionWidget.hide()
-        # self.songCreatorButton.setEnabled(not connected)
-        # self.songCreatorWidget.setEnabled(not connected)
-        # self.songCreatorWidget.hide()
+        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
+        self.connectionStatusLabel.setText("Connected" if connected else "Disconnected")
 
-    # def calibration_offset_changed(self):
-    #     calibration_offset = self.calibrationSpinBox.value()
+# Paradiddle GUI
+class PD_GUI(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(PD_GUI, self).__init__()
+        self.lastOpenFolder = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+        self.mcGUI = MIDICompanion_GUI()
+        self.chartList = [RLRR("")] # Will contain RLRR classes
+        self.chartListIndex = 0
+        self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
+
+        # Loads the .ui file
+        uic.loadUi(os.path.join(project_dir, "interface/pd_gui_layout.ui"), self)
+        
+
+        # MIDI Tab
+        self.midiFileButton.clicked.connect(self._select_midi_clicked)
+        self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
+        # TODO: We are missing the ghost notes and accent notes buttons
+
+        self.convertButton.clicked.connect(self._convert_button_clicked)
+        self.conversionList.addItem(self.chartList[0].metadata.title)
+        self.conversionList.setCurrentRow(0)
+        self.conversionList.currentItemChanged.connect(self._convert_list_item_change)
+
+        # Menu Bar
+        self.midiCompanionAction.triggered.connect(self.mcGUI._midi_companion_clicked)
+        self.openSingleChartAction.triggered.connect(self._open_single_chart_clicked)
+        self.importSingleChartAction.triggered.connect(self._import_single_chart_clicked)
+        self.openManyChartsAction.triggered.connect(self._open_charts_clicked)
+        self.importManyChartsAction.triggered.connect(self._import_charts_clicked)
+        self.replaceYAMLAction.triggered.connect(self._replace_all_yaml)
+        self.replaceDrumsetAction.triggered.connect(self._replace_all_drumset)
+
+        # Audio Tab
+        for i in range(5):
+            songTrackBtn = getattr(self, ('song' + str(i+1) + 'Button'), None)
+            drumTrackBtn = getattr(self, ('drum' + str(i+1) + 'Button'), None)
+            if drumTrackBtn:
+                drumTrackBtn.clicked.connect(self._select_audio_file_clicked)
+            if songTrackBtn:
+                songTrackBtn.clicked.connect(self._select_audio_file_clicked)
+
+        self.yamlButton.clicked.connect(self._select_yaml_file_clicked)
+        self.drumsetButton.clicked.connect(self._select_drum_set_clicked)
+        
+        drumset_dir = os.path.join(project_dir, "drum_sets")
+        drumset_files = [f for f in os.listdir(drumset_dir) if os.path.isfile(os.path.join(drumset_dir, f))]
+        drumset_file = ""
+        if len(drumset_files) != 0:
+            drumset_file = drumset_files[0]
+        self.drumsetTextBox.setText(drumset_file)
+        self.chartList[self.chartListIndex].options["drumRLRR"] = drumset_file
+
+        midi_yaml_dir = os.path.join(project_dir, 'midi_maps')
+        midi_yaml_files = [f for f in os.listdir(midi_yaml_dir) if os.path.isfile(os.path.join(midi_yaml_dir, f))]
+        midi_yaml = ""
+        if len(midi_yaml_files) != 0:
+            midi_yaml = midi_yaml_files[0]
+        self.yamlTextBox.setText(midi_yaml)
+        self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
+
+        # Metadata Tab
+        self.songNameTextBox.textChanged.connect(self._song_name_change)
+        self.charterNameTextBox.textChanged.connect(self._chart_name_text_change)
+        self.artistNameTextBox.textChanged.connect(self._artist_name_text_change)
+        self.albumNameTextBox.textChanged.connect(self._album_name_text_change)
+        self.descriptionTextBox.textChanged.connect(self._description_text_change)
+        self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
+        self.difficultyComboBox.addItems(["Easy", "Medium", "Hard", "Expert"])
+        self.complexityComboBox.currentIndexChanged.connect(self._complexity_changed)
+        self.complexityComboBox.addItems(["1", "2", "3", "4", "5"])
+        
+        self.outputButton.clicked.connect(self._set_output_clicked)
+        self.coverImageButton.clicked.connect(self._select_cover_image_clicked)
+
+
+    # LOCAL GUI FUNCTIONS
+    def _replace_all_yaml(self):
+        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), os.path.join(project_dir, 'midi_maps'), ("Midi Map (*.yaml *yml)"))[0]
+        if (midi_yaml == ""):
+            return
+        self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
+        for chart in self.chartList:
+            chart.options["yamlFilePath"] = midi_yaml
+        self.yamlTextBox.setText(midi_yaml)
+    
+    def _replace_all_drumset(self):
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), os.path.join(project_dir, 'drum_sets'), ("PD Drum Set Files (*.rlrr)"))[0]
+        if (drumset == ""):
+            return
+        self.lastOpenFolder = drumset.rsplit('/', 1)[0]
+
+        for chart in self.chartList:
+            chart.options["drumRLRR"] = drumset
+        self.drumsetTextBox.setText(drumset)
+    
+    def _song_name_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.title = self.songNameTextBox.toPlainText()
+        self.conversionList.currentItem().setText(self.songNameTextBox.toPlainText() + ' (' + self.chartList[self.chartListIndex].metadata.difficulty + ')')
+
+    def _chart_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.creator = self.charterNameTextBox.toPlainText()
+    
+    def _artist_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.artist = self.artistNameTextBox.toPlainText()
+        
+    def _album_name_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.album = self.albumNameTextBox.toPlainText()
+        
+    def _description_text_change(self):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.description = self.descriptionTextBox.toPlainText()
+        
+
+    def _convert_list_item_change(self):
+        self.chartListIndex = self.conversionList.currentRow()
+        self._update_gui_with_item()
+
+    def _difficulty_text_changed(self, text):
+        self.chartList[self.chartListIndex]._mc.difficulty = text
+        self.chartList[self.chartListIndex].metadata.difficulty = text
+        if (self.conversionList.currentItem() == None):
+                return
+        self.conversionList.currentItem().setText(self.songNameTextBox.toPlainText() + ' (' + text + ')')
+
+    def _show_error(self, text):
+        errMsg = QtWidgets.QMessageBox()
+        errMsg.setIcon(QtWidgets.QMessageBox.Critical)
+        errMsg.setWindowTitle("Error has occurred")
+        errMsg.setText("Error: Wrong Info")
+        errMsg.setInformativeText(text)
+        errMsg.exec_()
+        return
+
+    def _convert_button_clicked(self):
+        self.conversionProgress.setValue(0)
+        for i, rlrr in enumerate(self.chartList):
+            # Verify that required elements have properties
+            rlrr.metadata.complexity = self.complexityComboBox.currentIndex()+1
+            songName = self.songNameTextBox.toPlainText() 
+            if (songName == ""):
+                self._show_error("Row: " + str(i+1) + "\nThis chart needs a song name")
+                return
+            outputName = rlrr.metadata.artist + ' - ' + rlrr.metadata.title
+            outputDir = Path(os.path.join(self.outputTextBox.toPlainText(), re.sub(r'[\\/*?:"<>|]', "", outputName)))
+            os.makedirs(outputDir, exist_ok=True)
+            if (outputDir == ""):
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nOutput directory not set")
+                return
+            elif (self.midiFileTextBox.text() == ""):
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nMIDI File couldn't be found")
+                return
+            elif (self.midiTrackComboBox.currentIndex() == -1):
+                self._show_error("Name: " + outputName + "\nDifficulty: " + str(rlrr.metadata.difficulty) + "\nMIDI Track not selected")
+                return
+
+            # Run
+            res = rlrr.parse_midi(rlrr._mc.midi_file, self.midiTrackComboBox.currentIndex())
+            if (res != 0):
+                print("Error when parsing MIDI")
+                continue
+            rlrr.output_rlrr(outputDir)
+            rlrr.copy_files(outputDir)
+            self.conversionProgress.setValue(int(((i+1)/len(self.chartList))*100))
+            
+
+    def _open_single_chart_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart to open or dont idgaf you do you boo")
+        if (folder == ""):
+            return
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
+        self.chartList = []
+
+        self._append_chart(folder)
+        if (len(self.chartList) > 0):
+            self._chartlist_update()
+
+    def _chartlist_update(self):
+        # Updates chart list on GUI
+        self.conversionList.clear()
+        for chart in self.chartList:
+            self.conversionList.addItem(chart.metadata.title + ' (' + chart.metadata.difficulty + ')')
+        # Needs to index to 0
+        self.chartListIndex = 0
+        self.conversionList.setCurrentRow(self.chartListIndex)
+        self._update_gui_with_item()
+        
+    def _append_chart(self, folder):
+        convertedChart = RLRR(folder)
+        filePath = ""
+        for file in os.listdir(folder):
+            if file.endswith(".mid"):
+                filePath = file
+                convertedChart._mc.midi_file = os.path.join(folder, filePath)
+                break
+        if (filePath == ""):
+            return
+        for diff in difficulties:
+            convertedChart.metadata.difficulty = diff
+            self.chartList.append(deepcopy(convertedChart))
+
+    def _open_charts_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Directory that contains multiple charts ...Bruh...")
+        #print(folder)
+        if (folder == ""):
+            return
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
+        self.chartList = []
+        self._append_charts(folder)
+        if (len(self.chartList) > 0):
+            self._chartlist_update()
+
+    def _import_single_chart_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        if (folder == ""):
+            return
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
+        self._append_chart(folder)
+        self._chartlist_update()
+
+    def _import_charts_clicked(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Chart Directories ...Bruh...")
+        if (folder == ""):
+            return
+        self.lastOpenFolder = folder.rsplit('/', 1)[0]
+        self._append_charts(folder)
+        self._chartlist_update()
+
+    def _append_charts(self, folder):
+        subdirectories = [x.path for x in os.scandir(folder) if os.path.isdir(x)]
+        for directory in subdirectories:
+            self._append_chart(directory)
+
+    def _update_gui_with_item(self):
+        item = self.chartList[self.chartListIndex]
+
+        # Metadata
+        self.songNameTextBox.setPlainText(item.metadata.title)
+        self.charterNameTextBox.setPlainText(item.metadata.creator)
+        self.artistNameTextBox.setPlainText(item.metadata.artist)
+        self.albumNameTextBox.setPlainText(item.metadata.album)
+        self.coverImageTextBox.setPlainText(item.metadata.coverImagePath)
+        self.difficultyComboBox.setCurrentIndex(difficulties.index(item.metadata.difficulty))
+        self.complexityComboBox.setCurrentIndex(item.metadata.complexity-1)
+        self.descriptionTextBox.setText(item.metadata.description)
+
+        # Audio     
+        # Set songTracks
+        for i, song in enumerate(item.songTracks):
+            sTB = getattr(self, ('song' + str(i+1) + 'TextBox'), None)
+            sTB.setText(song)
+        # Set drumTracks
+        for i, drum in enumerate(item.drumTracks):
+            dTB = getattr(self, ('drum' + str(i+1) + 'TextBox'), None)
+            dTB.setText(drum)
+
+        # MIDI
+        if (os.path.exists(item.metadata.chartDir)):
+            for file in os.listdir(item.metadata.chartDir):
+                if file.endswith(".mid"):
+                    self.midiFileTextBox.setText(file)
+                    self._set_midi_track_combo()
+                    break
+        
+        
+
+    def _complexity_changed(self, text):
+        if (self.conversionList.currentItem() == None):
+            return
+        self.chartList[self.chartListIndex].metadata.complexity = int(text)
+
+    def _select_midi_clicked(self):
+        self.chartList[self.chartListIndex]._mc.midi_file = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Files (*.mid *.midi *.kar)"))[0]
+        # print(midi_file)
+        
+        if (self.chartList[self.chartListIndex]._mc.midi_file == ""):
+            return
+        self.lastOpenFolder = self.chartList[self.chartListIndex]._mc.midi_file.rsplit('/', 1)[0]
+        self.midiFileTextBox.setText(self.chartList[self.chartListIndex]._mc.midi_file)
+        self._set_midi_track_combo()
+
+    def _set_midi_track_combo(self):
+        self.midiTrackComboBox.clear()
+
+        self.chartList[self.chartListIndex]._mc.get_tracks()
+        (_, default_index) = self.chartList[self.chartListIndex]._mc.get_drum_track()
+        self.lastOpenFolder = self.chartList[self.chartListIndex]._mc.midi_file.rsplit('/', 1)[0]
+        
+        for i, track in enumerate(self.chartList[self.chartListIndex]._mc.midi_tracks):
+            isMessage = (isinstance(track[i], Message))
+            if (isMessage):
+                isMessage = hasattr(track[i], "channel")
+            hasName = (hasattr(track, 'name'))
+            trackName = "Track "
+            channel = "Channel "
+            if (hasName):
+                trackName += track.name
+            if (isMessage):
+                channel += str(track[i].channel)
+
+            item_name = trackName + " : " + channel
+            self.midiTrackComboBox.addItem(item_name)
+        
+        self.chartList[self.chartListIndex]._mc.convert_track_index = default_index
+        
+        self.midiTrackComboBox.setCurrentIndex(default_index)
+
+    def _select_yaml_file_clicked(self):
+        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), os.path.join(project_dir, 'midi_maps'), ("Midi Map (*.yaml *yml)"))[0]
+        if (midi_yaml == ""):
+            return
+        self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
+        self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
+        self.yamlTextBox.setText(midi_yaml)
+        
+    def _set_output_clicked(self):
+        output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
+        if (output_folder == ""):
+            return
+        self.lastOpenFolder = output_folder
+        self.outputTextBox.setPlainText(output_folder)
+
+    def _midi_track_index_changed(self, index):
+        self.chartList[self.chartListIndex]._mc.convert_track_index = index
+
+    def _select_drum_set_clicked(self):
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), os.path.join(project_dir, 'drum_sets'), ("PD Drum Set Files (*.rlrr)"))[0]
+        if (drumset == ""):
+            return
+        self.lastOpenFolder = drumset.rsplit('/', 1)[0]
+
+        self.chartList[self.chartListIndex].options["drumRLRR"] = drumset
+        self.drumsetTextBox.setText(drumset)
+
+    def _select_audio_file_clicked(self):
+        sender_name = self.sender().objectName().lower()
+        is_drum_track = "drum" in sender_name
+        track_index = int(sender_name[4]) - 1
+        audio_file = QFileDialog.getOpenFileName(self, ("Select Audio File"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
+        if (audio_file == ""):
+            return
+
+        self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
+        line_edit = getattr(self, ('drum' if is_drum_track else 'song') + str(track_index+1) + 'TextBox')
+        if (is_drum_track):
+            self.chartList[self.chartListIndex].drumTracks[track_index] = audio_file
+        else:
+            self.chartList[self.chartListIndex].songTracks[track_index] = audio_file
+
+        line_edit.setText(audio_file)
+
+    def _select_cover_image_clicked(self):
+        image_path = QFileDialog.getOpenFileName(self, ("Select Cover Image"), self.lastOpenFolder, ("Image Files (*.png *.jpg)"))[0]
+        if (image_path == ""):
+            return
+
+        self.lastOpenFolder = image_path.rsplit('/', 1)[0]
+        self.chartList[self.chartListIndex].metadata.coverImagePath = image_path
+        self.coverImageTextBox.setPlainText(image_path)
