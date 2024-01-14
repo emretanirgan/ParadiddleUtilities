@@ -129,11 +129,19 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.yamlButton.clicked.connect(self._select_yaml_file_clicked)
         self.drumsetButton.clicked.connect(self._select_drum_set_clicked)
         
-        drumset_file = os.path.join(project_dir, "drum_sets", "defaultset.rlrr")
+        drumset_dir = os.path.join(project_dir, "drum_sets")
+        drumset_files = [f for f in os.listdir(drumset_dir) if os.path.isfile(os.path.join(drumset_dir, f))]
+        drumset_file = ""
+        if len(drumset_files) != 0:
+            drumset_file = drumset_files[0]
         self.drumsetTextBox.setText(drumset_file)
         self.chartList[self.chartListIndex].options["drumRLRR"] = drumset_file
 
-        midi_yaml = os.path.join(project_dir, 'midi_maps', 'pdtracks_mapping.yaml')
+        midi_yaml_dir = os.path.join(project_dir, 'midi_maps')
+        midi_yaml_files = [f for f in os.listdir(midi_yaml_dir) if os.path.isfile(os.path.join(midi_yaml_dir, f))]
+        midi_yaml = ""
+        if len(midi_yaml_files) != 0:
+            midi_yaml = midi_yaml_files[0]
         self.yamlTextBox.setText(midi_yaml)
         self.chartList[self.chartListIndex].options["yamlFilePath"] = midi_yaml
 
@@ -154,7 +162,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     # LOCAL GUI FUNCTIONS
     def _replace_all_yaml(self):
-        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
+        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), os.path.join(project_dir, 'midi_maps'), ("Midi Map (*.yaml *yml)"))[0]
         if (midi_yaml == ""):
             return
         self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
@@ -163,7 +171,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.yamlTextBox.setText(midi_yaml)
     
     def _replace_all_drumset(self):
-        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), os.path.join(project_dir, 'drum_sets'), ("PD Drum Set Files (*.rlrr)"))[0]
         if (drumset == ""):
             return
         self.lastOpenFolder = drumset.rsplit('/', 1)[0]
@@ -393,7 +401,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.midiTrackComboBox.setCurrentIndex(default_index)
 
     def _select_yaml_file_clicked(self):
-        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
+        midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), os.path.join(project_dir, 'midi_maps'), ("Midi Map (*.yaml *yml)"))[0]
         if (midi_yaml == ""):
             return
         self.lastOpenFolder = midi_yaml.rsplit('/', 1)[0]
@@ -411,7 +419,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.chartList[self.chartListIndex]._mc.convert_track_index = index
 
     def _select_drum_set_clicked(self):
-        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
+        drumset = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), os.path.join(project_dir, 'drum_sets'), ("PD Drum Set Files (*.rlrr)"))[0]
         if (drumset == ""):
             return
         self.lastOpenFolder = drumset.rsplit('/', 1)[0]
