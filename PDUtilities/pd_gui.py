@@ -183,8 +183,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.mc.recording_description = self.descriptionTextEdit.toPlainText()
         self.mc.artist_name = self.artistNameLineEdit.text()
         self.mc.author_name = self.authorNameLineEdit.text()
-        convertion_result_status = self.mc.convert_to_rlrr()
-        self.statusLabel.setText(convertion_result_status)
+        conversion_result_status = self.mc.convert_to_rlrr()
+        self.statusLabel.setText(conversion_result_status)
 
     def _connect_clicked(self):
         if self.midicompanion.connected_to_host:
