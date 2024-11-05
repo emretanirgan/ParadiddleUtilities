@@ -30,7 +30,7 @@ class MidiConverter:
             'audioFileData' : {},
             'instruments' : [],
             'events' : []
-        }  
+        }
 
         self.difficulty_names = ['Easy', 'Medium', 'Hard', 'Expert']
         self.difficulty = self.difficulty_names[0]
@@ -39,7 +39,7 @@ class MidiConverter:
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.drum_set_file = os.path.join(script_dir,'drum_sets','defaultset.rlrr')
         self.drum_set_dict = None
-        self.midi_file_name = ''
+        self.midi_file = ''
         self.output_rlrr_dir = ''
         self.song_tracks = [""] * 5
         self.drum_tracks = [""] * 4
@@ -53,7 +53,7 @@ class MidiConverter:
         self.midi_track_names = []
         self.convert_track_index = 0
         self.note_to_drum_maps = [] # in order of difficulty
-        self.toggle_to_drum_maps = [] # example: [{111: Snare, 110: HiHat}, {100: Kick}] 
+        self.toggle_to_drum_maps = [] # example: [{111: Snare, 110: HiHat}, {100: Kick}]
 
         self.audio_file_data = {
             'songTracks' : [],
@@ -91,7 +91,7 @@ class MidiConverter:
             self.default_set_full_path = os.path.join(self.script_dir, self.default_set_name)
             print(self.default_set_full_path)
             drum_set_filename = self.default_set_full_path
-            
+
 
         with open(drum_set_filename) as f:
             self.drum_set_dict = json.load(f)
@@ -104,7 +104,7 @@ class MidiConverter:
     # (midi track object, track index)
     def get_default_midi_track(self):
         mid = MidiFile(self.midi_file, clip=True)
-        
+
         self.midi_track_names.clear()
 
         print('Midi file type: ' + str(mid.type))
@@ -141,7 +141,7 @@ class MidiConverter:
         total_time = 0.0
         total_ticks = 0.0
         longest_time = 0.0
-            
+
         # note_to_drums_map = pdtracks_notes
         diff_index = self.difficulty_names.index(self.difficulty)
         # fall back to highest difficulty map if our difficulty isn't in the map
@@ -193,7 +193,7 @@ class MidiConverter:
         tempo = 500000
         default_tempo = 500000
         active_toggles = []
-        for i, track in enumerate(mid.tracks): 
+        for i, track in enumerate(mid.tracks):
             for msg in track:
                 # print(msg.type + " " + str(msg.time))
                 tempo_total_seconds += mido.tick2second(msg.time, mid.ticks_per_beat, tempo)
@@ -249,7 +249,7 @@ class MidiConverter:
                 if msg.type == "note_on":
                     note = msg.note
                     # print(msg.note)
-                    #we ignore velocity 0 notes here? 
+                    #we ignore velocity 0 notes here?
                     if note in toggle_map:
                         if note not in active_toggles:
                             active_toggles.append(note)
@@ -257,7 +257,7 @@ class MidiConverter:
                         hits = []
                         has_toggle = False
                         for drum in note_map[note]:
-                            # if this drum has to be toggled on by a note, 
+                            # if this drum has to be toggled on by a note,
                             # check to see if the toggle note is active right now.
                             # might have to go ahead and look at all the other notes
                             # at this tick first before doing this
@@ -333,8 +333,10 @@ class MidiConverter:
                     note_map[note] = []
                 note_map[note].append({'drum' : 'BP_%s_C' % drum_name})
 
-    def convert_to_rlrr(self):
+    def convert_to_rlrr(self) -> str:
         print("Converting to rlrr...")
+        if not self.midi_file:
+            return "Please slect a MIDI file first."
         self.analyze_midi_file()
         # Filter out empty strings from track lists
         flt_drum_tracks = [x for x in self.drum_tracks if x.strip()]
@@ -344,7 +346,7 @@ class MidiConverter:
         last_event_time = 0
         if "events" in self.out_dict and len(self.out_dict["events"]):
             last_event_time = float(self.out_dict["events"][-1]["time"])
-        track_to_load = flt_song_tracks[0] if len(flt_song_tracks) else (flt_drum_tracks[0] if len(flt_drum_tracks) else None)        
+        track_to_load = flt_song_tracks[0] if len(flt_song_tracks) else (flt_drum_tracks[0] if len(flt_drum_tracks) else None)
         length = last_event_time
         if track_to_load:
             try:
@@ -381,15 +383,18 @@ class MidiConverter:
 
         output_folder_path = os.path.join(self.output_rlrr_dir, self.song_name)
         if not os.path.isdir(output_folder_path):
-            os.makedirs(output_folder_path)
-        
+            try:
+                os.makedirs(output_folder_path)
+            except Exception as e:
+                print("Error creating directory:", str(e))
+                return f"Failed to create output directory `{output_folder_path}`"
+
         all_tracks = flt_drum_tracks + flt_song_tracks
         for track in all_tracks:
             copyfile(track, output_folder_path + '/' + track.split('/')[-1])
         if self.cover_image_path:
-            copyfile(self.cover_image_path, output_folder_path + '/' + cover_image_short)    
-        
-        with open(os.path.join(self.output_rlrr_dir,self.song_name) + '/' + self.song_name + '_' + self.difficulty + '.rlrr', 'w') as outfile:  
+            copyfile(self.cover_image_path, output_folder_path + '/' + cover_image_short)
+
+        with open(os.path.join(self.output_rlrr_dir,self.song_name) + '/' + self.song_name + '_' + self.difficulty + '.rlrr', 'w') as outfile:
             json.dump(self.out_dict, outfile, indent=4)
-            print("Conversion done!")
-            return True
+            return "Conversion done!"
