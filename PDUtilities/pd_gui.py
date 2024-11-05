@@ -177,11 +177,17 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _convert_clicked(self):
         self.mc.song_name = self.songNameLineEdit.text()
+        if not self.mc.song_name:
+            self.statusLabel.setText('Please proivde a song name!')  #  required
+            return
         # TODO check if we need to escape the \n newline characters ('\n' to '\\n')
+        self.mc.artist_name = self.artistNameLineEdit.text()
+        if not self.mc.artist_name:
+            self.statusLabel.setText('Please proivde an artist name!')  # required
+            return
         self.statusLabel.setText("Converting...")
         self.statusLabel.repaint()
         self.mc.recording_description = self.descriptionTextEdit.toPlainText()
-        self.mc.artist_name = self.artistNameLineEdit.text()
         self.mc.author_name = self.authorNameLineEdit.text()
         conversion_result_status = self.mc.convert_to_rlrr()
         self.statusLabel.setText(conversion_result_status)
