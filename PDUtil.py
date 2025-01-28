@@ -9,7 +9,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 def _create_env():
     venv = importlib.import_module("venv")
     pd_env = venv.EnvBuilder()
-    context = pd_env.ensure_directories(dir_path)
+    context = pd_env.ensure_directories(os.path.join(dir_path, "venv/"))
     
     # FIX: Could possibly cause issues if calling this script from another environment? idk im too tired rn
     if not os.path.exists(context.env_exe):
@@ -24,15 +24,7 @@ def _create_env():
             _error(res)
 
 
-
-    venv_modules = subprocess.run([context.env_exe, "-m", "pip", "freeze"], capture_output=True, text=True).stdout
-    with open(os.path.join(dir_path, "requirements.txt")) as req_file:
-        for line in req_file:
-            if not line in venv_modules:
-                res = subprocess.run([context.env_exe, "-m", "pip", "install", "--no-cache-dir", line])
-                if res.returncode != 0:
-                    print("Could not install: ", line)
-                    _error(res.returncode)
+    res = subprocess.run([context.env_exe, "-m", "pip", "install", "."])
 
     return context.env_exe  
 
