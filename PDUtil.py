@@ -24,15 +24,7 @@ def _create_env():
             _error(res)
 
 
-
-    venv_modules = subprocess.run([context.env_exe, "-m", "pip", "freeze"], capture_output=True, text=True).stdout
-    with open(os.path.join(dir_path, "requirements.txt")) as req_file:
-        for line in req_file:
-            if not line in venv_modules:
-                res = subprocess.run([context.env_exe, "-m", "pip", "install", "--no-cache-dir", line])
-                if res.returncode != 0:
-                    print("Could not install: ", line)
-                    _error(res.returncode)
+    res = subprocess.run([context.env_exe, "-m", "pip", "install", "."])
 
     return context.env_exe  
 
