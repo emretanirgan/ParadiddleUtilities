@@ -9,7 +9,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 def _create_env():
     venv = importlib.import_module("venv")
     pd_env = venv.EnvBuilder()
-    context = pd_env.ensure_directories(dir_path)
+    context = pd_env.ensure_directories(os.path.join(dir_path, "venv/"))
     
     # FIX: Could possibly cause issues if calling this script from another environment? idk im too tired rn
     if not os.path.exists(context.env_exe):
