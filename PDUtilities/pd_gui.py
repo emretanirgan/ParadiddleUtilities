@@ -1,11 +1,13 @@
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from midiconvert import MidiConverter
 from midicompanion import MidiCompanion
 import yaml
 import json
 import os
+import requests
+import importlib
 
 project_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -13,6 +15,9 @@ project_dir = os.path.dirname(os.path.realpath(__file__))
 class PD_GUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(PD_GUI, self).__init__()
+
+        check_for_updates()
+
         self.mc = MidiConverter()
         self.midicompanion = MidiCompanion()
         self.midicompanion.midi_msg_cb = self._midi_msg_callback
@@ -232,3 +237,23 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     # def calibration_offset_changed(self):
     #     calibration_offset = self.calibrationSpinBox.value()
+
+def check_for_updates():
+    newVersion = requests.get("https://api.github.com/repos/emretanirgan/ParadiddleUtilities/releases/latest").json()["tag_name"]
+    curVersion = "v" + importlib.metadata.version("ParadiddleUtilities")
+
+    if not newVersion == curVersion:
+        widget = QMessageBox()
+        widget.setIcon(QMessageBox.Question)
+        widget.setWindowTitle("New Update Available")
+        widget.setText("A new update is available. Would you like to download?\n- New Version: " + newVersion + "\n- Current Version: " + curVersion)
+        widget.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+        ret = widget.exec_()
+
+        if ret == widget.Yes:
+            import webbrowser
+            webbrowser.open("https://www.github.com/emretanirgan/ParadiddleUtilities/releases/tag/v0.7.3")
+            exit(0)
+    
+    return
