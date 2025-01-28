@@ -26,7 +26,8 @@ dependencies = [
     "PyQt5-sip==12.16.1",
     "python-rtmidi==1.5.8",
     "PyYAML==6.0.2",
-    "soundfile==0.12.1"
+    "soundfile==0.12.1",
+    "requests"
 ]
 
 [project.urls]
