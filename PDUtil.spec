@@ -8,7 +8,7 @@ a = Analysis(
     ['PDUtilities/__main__.py'],
     pathex=['myenv39/Lib/site-packages/'],
     binaries=[],
-    datas=[('PDUtilities/pd_gui_layout.ui', '.'), ('PDUtilities/midi_maps/*', 'midi_maps'), ('PDUtilities/drum_sets', 'drum_sets'), ('PDUtilities/assets/*', 'assets')],
+    datas=[('PDUtilities/ui_layouts/pd_gui_layout.ui', '.'), ('PDUtilities/ui_layouts/song_display_layout.ui', '.'), ('PDUtilities/midi_maps/*', 'midi_maps'), ('PDUtilities/drum_sets', 'drum_sets'), ('PDUtilities/assets/*', 'assets')],
     hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi'],
     hookspath=[],
     hooksconfig={},
