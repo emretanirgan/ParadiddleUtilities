@@ -1,6 +1,8 @@
 import os # path.exists(), path.join()
 import subprocess
 import importlib
+import sys
+import argparse
 from importlib.metadata import version, PackageNotFoundError
 
 # Global Variables
@@ -48,6 +50,16 @@ except (PackageNotFoundError):
 
 # Makes sure that virtualenv files are installed
 env_exe = _create_env()
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--build', action='store_true', default=False)
+args = argparser.parse_args()
+if args.build:
+    pyinstaller_exe = os.path.join(os.path.dirname(env_exe), "pyinstaller")
+    ret = subprocess.run([pyinstaller_exe, "PDUtil.spec"])
+    if ret.returncode != 0:
+        exit(ret)
+
 res = subprocess.run([env_exe, "PDUtilities"])
 
 #_main() # Calls the main function for PDUtilities
