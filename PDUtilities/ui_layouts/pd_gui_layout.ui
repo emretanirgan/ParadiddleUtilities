@@ -699,19 +699,6 @@ QCheckBox {
         <string>- Total MIDI Notes: </string>
        </property>
       </widget>
-      <widget class="QLabel" name="totalDrumNotesLabel">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>150</y>
-         <width>111</width>
-         <height>19</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>- Total Drum Notes: </string>
-       </property>
-      </widget>
       <widget class="QLabel" name="midiNotesNum">
        <property name="geometry">
         <rect>
@@ -725,17 +712,30 @@ QCheckBox {
         <string>0</string>
        </property>
       </widget>
-      <widget class="QLabel" name="drumNotesNum">
+      <widget class="QLabel" name="trackNotesNum">
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>150</y>
+         <y>160</y>
          <width>111</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
         <string>0</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="totalInTrackLabel">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>160</y>
+         <width>111</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>- Total Track Notes: </string>
        </property>
       </widget>
      </widget>
@@ -1959,7 +1959,7 @@ QCheckBox {
     <property name="title">
      <string>Companion</string>
     </property>
-    <addaction name="actionOpen_Song_Display"/>
+    <addaction name="openSongDisplay"/>
    </widget>
    <addaction name="menuCompanion"/>
    <addaction name="menuAbout"/>
@@ -1970,7 +1970,7 @@ QCheckBox {
     <string>About</string>
    </property>
   </action>
-  <action name="actionOpen_Song_Display">
+  <action name="openSongDisplay">
    <property name="text">
     <string>Open Song Display</string>
    </property>

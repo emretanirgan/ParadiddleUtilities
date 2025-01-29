@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from midiconvert import MidiConverter
 from midicompanion import MidiCompanion
+from song_display import SongDisplay_GUI
+import mido
 import yaml
 import json
 import os
@@ -19,6 +21,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         check_for_updates()
 
         self.mc = MidiConverter()
+        self.sd_gui = SongDisplay_GUI(self.mc)
         self.midicompanion = MidiCompanion()
         self.midicompanion.midi_msg_cb = self._midi_msg_callback
         self.midicompanion.connection_cb = self._connection_callback
@@ -53,6 +56,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.convertButton.clicked.connect(self._convert_clicked)
         self.setOutputButton.clicked.connect(self._set_output_clicked)
         self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
+
+        self.openSongDisplay.triggered.connect(self._open_song_display_clicked)
         # self.songCreatorButton.clicked.connect(self._song_creator_clicked)
         # self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
         # self.selectDrumTrackButton_1.clicked.connect(self._select_audio_file_clicked)
@@ -78,6 +83,25 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.set_default_set(default_set_file)
 
         self.show()
+
+    def count_track_notes(self):
+        mid = mido.MidiFile(self.mc.midi_file)
+        note_count = 0
+        for msg in mid.tracks[self.mc.convert_track_index]:
+            if msg.type == 'note_on':
+                note_count+=1
+        return note_count
+
+    def count_all_notes(self):
+        mid = mido.MidiFile(self.mc.midi_file)
+        note_count = 0
+        for i, track in enumerate(mid.tracks):
+            for msg in track:
+                if msg.type == 'note_on':
+                    note_count+=1
+        return note_count
+
+    
 
     def closeEvent(self, event):
         if self.midicompanion.connected_to_host:
@@ -106,6 +130,9 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     # LOCAL GUI FUNCTIONS
 
+    def _open_song_display_clicked(self):
+        self.sd_gui.show()
+
     def _difficulty_text_changed(self, text):
         self.mc.difficulty = text
 
@@ -132,6 +159,9 @@ class PD_GUI(QtWidgets.QMainWindow):
         print("Convert track index: " + str(self.mc.convert_track_index))
         self.midiTrackComboBox.setCurrentIndex(self.mc.convert_track_index)
 
+        self.midiNotesNum.setText(str(self.count_all_notes()))
+        self.trackNotesNum.setText(str(self.count_track_notes()))
+
     def _select_midi_map_clicked(self):
         midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
         if not midi_yaml:  # User cancelled the dialog
@@ -140,6 +170,8 @@ class PD_GUI(QtWidgets.QMainWindow):
             midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
             self.mc.create_midi_map(midi_yaml_dict)
             self.midiMappingLineEdit.setText(midi_yaml.split('/')[-1])
+        self.midiNotesNum.setText(str(self.count_all_notes()))
+        self.trackNotesNum.setText(str(self.count_track_notes()))
 
     def _set_output_clicked(self):
         output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
@@ -148,6 +180,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _midi_track_index_changed(self, index):
         self.mc.convert_track_index = index
+        self.trackNotesNum.setText(str(self.count_track_notes()))
 
     def _select_drum_set_clicked(self):
         self.mc.drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
