@@ -27,7 +27,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Loads the .ui file
         uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
-        self.songCreatorWidget.hide()
+        # self.songCreatorWidget.hide()
 
         # Load IP address from save json file
         try:
@@ -53,8 +53,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.convertButton.clicked.connect(self._convert_clicked)
         self.setOutputButton.clicked.connect(self._set_output_clicked)
         self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
-        self.songCreatorButton.clicked.connect(self._song_creator_clicked)
-        self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
+        # self.songCreatorButton.clicked.connect(self._song_creator_clicked)
+        # self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
         # self.selectDrumTrackButton_1.clicked.connect(self._select_audio_file_clicked)
         # self.calibrationSpinBox.valueChanged.connect(self._calibration_offset_changed)
 
@@ -210,14 +210,6 @@ class PD_GUI(QtWidgets.QMainWindow):
     def _midi_output_index_changed(self, index):
         print("index changed to " + str(index))
         self.midicompanion.midi_output_index = index
-
-    def _midi_companion_clicked(self):
-        self.midiCompanionWidget.show()
-        self.songCreatorWidget.hide()
-
-    def _song_creator_clicked(self):
-        self.midiCompanionWidget.hide()
-        self.songCreatorWidget.show()
 
     def _midi_msg_callback(self, msg):
         self.midiMessageDebugLabel.setText(msg)
