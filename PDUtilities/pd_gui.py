@@ -26,7 +26,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.setWindowIcon(QIcon(os.path.join(project_dir, "assets", "favicon.ico")))
 
         # Loads the .ui file
-        uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
+        uic.loadUi(os.path.join(project_dir, "ui_layouts", "pd_gui_layout.ui"), self)
         # self.songCreatorWidget.hide()
 
         # Load IP address from save json file
