@@ -28,8 +28,9 @@ dependencies = [
     "PyYAML==6.0.2",
     "soundfile==0.12.1",
     "requests",
-    "pyogg",
-    "simpleaudio"
+    "soundfile",
+    "sounddevice",
+    "numpy"
 ]
 
 [project.urls]
