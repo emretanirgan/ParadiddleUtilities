@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>459</height>
+    <width>602</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,7 +96,7 @@ QCheckBox {
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="midiConnectTab">
       <attribute name="title">
@@ -748,8 +748,8 @@ QCheckBox {
         <rect>
          <x>10</x>
          <y>60</y>
-         <width>571</width>
-         <height>201</height>
+         <width>561</width>
+         <height>205</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -858,6 +858,29 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewSongTrackButton_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>
@@ -948,6 +971,29 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewSongTrackButton_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>
@@ -1035,6 +1081,29 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewSongTrackButton_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>
@@ -1120,6 +1189,29 @@ QCheckBox {
              </property>
              <property name="text">
               <string>...</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="previewSongTrackButton_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
              </property>
             </widget>
            </widget>
@@ -1215,22 +1307,32 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewSongTrackButton_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="Line" name="line">
-          <property name="minimumSize">
-           <size>
-            <width>30</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1334,6 +1436,29 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewDrumTrackButton_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>
@@ -1419,6 +1544,29 @@ QCheckBox {
              </property>
              <property name="text">
               <string>...</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="previewDrumTrackButton_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
              </property>
             </widget>
            </widget>
@@ -1508,6 +1656,29 @@ QCheckBox {
               <string>...</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="previewDrumTrackButton_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
            </widget>
           </item>
           <item>
@@ -1593,6 +1764,29 @@ QCheckBox {
              </property>
              <property name="text">
               <string>...</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="previewDrumTrackButton_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
              </property>
             </widget>
            </widget>
@@ -1945,7 +2139,7 @@ QCheckBox {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>610</width>
+     <width>602</width>
      <height>24</height>
     </rect>
    </property>
@@ -1973,6 +2167,16 @@ QCheckBox {
   <action name="openSongDisplay">
    <property name="text">
     <string>Open Song Display</string>
+   </property>
+  </action>
+  <action name="actionImport_Song">
+   <property name="text">
+    <string>Import Song</string>
+   </property>
+  </action>
+  <action name="actionImport_Folder">
+   <property name="text">
+    <string>Import Folder</string>
    </property>
   </action>
  </widget>

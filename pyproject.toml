@@ -27,7 +27,9 @@ dependencies = [
     "python-rtmidi==1.5.8",
     "PyYAML==6.0.2",
     "soundfile==0.12.1",
-    "requests"
+    "requests",
+    "pyogg",
+    "simpleaudio"
 ]
 
 [project.urls]

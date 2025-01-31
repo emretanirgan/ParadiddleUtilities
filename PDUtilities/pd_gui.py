@@ -65,12 +65,13 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # TODO: May not be an issue, but try to see if there is a better way of doing things
         for i in range(5):
-            songTrackBtn = getattr(self, ('selectSongTrackButton_' + str(i+1)), None)
-            drumTrackBtn = getattr(self, ('selectDrumTrackButton_' + str(i+1)), None)
-            if drumTrackBtn:
-                drumTrackBtn.clicked.connect(self._select_audio_file_clicked)
-            if songTrackBtn:
-                songTrackBtn.clicked.connect(self._select_audio_file_clicked)
+            selSongTrackBtn = getattr(self, ('selectSongTrackButton_' + str(i+1)), None)
+            selDrumTrackBtn = getattr(self, ('selectDrumTrackButton_' + str(i+1)), None)
+            if selDrumTrackBtn:
+                selDrumTrackBtn.clicked.connect(self._select_audio_file_clicked)
+            elif selSongTrackBtn:
+                selSongTrackBtn.clicked.connect(self._select_audio_file_clicked)
+            
 
         self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
         self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
@@ -99,9 +100,7 @@ class PD_GUI(QtWidgets.QMainWindow):
             for msg in track:
                 if msg.type == 'note_on':
                     note_count+=1
-        return note_count
-
-    
+        return note_count  
 
     def closeEvent(self, event):
         if self.midicompanion.connected_to_host:
@@ -129,6 +128,9 @@ class PD_GUI(QtWidgets.QMainWindow):
             self.midiMappingLineEdit.setText(os.path.basename(midi_yaml))
 
     # LOCAL GUI FUNCTIONS
+
+    def _preview_audio_file(self):
+        pass
 
     def _open_song_display_clicked(self):
         self.sd_gui.show()
