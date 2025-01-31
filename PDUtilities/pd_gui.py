@@ -1,11 +1,13 @@
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from midiconvert import MidiConverter
 from midicompanion import MidiCompanion
 import yaml
 import json
 import os
+import requests
+import importlib
 
 project_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -13,6 +15,9 @@ project_dir = os.path.dirname(os.path.realpath(__file__))
 class PD_GUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(PD_GUI, self).__init__()
+
+        check_for_updates()
+
         self.mc = MidiConverter()
         self.midicompanion = MidiCompanion()
         self.midicompanion.midi_msg_cb = self._midi_msg_callback
@@ -22,7 +27,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Loads the .ui file
         uic.loadUi(os.path.join(project_dir, "pd_gui_layout.ui"), self)
-        self.songCreatorWidget.hide()
+        # self.songCreatorWidget.hide()
 
         # Load IP address from save json file
         try:
@@ -48,8 +53,8 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.convertButton.clicked.connect(self._convert_clicked)
         self.setOutputButton.clicked.connect(self._set_output_clicked)
         self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
-        self.songCreatorButton.clicked.connect(self._song_creator_clicked)
-        self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
+        # self.songCreatorButton.clicked.connect(self._song_creator_clicked)
+        # self.midiCompanionButton.clicked.connect(self._midi_companion_clicked)
         # self.selectDrumTrackButton_1.clicked.connect(self._select_audio_file_clicked)
         # self.calibrationSpinBox.valueChanged.connect(self._calibration_offset_changed)
 
@@ -206,14 +211,6 @@ class PD_GUI(QtWidgets.QMainWindow):
         print("index changed to " + str(index))
         self.midicompanion.midi_output_index = index
 
-    def _midi_companion_clicked(self):
-        self.midiCompanionWidget.show()
-        self.songCreatorWidget.hide()
-
-    def _song_creator_clicked(self):
-        self.midiCompanionWidget.hide()
-        self.songCreatorWidget.show()
-
     def _midi_msg_callback(self, msg):
         self.midiMessageDebugLabel.setText(msg)
 
@@ -232,3 +229,23 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     # def calibration_offset_changed(self):
     #     calibration_offset = self.calibrationSpinBox.value()
+
+def check_for_updates():
+    newVersion = requests.get("https://api.github.com/repos/emretanirgan/ParadiddleUtilities/releases/latest").json()["tag_name"]
+    curVersion = "v" + importlib.metadata.version("ParadiddleUtilities")
+
+    if not newVersion == curVersion:
+        widget = QMessageBox()
+        widget.setIcon(QMessageBox.Question)
+        widget.setWindowTitle("New Update Available")
+        widget.setText("A new update is available. Would you like to download?\n- New Version: " + newVersion + "\n- Current Version: " + curVersion)
+        widget.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+        ret = widget.exec_()
+
+        if ret == widget.Yes:
+            import webbrowser
+            webbrowser.open("https://www.github.com/emretanirgan/ParadiddleUtilities/releases/latest")
+            exit(0)
+    
+    return

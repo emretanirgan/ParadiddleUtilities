@@ -17,8 +17,11 @@ import sys
 from PyQt5 import QtWidgets
 from pd_gui import PD_GUI
 
-if __name__ == '__main__':
+def _main():
     # Sets primary window for the application
     app = QtWidgets.QApplication(sys.argv)
     window = PD_GUI()
     app.exec_()
+
+if __name__ == '__main__':
+    _main()
