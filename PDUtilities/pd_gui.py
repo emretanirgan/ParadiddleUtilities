@@ -10,6 +10,10 @@ import json
 import os
 import requests
 import importlib
+import time
+import threading
+import sounddevice
+import soundfile
 
 project_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,6 +24,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         check_for_updates()
 
+        self.play_obj = None
         self.mc = MidiConverter()
         self.sd_gui = SongDisplay_GUI(self.mc)
         self.midicompanion = MidiCompanion()
@@ -67,10 +72,17 @@ class PD_GUI(QtWidgets.QMainWindow):
         for i in range(5):
             selSongTrackBtn = getattr(self, ('selectSongTrackButton_' + str(i+1)), None)
             selDrumTrackBtn = getattr(self, ('selectDrumTrackButton_' + str(i+1)), None)
+            prevSongTrackBtn = getattr(self, ('previewSongTrackButton_' + str(i+1)), None)
+            prevDrumTrackBtn = getattr(self, ('previewDrumTrackButton_' + str(i+1)), None)
+
             if selDrumTrackBtn:
                 selDrumTrackBtn.clicked.connect(self._select_audio_file_clicked)
-            elif selSongTrackBtn:
+            if selSongTrackBtn:
                 selSongTrackBtn.clicked.connect(self._select_audio_file_clicked)
+            if prevSongTrackBtn:
+                prevSongTrackBtn.clicked.connect(self._preview_audio_file)
+            if prevDrumTrackBtn:
+                prevDrumTrackBtn.clicked.connect(self._preview_audio_file)
             
 
         self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
@@ -128,9 +140,35 @@ class PD_GUI(QtWidgets.QMainWindow):
             self.midiMappingLineEdit.setText(os.path.basename(midi_yaml))
 
     # LOCAL GUI FUNCTIONS
+    def _track_song_player(self, audio_path):
+        # self.play_obj.play()
+        data, fs = soundfile.read(audio_path, dtype="float32")
+        sounddevice.play(data[:int(20*fs)], fs)
 
     def _preview_audio_file(self):
-        pass
+        # Get audio file path
+        objName = self.sender().objectName()
+        
+        if self.play_obj == objName:
+            sounddevice.stop()
+            self.play_obj = None
+            return        
+        
+        self.play_obj = objName
+        indexNum = int(objName[-1])-1
+        audio_path = None
+        if "Song" in objName:
+            audio_path = self.mc.song_tracks[indexNum]
+        else:
+            audio_path = self.mc.drum_tracks[indexNum]
+        
+        # Check to see if audio file exists
+        if not os.path.exists(audio_path):
+            return
+
+        # Play audio file
+        thread = threading.Thread(target=self._track_song_player(audio_path))
+        thread.start()
 
     def _open_song_display_clicked(self):
         self.sd_gui.show()
