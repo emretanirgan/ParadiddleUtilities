@@ -245,7 +245,7 @@ def check_for_updates():
 
         if ret == widget.Yes:
             import webbrowser
-            webbrowser.open("https://www.github.com/emretanirgan/ParadiddleUtilities/releases/tag/v0.7.3")
+            webbrowser.open("https://www.github.com/emretanirgan/ParadiddleUtilities/releases/latest")
             exit(0)
     
     return
