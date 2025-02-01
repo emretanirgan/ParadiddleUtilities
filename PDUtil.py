@@ -8,6 +8,16 @@ from importlib.metadata import version, PackageNotFoundError
 # Global Variables
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--build', action='store_true', default=False)
+argparser.add_argument('--get_poetry', action='store_true', default=False)
+args = argparser.parse_args()
+
+poetry_arg = ["poetry"]
+if args.get_poetry:
+    poetry_arg = [env_exe, "-m"] + poetry_arg
+
+
 def _create_env():
     venv = importlib.import_module("venv")
     pd_env = venv.EnvBuilder()
@@ -26,7 +36,7 @@ def _create_env():
             _error(res)
 
 
-    res = subprocess.run([context.env_exe, "-m", "pip", "install", "."])
+    res = subprocess.run(poetry_arg + ["install"])
 
     return context.env_exe  
 
@@ -35,7 +45,6 @@ def _create_env():
 def _error(errLevel):
     print("\nFailed with code: ", errLevel)
     exit(errLevel)
-
 
 
 # If virtualenv doesn't exist, then install it
@@ -48,17 +57,16 @@ except (PackageNotFoundError):
         print("Could not install Virtualenv")
         _error(res)
 
+
 # Makes sure that virtualenv files are installed
 env_exe = _create_env()
 
-argparser = argparse.ArgumentParser()
-argparser.add_argument('--build', action='store_true', default=False)
-args = argparser.parse_args()
 if args.build:
-    pyinstaller_exe = os.path.join(os.path.dirname(env_exe), "pyinstaller")
-    ret = subprocess.run([pyinstaller_exe, "PDUtil.spec"])
+    build_com = poetry_arg + ["build"]
+    ret = subprocess.run(build_com)
     if ret.returncode != 0:
-        exit(ret)
+        print("Could not build exe")
+        _error(ret.returncode)
 
 res = subprocess.run([env_exe, "PDUtilities"])
 

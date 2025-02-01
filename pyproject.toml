@@ -1,8 +1,8 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core", "poetry-pyinstaller-plugin"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "ParadiddleUtilities"
 version = "0.7.4"
 authors = [
@@ -13,24 +13,30 @@ description = "Utility apps and libraries for Paradiddle, currently containing t
 readme = {file = "README.md", content-type = "text/markdown"}
 
 dependencies = [
-    "altgraph==0.17.4",
-    "cffi==1.17.1",
-    "macholib==1.16.3",
-    "mido==1.3.0",
-    "packaging==23.2",
-    "pycparser==2.21",
+    "altgraph",
+    "cffi",
+    "macholib",
+    "mido",
+    "packaging",
+    "pycparser",
     "pyinstaller",
     "pyinstaller-hooks-contrib",
-    "PyQt5==5.15.9",
-    "PyQt5-Qt5==5.15.2",
-    "PyQt5-sip==12.16.1",
-    "python-rtmidi==1.5.8",
-    "PyYAML==6.0.2",
-    "soundfile==0.12.1",
+    "PyQt5",
+    "PyQt5-Qt5",
+    "PyQt5-sip",
+    "python-rtmidi",
+    "PyYAML",
+    "soundfile",
     "requests",
     "soundfile",
     "sounddevice",
-    "numpy"
+    "numpy",
+    "poetry",
+    "poetry-pyinstaller-plugin"
+]
+
+packages = [
+    {include = "PDUtilities"}
 ]
 
 [project.urls]
@@ -38,6 +44,8 @@ Homepage = "https://www.paradiddleapp.com/"
 Repository = "https://www.github.com/emretanirgan/ParadiddleUtilities"
 Issues = "https://www.github.com/emretanirgan/ParadiddleUtilities/issues"
 
-[tool.setuptools]
-packages = []
-py-modules = []
+
+[tool.poetry-pyinstaller-plugin]
+scripts = [
+    {name = "PDUtilities", source = "PDUtilities.__main__", type = "onedirectory"}
+]

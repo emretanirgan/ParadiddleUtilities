@@ -1,5 +1,9 @@
 **Paradiddle Utilities**
 
+REQUIREMENTS:
+- Python 3
+- Poetry (if using pipx)
+
 Utility apps and libraries for Paradiddle, currently containing the song creator.
 
 **Song Creator & Custom Song Guide:** https://paradiddleapp.com/custom-song-guide
