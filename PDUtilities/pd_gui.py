@@ -1,3 +1,5 @@
+import __init__
+
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
@@ -305,7 +307,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
 def check_for_updates():
     newVersion = requests.get("https://api.github.com/repos/emretanirgan/ParadiddleUtilities/releases/latest").json()["tag_name"]
-    curVersion = "v" + importlib.metadata.version("ParadiddleUtilities")
+    curVersion = "v" + __init__.__version__
 
     if not newVersion == curVersion:
         widget = QMessageBox()
