@@ -59,7 +59,7 @@ except (PackageNotFoundError):
 env_exe = _create_env()
 
 if args.build:
-    ret = subprocess.run([env_exe, "-m", "pyinstaller", "PDUtil.spec"])
+    ret = subprocess.run([os.path.join(os.path.dirname(env_exe), "pyinstaller"), "PDUtil.spec"])
     if ret.returncode != 0:
         print("Could not build exe")
         _error(ret.returncode)
