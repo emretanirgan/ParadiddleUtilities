@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ParadiddleUtilities"
 requires-python = ">=3.10"
-version = "0.7.4"
+version = "0.7.5"
 authors = [
     {name = "Emre Tanirgan"},
     {name = "Emma Pisarsky"}
@@ -30,7 +30,6 @@ dependencies = [
     "PyYAML",
     "soundfile",
     "requests",
-    "soundfile",
     "sounddevice",
     "numpy"
 ]
