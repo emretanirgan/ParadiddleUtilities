@@ -6,10 +6,10 @@ block_cipher = None
 
 a = Analysis(
     ['PDUtilities/__main__.py'],
-    pathex=['myenv39/Lib/site-packages/'],
+    pathex=["venv/lib/python3.13/site-packages", "venv/lib64/python3.13/site-packages"],
     binaries=[],
-    datas=[('PDUtilities/pd_gui_layout.ui', '.'), ('PDUtilities/midi_maps/*', 'midi_maps'), ('PDUtilities/drum_sets', 'drum_sets'), ('PDUtilities/assets/*', 'assets')],
-    hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi'],
+    datas=[('PDUtilities/', '.')],
+    hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi', 'PyQt5.uic', 'soundfile', 'requests', 'sounddevice', 'numpy'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

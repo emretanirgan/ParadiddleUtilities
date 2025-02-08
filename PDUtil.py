@@ -2,10 +2,16 @@ import os # path.exists(), path.join()
 import sys
 import subprocess
 import importlib
+import sys
+import argparse
 from importlib.metadata import version, PackageNotFoundError
 
 # Global Variables
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--build', action='store_true', default=False)
+args = argparser.parse_args()
 
 def _create_env():
     venv = importlib.import_module("venv")
@@ -26,7 +32,10 @@ def _create_env():
 
 
     res = subprocess.run([context.env_exe, "-m", "pip", "install", "."])
-
+    if res.returncode != 0:
+        print("Could not install pyproject.toml dependencies")
+        _error(res)
+        
     return context.env_exe  
 
     #pdutil = importlib.import_module("PDUtilities")
@@ -34,7 +43,6 @@ def _create_env():
 def _error(errLevel):
     print("\nFailed with code: ", errLevel)
     exit(errLevel)
-
 
 
 # If virtualenv doesn't exist, then install it
@@ -47,8 +55,16 @@ except (PackageNotFoundError):
         print("Could not install Virtualenv")
         _error(res)
 
+
 # Makes sure that virtualenv files are installed
 env_exe = _create_env()
+
+if args.build:
+    ret = subprocess.run([os.path.join(os.path.dirname(env_exe), "pyinstaller"), "PDUtil.spec"])
+    if ret.returncode != 0:
+        print("Could not build exe")
+        _error(ret.returncode)
+
 res = subprocess.run([env_exe, "PDUtilities"])
 
 #_main() # Calls the main function for PDUtilities
