@@ -1,9 +1,10 @@
 [build-system]
-requires = ["poetry-core", "poetry-pyinstaller-plugin"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "ParadiddleUtilities"
+requires-python = ">=3.10"
 version = "0.7.4"
 authors = [
     {name = "Emre Tanirgan"},
@@ -11,6 +12,7 @@ authors = [
 ]
 description = "Utility apps and libraries for Paradiddle, currently containing the song creator."
 readme = {file = "README.md", content-type = "text/markdown"}
+
 
 dependencies = [
     "altgraph",
@@ -30,13 +32,7 @@ dependencies = [
     "requests",
     "soundfile",
     "sounddevice",
-    "numpy",
-    "poetry",
-    "poetry-pyinstaller-plugin"
-]
-
-packages = [
-    {include = "PDUtilities"}
+    "numpy"
 ]
 
 [project.urls]
@@ -44,8 +40,6 @@ Homepage = "https://www.paradiddleapp.com/"
 Repository = "https://www.github.com/emretanirgan/ParadiddleUtilities"
 Issues = "https://www.github.com/emretanirgan/ParadiddleUtilities/issues"
 
-
-[tool.poetry-pyinstaller-plugin]
-scripts = [
-    {name = "PDUtilities", source = "PDUtilities.__main__", type = "onedirectory"}
-]
+[tool.setuptools]
+packages = []
+py-modules = []

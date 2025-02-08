@@ -10,13 +10,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--build', action='store_true', default=False)
-argparser.add_argument('--get_poetry', action='store_true', default=False)
 args = argparser.parse_args()
-
-poetry_arg = ["poetry"]
-if args.get_poetry:
-    poetry_arg = [env_exe, "-m"] + poetry_arg
-
 
 def _create_env():
     venv = importlib.import_module("venv")
@@ -36,8 +30,11 @@ def _create_env():
             _error(res)
 
 
-    res = subprocess.run(poetry_arg + ["install"])
-
+    res = subprocess.run([context.env_exe, "-m", "pip", "install", "."])
+    if res.returncode != 0:
+        print("Could not install pyproject.toml dependencies")
+        _error(res)
+        
     return context.env_exe  
 
     #pdutil = importlib.import_module("PDUtilities")
@@ -62,8 +59,7 @@ except (PackageNotFoundError):
 env_exe = _create_env()
 
 if args.build:
-    build_com = poetry_arg + ["build"]
-    ret = subprocess.run(build_com)
+    ret = subprocess.run([env_exe, "-m", "pyinstaller", "PDUtil.spec"])
     if ret.returncode != 0:
         print("Could not build exe")
         _error(ret.returncode)
