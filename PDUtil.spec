@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['PDUtilities/__main__.py'],
-    pathex=["venv/lib/python3.13/site-packages", "venv/lib64/python3.13/site-packages"],
+    pathex=[],
     binaries=[],
     datas=[('PDUtilities/', '.')],
     hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi', 'PyQt5.uic', 'soundfile', 'requests', 'sounddevice', 'numpy'],
