@@ -1,3 +1,4 @@
+from packaging import version
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
@@ -231,14 +232,18 @@ class PD_GUI(QtWidgets.QMainWindow):
     #     calibration_offset = self.calibrationSpinBox.value()
 
 def check_for_updates():
-    newVersion = requests.get("https://api.github.com/repos/emretanirgan/ParadiddleUtilities/releases/latest").json()["tag_name"]
-    curVersion = "v" + importlib.metadata.version("ParadiddleUtilities")
+    curVersion = version.parse(importlib.metadata.version("ParadiddleUtilities"))
+    try:
+        newVersion = version.parse(requests.get("https://api.github.com/repos/emretanirgan/ParadiddleUtilities/releases/latest").json()["tag_name"])
+    except requests.exceptions.RequestException as e:
+        print(f"Network error checking updates, skipping check: ({e})")
+        return
 
-    if not newVersion == curVersion:
+    if newVersion > curVersion:
         widget = QMessageBox()
         widget.setIcon(QMessageBox.Question)
         widget.setWindowTitle("New Update Available")
-        widget.setText("A new update is available. Would you like to download?\n- New Version: " + newVersion + "\n- Current Version: " + curVersion)
+        widget.setText(f"A new update is available. Would you like to download?\n- New Version: {newVersion}\n- Current Version: {curVersion})")
         widget.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
 
         ret = widget.exec_()
