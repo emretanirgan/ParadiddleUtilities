@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ParadiddleUtilities"
-version = "0.7.4"
+requires-python = ">=3.10"
+version = "0.7.5"
 authors = [
     {name = "Emre Tanirgan"},
     {name = "Emma Pisarsky"}
@@ -12,22 +13,25 @@ authors = [
 description = "Utility apps and libraries for Paradiddle, currently containing the song creator."
 readme = {file = "README.md", content-type = "text/markdown"}
 
+
 dependencies = [
-    "altgraph==0.17.4",
-    "cffi==1.17.1",
-    "macholib==1.16.3",
-    "mido==1.3.0",
-    "packaging==23.2",
-    "pycparser==2.21",
+    "altgraph",
+    "cffi",
+    "macholib",
+    "mido",
+    "packaging",
+    "pycparser",
     "pyinstaller",
     "pyinstaller-hooks-contrib",
-    "PyQt5==5.15.9",
-    "PyQt5-Qt5==5.15.2",
-    "PyQt5-sip==12.16.1",
-    "python-rtmidi==1.5.8",
-    "PyYAML==6.0.2",
-    "soundfile==0.12.1",
-    "requests"
+    "PyQt5",
+    "PyQt5-Qt5",
+    "PyQt5-sip",
+    "python-rtmidi",
+    "PyYAML",
+    "soundfile",
+    "requests",
+    "sounddevice",
+    "numpy"
 ]
 
 [project.urls]
