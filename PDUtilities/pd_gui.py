@@ -89,6 +89,9 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.midiTrackComboBox.currentIndexChanged.connect(self._midi_track_index_changed)
         self.difficultyComboBox.currentTextChanged.connect(self._difficulty_text_changed)
         self.complexityComboBox.currentTextChanged.connect(self._complexity_text_changed)
+        
+        # Connect artist name field to update song display title
+        self.artistNameLineEdit.textChanged.connect(self._artist_name_changed)
 
         self.lastOpenFolder = "."
 
@@ -172,6 +175,16 @@ class PD_GUI(QtWidgets.QMainWindow):
         thread.start()
 
     def _open_song_display_clicked(self):
+        if not self.mc.midi_file:
+            QMessageBox.warning(self, "Warning", "Please select a MIDI file first!")
+            return
+            
+        # Initialize song display with current MIDI file
+        self.sd_gui.change_midi(self.mc.midi_file)
+        
+        # Load all audio tracks from the MIDI converter
+        self.sd_gui.load_audio_tracks_from_converter()
+            
         self.sd_gui.show()
 
     def _difficulty_text_changed(self, text):
@@ -202,6 +215,10 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         self.midiNotesNum.setText(str(self.count_all_notes()))
         self.trackNotesNum.setText(str(self.count_track_notes()))
+        
+        # Update song display if it's open
+        if hasattr(self, 'sd_gui') and self.sd_gui.isVisible():
+            self.sd_gui.change_midi(self.mc.midi_file)
 
     def _select_midi_map_clicked(self):
         midi_yaml = QFileDialog.getOpenFileName(self, ("Select Midi File"), self.lastOpenFolder, ("Midi Map (*.yaml *yml)"))[0]
@@ -211,6 +228,10 @@ class PD_GUI(QtWidgets.QMainWindow):
             midi_yaml_dict = yaml.load(file, Loader=yaml.FullLoader)
             self.mc.create_midi_map(midi_yaml_dict)
             self.midiMappingLineEdit.setText(midi_yaml.split('/')[-1])
+        
+        # Update song display with new mapping
+        self.sd_gui.change_midi_map(midi_yaml)
+        
         self.midiNotesNum.setText(str(self.count_all_notes()))
         self.trackNotesNum.setText(str(self.count_track_notes()))
 
@@ -303,6 +324,9 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     # def calibration_offset_changed(self):
     #     calibration_offset = self.calibrationSpinBox.value()
+
+    def _artist_name_changed(self):
+        self.sd_gui.update_artist_name(self.artistNameLineEdit.text())
 
 def check_for_updates():
     curVersion = version.parse(importlib.metadata.version("ParadiddleUtilities"))
