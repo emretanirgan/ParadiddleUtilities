@@ -743,11 +743,86 @@ QCheckBox {
       <attribute name="title">
        <string>Audio Tracks</string>
       </attribute>
+      <widget class="QSplitter" name="songPreviewSplitter">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>571</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="QLabel" name="songPreviewLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>5</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>1000</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>-1</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Song Preview Track:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="songPreviewLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="selectSongPreviewButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>90</y>
          <width>561</width>
          <height>205</height>
         </rect>
@@ -1815,7 +1890,7 @@ QCheckBox {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>60</y>
          <width>271</width>
          <height>20</height>
         </rect>
@@ -1836,7 +1911,7 @@ QCheckBox {
        <property name="geometry">
         <rect>
          <x>310</x>
-         <y>30</y>
+         <y>60</y>
          <width>271</width>
          <height>16</height>
         </rect>

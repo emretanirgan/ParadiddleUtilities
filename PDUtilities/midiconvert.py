@@ -43,6 +43,7 @@ class MidiConverter:
         self.output_rlrr_dir = ''
         self.song_tracks = [""] * 5
         self.drum_tracks = [""] * 4
+        self.song_preview_track = ""
         self.calibration_offset = 0
 
         self.midi_lenth = 0
@@ -58,6 +59,7 @@ class MidiConverter:
         self.audio_file_data = {
             'songTracks' : [],
             'drumTracks' : [],
+            'songPreview' : '',
             'calibrationOffset' : 0
         }
 
@@ -369,6 +371,7 @@ class MidiConverter:
         self.audio_file_data['songTracks'] = short_stracks
         self.audio_file_data['drumTracks'] = short_dtracks
         self.audio_file_data['calibrationOffset'] = self.calibration_offset
+        self.audio_file_data['songPreview'] = self.song_preview_track.split('/')[-1] if self.song_preview_track else ''
         self.out_dict["audioFileData"] = self.audio_file_data
 
         self.recording_metadata['title'] = self.song_name

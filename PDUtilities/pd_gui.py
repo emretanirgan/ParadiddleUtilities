@@ -62,6 +62,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.convertButton.clicked.connect(self._convert_clicked)
         self.setOutputButton.clicked.connect(self._set_output_clicked)
         self.selectCoverImageButton.clicked.connect(self._select_cover_image_clicked)
+        self.selectSongPreviewButton.clicked.connect(self._select_song_preview_clicked)
 
         self.openSongDisplay.triggered.connect(self._open_song_display_clicked)
         # self.songCreatorButton.clicked.connect(self._song_creator_clicked)
@@ -274,6 +275,14 @@ class PD_GUI(QtWidgets.QMainWindow):
         print(self.mc.cover_image_path)
         self.lastOpenFolder = self.mc.cover_image_path.rsplit('/', 1)[0]
         self.coverImageLineEdit.setText(self.mc.cover_image_path.split('/')[-1])
+
+    def _select_song_preview_clicked(self):
+        audio_file = QFileDialog.getOpenFileName(self, ("Select Song Preview Track"), self.lastOpenFolder, ("Audio Files (*.mp3 *.wav *.ogg)"))[0]
+        if audio_file:
+            self.mc.song_preview_track = audio_file
+            print(f"Song preview track: {self.mc.song_preview_track}")
+            self.lastOpenFolder = audio_file.rsplit('/', 1)[0]
+            self.songPreviewLineEdit.setText(audio_file.split('/')[-1])
 
     def _convert_clicked(self):
         self.mc.song_name = self.songNameLineEdit.text()

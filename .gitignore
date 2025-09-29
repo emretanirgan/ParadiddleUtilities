@@ -153,6 +153,7 @@ cython_debug/
 
 # Custom
 PDUtilities/rlrr_files/
+rlrr_files/
 PDUtilities/pdsave.json
 *.mid
 pyvenv.cfg
