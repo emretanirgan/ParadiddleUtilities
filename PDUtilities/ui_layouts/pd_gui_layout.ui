@@ -119,7 +119,7 @@ QCheckBox {
          <rect>
           <x>120</x>
           <y>120</y>
-          <width>0</width>
+          <width>291</width>
           <height>22</height>
          </rect>
         </property>
@@ -132,7 +132,7 @@ QCheckBox {
          <rect>
           <x>30</x>
           <y>120</y>
-          <width>0</width>
+          <width>71</width>
           <height>16</height>
          </rect>
         </property>

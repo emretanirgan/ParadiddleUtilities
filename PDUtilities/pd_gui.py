@@ -49,7 +49,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         # Midi Companion Buttons
         self.connectButton.clicked.connect(self._connect_clicked)
-        # self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
+        self.midiInputComboBox.currentIndexChanged.connect(self._midi_input_index_changed)
         self.midiOutputComboBox.currentIndexChanged.connect(self._midi_output_index_changed)
         self.midiInputComboBox.addItems(self.midicompanion.midi_inputs)
         self.midiOutputComboBox.addItems(self.midicompanion.midi_outputs)
@@ -302,11 +302,66 @@ class PD_GUI(QtWidgets.QMainWindow):
         self.statusLabel.setText(conversion_result_status)
 
     def _connect_clicked(self):
-        if self.midicompanion.connected_to_host:
+        """Handle connect/disconnect button clicks"""
+        if self.midicompanion.is_connected():
+            # Currently connected - disconnect
+            self.connectButton.setText("Disconnecting...")
+            self.connectButton.setEnabled(False)
             self.midicompanion.disconnect_from_host()
         else:
-            self.midicompanion.connect_to_host(self.IPLineEdit.text())
-        self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
+            # Currently disconnected - connect
+            ip_address = self.IPLineEdit.text().strip()
+            if not ip_address:
+                self.midiConnectionStatus.setText("Error: No IP address entered")
+                return
+                
+            self.connectButton.setText("Connecting...")
+            self.connectButton.setEnabled(False)
+            self.midiConnectionStatus.setText("Connecting...")
+            
+            # Try to connect
+            success = self.midicompanion.connect_to_host(ip_address)
+            if not success:
+                # Connection failed immediately
+                self.connectButton.setText("Connect")
+                self.connectButton.setEnabled(True)
+                self.midiConnectionStatus.setText("Connection failed")
+
+    def _connection_callback(self, connected):
+        print("Connection state changed: " + str(connected))
+        """Called when connection state changes"""
+        if connected:
+            # Successfully connected
+            self.midiConnectionStatus.setText("Connected")
+            self.connectButton.setText("Disconnect")
+            self.connectButton.setEnabled(True)
+            
+            # Optionally disable IP editing while connected
+            self.IPLineEdit.setEnabled(False)
+            
+            # Enable MIDI input/output controls
+            self.midiInputComboBox.setEnabled(True)
+            self.midiOutputComboBox.setEnabled(True)
+            
+        else:
+            # Disconnected (either intentionally or due to error)
+            self.midiConnectionStatus.setText("Disconnected")
+            self.connectButton.setText("Connect")
+            self.connectButton.setEnabled(True)
+            
+            # Re-enable IP editing
+            self.IPLineEdit.setEnabled(True)
+            
+            # Keep MIDI controls enabled for local testing
+            self.midiInputComboBox.setEnabled(True)
+            self.midiOutputComboBox.setEnabled(True)
+    
+    # def _connect_clicked(self):
+    #     if self.midicompanion.connected_to_host:
+    #         self.midicompanion.disconnect_from_host()
+    #     else:
+    #         self.midicompanion.connect_to_host(self.IPLineEdit.text())
+    #     self.connectButton.setText("Disconnect" if self.midicompanion.connected_to_host else "Connect")
 
     def _midi_input_index_changed(self, index):
         self.midicompanion.midi_input_index = index
@@ -318,8 +373,8 @@ class PD_GUI(QtWidgets.QMainWindow):
     def _midi_msg_callback(self, msg):
         self.midiMessageDebugLabel.setText(msg)
 
-    def _connection_callback(self, connected):
-        self.midiConnectionStatus.setText("Connected" if connected else "Disconnected")
+    # def _connection_callback(self, connected):
+    #     self.midiConnectionStatus.setText("Connected" if connected else "Disconnected")
         # self.connectButton.setText("Disconnect" if connected else "Connect")
         # self.midiInputComboBox.setEnabled(not connected)
         # self.midiOutputComboBox.setEnabled(not connected)
