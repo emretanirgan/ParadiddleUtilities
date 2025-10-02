@@ -738,6 +738,32 @@ QCheckBox {
         <string>- Total Track Notes: </string>
        </property>
       </widget>
+      <widget class="QLabel" name="convertedEventsLabel">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>180</y>
+         <width>111</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>- Converted Events: </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="convertedEventsNum">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>180</y>
+         <width>111</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="audioTab">
       <attribute name="title">

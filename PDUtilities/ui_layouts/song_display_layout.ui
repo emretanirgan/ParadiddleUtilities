@@ -45,7 +45,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="viewModeToggleButton">
+   <widget class="QWidget" name="viewModeWidget" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -54,14 +54,45 @@
       <height>41</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Show: Mapped</string>
-    </property>
+    <widget class="QRadioButton" name="mappedViewRadio">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>2</y>
+       <width>110</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Mapped</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rawMidiViewRadio">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>21</y>
+       <width>110</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Raw MIDI</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QScrollBar" name="horizontalScrollBar">
     <property name="geometry">

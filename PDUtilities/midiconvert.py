@@ -285,6 +285,63 @@ class MidiConverter:
         print("Midi File Length " + str(mid.length))
         print("Our totaled file length " + str(longest_time))
         # print(out_dict)
+        
+    def count_converted_events(self) -> int:
+        """Count how many events would be in the converted RLRR file without doing full conversion"""
+        if not self.midi_file:
+            return 0
+            
+        if not self.note_to_drum_maps or not self.toggle_to_drum_maps:
+            return 0
+            
+        try:
+            mid = MidiFile(self.midi_file, clip=True)
+            diff_index = self.difficulty_names.index(self.difficulty)
+            note_map = copy.deepcopy(self.note_to_drum_maps[min(len(self.note_to_drum_maps)-1, diff_index)])
+            toggle_map = copy.deepcopy(self.toggle_to_drum_maps[min(len(self.toggle_to_drum_maps)-1, diff_index)])
+            
+            # Create reverse toggle map for lookup
+            toggle_map_rev = {}
+            for note in toggle_map:
+                for drum in toggle_map[note]:
+                    toggle_map_rev[drum["drum"]] = note
+                    
+            track_to_convert = mid.tracks[self.convert_track_index]
+            event_count = 0
+            active_toggles = []
+            
+            for msg in track_to_convert:
+                if msg.type == "note_on" and msg.velocity > 0:
+                    note = msg.note
+                    if note in note_map:
+                        toggle_active = False
+                        notoggle_hits = []
+                        
+                        for drum in note_map[note]:
+                            drum_name = drum["drum"]
+                            
+                            if drum_name in toggle_map_rev and toggle_map_rev[drum_name] in active_toggles:
+                                toggle_active = True
+                                event_count += 1
+                            if drum_name not in toggle_map_rev:
+                                notoggle_hits.append(drum_name)
+                                
+                        if not toggle_active:
+                            event_count += len(notoggle_hits)
+                            
+                    elif note in toggle_map:
+                        active_toggles.append(note)
+                        
+                elif msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0):
+                    note = msg.note
+                    if note in toggle_map and note in active_toggles:
+                        active_toggles.remove(note)
+                        
+            return event_count
+            
+        except Exception as e:
+            print(f"Error counting converted events: {e}")
+            return 0
 
     def create_midi_map(self, midi_yaml):
         '''Construct dicts for each difficulty that

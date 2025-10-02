@@ -163,7 +163,15 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         # Connect UI signals
         self.playStateButton.clicked.connect(self._playState_changed)
         self.curSongPosSlider.valueChanged.connect(self._curSongPos_changed)
-        self.viewModeToggleButton.clicked.connect(self._toggle_view_mode)
+        
+        # Set up radio button group for view mode
+        from PyQt5.QtWidgets import QButtonGroup
+        self.viewModeButtonGroup = QButtonGroup()
+        self.viewModeButtonGroup.addButton(self.mappedViewRadio)
+        self.viewModeButtonGroup.addButton(self.rawMidiViewRadio)
+        
+        self.mappedViewRadio.toggled.connect(self._view_mode_changed)
+        self.rawMidiViewRadio.toggled.connect(self._view_mode_changed)
         self.zoomSlider.valueChanged.connect(self._zoom_changed)
         self.horizontalScrollBar.valueChanged.connect(self._scroll_changed)
         self.drumSoundsToggle.clicked.connect(self._toggle_drum_sounds)
@@ -183,6 +191,12 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         
         # Set up initial control positions (anchored to bottom)
         self._update_control_positions()
+        
+        # Waveform visualization
+        self.combined_audio = None
+        self.waveform_data = None
+        self.waveform_height = 60  # Height reserved for waveform display
+        self.show_waveform = True
         
     def _playState_changed(self):
         if not self.midi_file:
@@ -787,7 +801,7 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
             # Play controls row
             self.playStateButton.setGeometry(146, play_button_y, 71, play_button_height)
             self.timeLabel.setGeometry(225, time_label_y, 116, time_height)
-            self.viewModeToggleButton.setGeometry(20, view_button_y, 120, play_button_height)
+            self.viewModeWidget.setGeometry(20, view_button_y, 120, play_button_height)
             
             # Position slider
             self.curSongPosSlider.setGeometry(20, slider_y, window_width - 40, slider_height)
@@ -839,6 +853,12 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         total_height = self.height() - 120  # Leave space for controls
         piano_roll_width = total_width - self.label_width
         
+        # Reserve space for waveform if enabled
+        waveform_offset = 0
+        if self.show_waveform and self.waveform_data is not None:
+            waveform_offset = self.waveform_height + 10  # Extra padding
+            total_height -= waveform_offset
+        
         # Avoid division by zero
         if display_data['duration'] <= 0:
             return
@@ -855,8 +875,8 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         
         if self.total_rows > 0:
             for instrument, row_index in self.instrument_rows.items():
-                y = row_index * self.row_height
-                if y < total_height:
+                y = row_index * self.row_height + waveform_offset
+                if y < total_height + waveform_offset:
                     # Draw grid line
                     painter.drawLine(self.label_width, y, total_width, y)
                     
@@ -872,6 +892,10 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         
         # Set clipping region for piano roll area
         painter.setClipRect(self.label_width, 0, piano_roll_width, total_height)
+        
+        # Draw waveform if available
+        if self.show_waveform and self.waveform_data is not None:
+            self._draw_waveform(painter, piano_roll_width, time_scale, display_data['duration'])
         
         # Draw notes
         for note in display_data['notes']:
@@ -894,11 +918,11 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
                 continue
                 
             row_index = self.instrument_rows[instrument_key]
-            y = row_index * self.row_height + 2  # Small padding
+            y = row_index * self.row_height + waveform_offset + 2  # Small padding + waveform offset
             h = self.row_height - 4  # Leave some space between rows
             
             # Skip notes that are outside the visible height
-            if y > total_height:
+            if y > total_height + waveform_offset:
                 continue
             
             # Use different colors for different drum types in mapped view
@@ -941,7 +965,8 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
             # Only draw if within visible area
             if self.label_width <= x <= total_width:
                 painter.setPen(QPen(current_time_color, 2))
-                painter.drawLine(x, 0, x, total_height)
+                # Draw line from top of display (including waveform) to bottom of notes
+                painter.drawLine(x, 0, x, total_height + waveform_offset)
                 
         # Update scroll range
         self._update_scroll_range()
@@ -984,6 +1009,9 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
         
         # Update window title
         self._update_window_title()
+        
+        # Load audio tracks and generate waveform
+        self.load_audio_tracks_from_converter()
         
         self.update()
         
@@ -1068,15 +1096,11 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
             self.audio_data = None
             self.sample_rate = None
 
-    def _toggle_view_mode(self):
-        """Toggle between showing raw MIDI notes and mapped drum events"""
-        self.show_mapped_view = not self.show_mapped_view
+    def _view_mode_changed(self):
+        """Handle view mode change from radio buttons"""
+        # Update the show_mapped_view state based on which radio button is checked
+        self.show_mapped_view = self.mappedViewRadio.isChecked()
         
-        if self.show_mapped_view:
-            self.viewModeToggleButton.setText("Show: Mapped")
-        else:
-            self.viewModeToggleButton.setText("Show: Raw MIDI")
-            
         self.update()  # Trigger repaint
 
     def _get_tempo_map(self, midi_file):
@@ -1689,6 +1713,144 @@ class SongDisplay_GUI(QtWidgets.QDockWidget):
             longest_track = max(all_tracks, key=len)
             self.audio_data = longest_track
             print(f"Set main audio data to longest track: {len(longest_track)} samples")
+            
+        # Generate combined audio and waveform after loading tracks
+        self._combine_audio_tracks()
+        self._generate_waveform_data()
+        
+    def _combine_audio_tracks(self):
+        """Combine all loaded audio tracks into a single waveform"""
+        if not self.song_tracks and not self.drum_tracks:
+            self.combined_audio = None
+            return
+            
+        # Get all non-None tracks
+        valid_tracks = [t for t in self.song_tracks + self.drum_tracks if t is not None]
+        
+        if not valid_tracks:
+            self.combined_audio = None
+            return
+            
+        # Find the maximum length
+        max_length = max(len(track) for track in valid_tracks)
+        
+        # Create combined audio array
+        self.combined_audio = np.zeros(max_length)
+        
+        # Mix all tracks together
+        for track in valid_tracks:
+            if len(track) > 0:
+                # Pad track to max length if necessary
+                if len(track) < max_length:
+                    padded_track = np.pad(track, (0, max_length - len(track)), 'constant')
+                else:
+                    padded_track = track
+                    
+                # Add to combined audio with normalization to prevent clipping
+                self.combined_audio += padded_track * 0.5  # Scale down to prevent clipping
+                
+        # Normalize the combined audio
+        if len(self.combined_audio) > 0:
+            max_val = np.max(np.abs(self.combined_audio))
+            if max_val > 0:
+                self.combined_audio = self.combined_audio / max_val
+                
+        print(f"✓ Combined audio tracks: {len(self.combined_audio)} samples")
+        
+    def _generate_waveform_data(self, target_width=2000):
+        """Generate downsampled waveform data for visualization"""
+        if self.combined_audio is None or len(self.combined_audio) == 0:
+            self.waveform_data = None
+            return
+            
+        # Downsample for visualization
+        audio_length = len(self.combined_audio)
+        
+        if audio_length <= target_width:
+            # If audio is shorter than target, use it directly
+            self.waveform_data = self.combined_audio
+        else:
+            # Downsample by taking maximum absolute values in chunks
+            chunk_size = audio_length // target_width
+            waveform = []
+            
+            for i in range(0, audio_length, chunk_size):
+                chunk = self.combined_audio[i:i + chunk_size]
+                if len(chunk) > 0:
+                    # Take the maximum absolute value in the chunk
+                    max_val = np.max(np.abs(chunk))
+                    # Preserve the sign of the loudest sample in the chunk
+                    max_idx = np.argmax(np.abs(chunk))
+                    waveform.append(chunk[max_idx] if max_idx < len(chunk) else max_val)
+                    
+            self.waveform_data = np.array(waveform)
+            
+        print(f"✓ Generated waveform data: {len(self.waveform_data)} points")
+        
+        # Trigger a repaint to show the new waveform
+        self.update()
+        
+    def _draw_waveform(self, painter, piano_roll_width, time_scale, duration):
+        """Draw the combined audio waveform above the note timeline"""
+        if self.waveform_data is None or len(self.waveform_data) == 0:
+            return
+            
+        # Set up waveform colors
+        waveform_color = QColor(100, 150, 255)  # Light blue
+        waveform_bg_color = QColor(20, 20, 30)  # Dark background
+        waveform_center_color = QColor(80, 80, 80)  # Center line
+        
+        # Draw waveform background
+        waveform_rect_y = 5
+        waveform_rect_height = self.waveform_height - 10
+        painter.fillRect(self.label_width, waveform_rect_y, piano_roll_width, waveform_rect_height, waveform_bg_color)
+        
+        # Draw center line
+        waveform_center_y = waveform_rect_y + waveform_rect_height // 2
+        painter.setPen(QPen(waveform_center_color, 1))
+        painter.drawLine(self.label_width, waveform_center_y, self.label_width + piano_roll_width, waveform_center_y)
+        
+        # Calculate waveform scaling
+        waveform_length = len(self.waveform_data)
+        if waveform_length == 0:
+            return
+            
+        # Calculate time mapping from waveform samples to display pixels
+        audio_duration = len(self.combined_audio) / self.sample_rate if self.combined_audio is not None else duration
+        samples_per_second = waveform_length / audio_duration if audio_duration > 0 else 1
+        
+        # Set up waveform drawing
+        painter.setPen(QPen(waveform_color, 1))
+        
+        # Draw waveform samples
+        prev_x = None
+        prev_y = None
+        
+        for i in range(0, waveform_length, max(1, waveform_length // (piano_roll_width * 2))):  # Subsample for performance
+            # Calculate time position
+            sample_time = (i / samples_per_second) - self.scroll_offset
+            x = self.label_width + int(sample_time * time_scale)
+            
+            # Skip samples outside visible area
+            if x < self.label_width or x > self.label_width + piano_roll_width:
+                prev_x = None
+                prev_y = None
+                continue
+                
+            # Calculate waveform amplitude
+            amplitude = self.waveform_data[i] if i < len(self.waveform_data) else 0
+            y = waveform_center_y - int(amplitude * (waveform_rect_height // 2 - 5))
+            
+            # Draw line from previous point
+            if prev_x is not None and prev_y is not None:
+                painter.drawLine(prev_x, prev_y, x, y)
+            
+            prev_x = x
+            prev_y = y
+            
+        # Draw waveform label
+        painter.setPen(QPen(QColor(200, 200, 200), 1))
+        painter.drawText(5, waveform_rect_y + 15, "Waveform")
 
     def update_artist_name(self, artist_name):
         """Update the artist name and window title"""

@@ -117,7 +117,11 @@ class PD_GUI(QtWidgets.QMainWindow):
             for msg in track:
                 if msg.type == 'note_on':
                     note_count+=1
-        return note_count  
+        return note_count
+        
+    def count_converted_events(self):
+        """Count how many events will be in the converted RLRR file"""
+        return self.mc.count_converted_events()  
 
     def closeEvent(self, event):
         if self.midicompanion.connected_to_host:
@@ -190,6 +194,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
     def _difficulty_text_changed(self, text):
         self.mc.difficulty = text
+        self.convertedEventsNum.setText(str(self.count_converted_events()))
 
     def _complexity_text_changed(self, text):
         self.mc.song_complexity = int(text)
@@ -216,6 +221,7 @@ class PD_GUI(QtWidgets.QMainWindow):
 
         self.midiNotesNum.setText(str(self.count_all_notes()))
         self.trackNotesNum.setText(str(self.count_track_notes()))
+        self.convertedEventsNum.setText(str(self.count_converted_events()))
         
         # Update song display if it's open
         if hasattr(self, 'sd_gui') and self.sd_gui.isVisible():
@@ -235,6 +241,7 @@ class PD_GUI(QtWidgets.QMainWindow):
         
         self.midiNotesNum.setText(str(self.count_all_notes()))
         self.trackNotesNum.setText(str(self.count_track_notes()))
+        self.convertedEventsNum.setText(str(self.count_converted_events()))
 
     def _set_output_clicked(self):
         output_folder = QFileDialog.getExistingDirectory(self, ("Select Folder"), self.lastOpenFolder)
@@ -244,6 +251,7 @@ class PD_GUI(QtWidgets.QMainWindow):
     def _midi_track_index_changed(self, index):
         self.mc.convert_track_index = index
         self.trackNotesNum.setText(str(self.count_track_notes()))
+        self.convertedEventsNum.setText(str(self.count_converted_events()))
 
     def _select_drum_set_clicked(self):
         self.mc.drum_set_file = QFileDialog.getOpenFileName(self, ("Select Drum Set File"), self.lastOpenFolder, ("PD Drum Set Files (*.rlrr)"))[0]
