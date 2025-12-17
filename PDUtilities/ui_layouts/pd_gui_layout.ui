@@ -2253,7 +2253,7 @@ QCheckBox {
    </widget>
    <widget class="QMenu" name="menuCompanion">
     <property name="title">
-     <string>Companion</string>
+     <string>Window</string>
     </property>
     <addaction name="openSongDisplay"/>
    </widget>
