@@ -1,15 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+from PyInstaller.utils.hooks import copy_metadata
 
 block_cipher = None
 
+# Copy metadata for ParadiddleUtilities package
+datas = [('PDUtilities/', '.')]
+datas += copy_metadata('ParadiddleUtilities')
 
 a = Analysis(
     ['PDUtilities/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[('PDUtilities/', '.')],
-    hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi', 'PyQt5.uic', 'soundfile', 'requests', 'sounddevice', 'numpy'],
+    datas=datas,
+    hiddenimports=['python-rtmidi', 'rtmidi-python', 'mido.backends.rtmidi', 'PyQt5.uic', 'soundfile', 'requests', 'sounddevice', 'numpy', 'yaml'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
