@@ -14,5 +14,5 @@ If you'd like to help develop this utility application further, all you have to 
 - Downloading required packages
 - Running application
 
-**PyInstaller Command to Create Executable**
-`pyinstaller PDUtil.spec`
+**Command to Create Executable Using Pyinstaller**
+`python PDUtil.py --build`

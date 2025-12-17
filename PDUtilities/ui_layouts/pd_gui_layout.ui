@@ -85,7 +85,6 @@ QCheckBox {
      </property>
      <property name="font">
       <font>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -96,7 +95,7 @@ QCheckBox {
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="midiConnectTab">
       <attribute name="title">
@@ -274,7 +273,7 @@ QCheckBox {
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>16777215</height>
+         <height>32</height>
         </size>
        </property>
        <property name="orientation">
@@ -379,7 +378,7 @@ QCheckBox {
       <widget class="QLabel" name="difficultyLabel">
        <property name="geometry">
         <rect>
-         <x>310</x>
+         <x>340</x>
          <y>100</y>
          <width>81</width>
          <height>16</height>
@@ -397,9 +396,9 @@ QCheckBox {
       <widget class="QComboBox" name="difficultyComboBox">
        <property name="geometry">
         <rect>
-         <x>370</x>
+         <x>400</x>
          <y>100</y>
-         <width>181</width>
+         <width>191</width>
          <height>22</height>
         </rect>
        </property>
@@ -502,6 +501,9 @@ QCheckBox {
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
@@ -612,7 +614,7 @@ QCheckBox {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>190</y>
+         <y>195</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -689,20 +691,20 @@ QCheckBox {
       <widget class="QLabel" name="totalMIDINotesLabel">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>130</y>
-         <width>101</width>
+         <width>131</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
-        <string>- Total MIDI Notes: </string>
+        <string>- Midi File Total Notes: </string>
        </property>
       </widget>
       <widget class="QLabel" name="midiNotesNum">
        <property name="geometry">
         <rect>
-         <x>140</x>
+         <x>160</x>
          <y>130</y>
          <width>111</width>
          <height>19</height>
@@ -715,8 +717,8 @@ QCheckBox {
       <widget class="QLabel" name="trackNotesNum">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>160</y>
+         <x>160</x>
+         <y>150</y>
          <width>111</width>
          <height>19</height>
         </rect>
@@ -728,34 +730,34 @@ QCheckBox {
       <widget class="QLabel" name="totalInTrackLabel">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>160</y>
+         <x>10</x>
+         <y>150</y>
          <width>111</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
-        <string>- Total Track Notes: </string>
+        <string>- Midi Track Notes: </string>
        </property>
       </widget>
       <widget class="QLabel" name="convertedEventsLabel">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>180</y>
-         <width>111</width>
+         <x>10</x>
+         <y>170</y>
+         <width>141</width>
          <height>19</height>
         </rect>
        </property>
        <property name="text">
-        <string>- Converted Events: </string>
+        <string>- Notes to be Converted: </string>
        </property>
       </widget>
       <widget class="QLabel" name="convertedEventsNum">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>180</y>
+         <x>160</x>
+         <y>170</y>
          <width>111</width>
          <height>19</height>
         </rect>
@@ -787,7 +789,7 @@ QCheckBox {
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>16777215</height>
+         <height>32</height>
         </size>
        </property>
        <property name="orientation">
@@ -849,7 +851,7 @@ QCheckBox {
         <rect>
          <x>10</x>
          <y>90</y>
-         <width>561</width>
+         <width>578</width>
          <height>205</height>
         </rect>
        </property>
@@ -885,7 +887,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -998,7 +1000,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1108,7 +1110,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1218,7 +1220,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1334,7 +1336,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1463,7 +1465,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1573,7 +1575,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1683,7 +1685,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -1793,7 +1795,7 @@ QCheckBox {
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>32</height>
              </size>
             </property>
             <property name="orientation">
@@ -2204,7 +2206,6 @@ QCheckBox {
      <property name="font">
       <font>
        <pointsize>-1</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -2241,7 +2242,7 @@ QCheckBox {
      <x>0</x>
      <y>0</y>
      <width>602</width>
-     <height>24</height>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">
