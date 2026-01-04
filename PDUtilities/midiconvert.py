@@ -25,7 +25,8 @@ import copy
 class MidiConverter:
     def __init__(self):
         self.out_dict = {
-            'version' : 0.5,
+            'version' : 0.7,
+            'authoringTool': 'ParadiddleUtilities MidiConverter',
             'recordingMetadata' : {},
             'audioFileData' : {},
             'instruments' : [],
@@ -123,7 +124,6 @@ class MidiConverter:
         return (track_to_convert, default_index)
 
     def analyze_midi_file(self):
-        self.out_dict["version"] = 0.6
         self.out_dict["instruments"] = []
         self.out_dict["events"] = []
         self.out_dict["bpmEvents"] = []
