@@ -1,151 +1,224 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://paradiddleapp.com/schemas/rlrrschema_v0.7.json",
-    "$comment": "TODO - Update to latest, Add optional values here such as MIDI notes etc.",
-    "title": "Paradiddle RLRR Schema",
-    "description": "Json schema for .rlrr format used in Paradiddle instrument kit and recording save files.",
-    "type": "object",
-    "required": [
-        "version",
-        "instruments"
-    ],
-    "properties": {
-        "version": {
-            "type": "number"
-        },
-        "authoringTool": {
-          "type": "string"
-        },
-        "instruments": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Instrument"
-            }
-        },
-        "events": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Event"
-            }
-        },
-        "audioFileData": {
-            "$ref": "#/definitions/AudioFileData"
-        },
-        "recordingMetadata": {
-            "$ref": "#/definitions/RecordingMetadata"
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://paradiddleapp.com/schemas/rlrrschema_v0.7.json",
+  "title": "Paradiddle RLRR Schema",
+  "description": "Json schema for .rlrr format used in Paradiddle songs, instrument kits and recording save files.",
+  "type": "object",
+  "required": [
+    "version",
+    "instruments"
+  ],
+  "properties": {
+    "version": {
+      "type": "number",
+      "description": "Schema version number"
     },
-    "definitions": {
-        "AudioFileData": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "path": {
-                    "type": "string"
-                },
-                "calibrationOffset": {
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "calibrationOffset",
-                "path"
-            ],
-            "title": "AudioFileData"
-        },
-        "Event": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "vel": {
-                    "type": "integer"
-                },
-                "loc": {
-                    "type": "integer"
-                },
-                "time": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "loc",
-                "name",
-                "time",
-                "vel"
-            ],
-            "title": "Event"
-        },
-        "Instrument": {
-            "type": "object",
-            "properties": {
-                "DrumName": {
-                    "type": "string"
-                },
-                "Class": {
-                    "type": "string"
-                },
-                "Loc": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "Rot": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "Scale": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                }
-            },
-            "required": [
-                "Class",
-                "DrumName",
-                "Loc",
-                "Rot",
-                "Scale"
-            ],
-            "title": "Instrument"
-        },
-        "RecordingMetadata": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "coverImagePath": {
-                    "type": "string"
-                },
-                "artist": {
-                    "type": "string"
-                },
-                "author": {
-                    "type": "string"
-                },
-                "creator": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "artist",
-                "author",
-                "coverImagePath",
-                "creator",
-                "description",
-                "title"
-            ],
-            "title": "RecordingMetadata"
-        }
+    "authoringTool": {
+      "type": "string",
+      "description": "Tool used to create this file"
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Instrument"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/DrumEvent"
+          },
+          {
+            "$ref": "#/definitions/BPMEvent"
+          }
+        ]
+      }
+    },
+    "audioFileData": {
+      "$ref": "#/definitions/AudioFileData"
+    },
+    "recordingMetadata": {
+      "$ref": "#/definitions/RecordingMetadata"
     }
+  },
+  "definitions": {
+    "AudioFileData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "songTracks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of song track file paths (drumless backing tracks)"
+        },
+        "drumTracks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of drum track file paths"
+        },
+        "songPreview": {
+          "type": "string",
+          "description": "Preview audio file path"
+        },
+        "calibrationOffset": {
+          "type": "integer",
+          "description": "Audio calibration offset in milliseconds"
+        }
+      },
+      "required": [
+        "calibrationOffset"
+      ],
+      "title": "AudioFileData"
+    },
+    "DrumEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the instrument that was hit"
+        },
+        "vel": {
+          "type": "integer",
+          "description": "Velocity of the hit (0-127)"
+        },
+        "loc": {
+          "type": "integer",
+          "description": "Location on the instrument that was hit"
+        },
+        "time": {
+          "type": "string",
+          "description": "Timestamp of the event in seconds"
+        }
+      },
+      "required": [
+        "loc",
+        "name",
+        "time",
+        "vel"
+      ],
+      "title": "DrumEvent"
+    },
+    "BPMEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bpm": {
+          "type": "number",
+          "description": "Beats per minute at this timestamp"
+        },
+        "time": {
+          "type": "number",
+          "description": "Timestamp of the tempo change in seconds"
+        }
+      },
+      "required": [
+        "bpm",
+        "time"
+      ],
+      "title": "BPMEvent"
+    },
+    "Instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique name/identifier for this instrument instance"
+        },
+        "class": {
+          "type": "string",
+          "description": "Blueprint class type of the instrument"
+        },
+        "location": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "3D position [x, y, z] in world space"
+        },
+        "rotation": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "3D rotation [pitch, yaw, roll] in degrees"
+        },
+        "scale": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "3D scale [x, y, z] multipliers"
+        }
+      },
+      "required": [
+        "class",
+        "name",
+        "location",
+        "rotation",
+        "scale"
+      ],
+      "title": "Instrument"
+    },
+    "RecordingMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the recording/song"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description or notes about the recording"
+        },
+        "coverImagePath": {
+          "type": "string",
+          "description": "Path to cover art image file"
+        },
+        "artist": {
+          "type": "string",
+          "description": "Original artist name"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the RLRR file/chart"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Creator/charter username or ID"
+        },
+        "length": {
+          "type": "number",
+          "description": "Total length of the recording in seconds"
+        },
+        "complexity": {
+          "type": "integer",
+          "description": "Difficulty rating (typically 0-5 scale)",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "artist",
+        "coverImagePath",
+        "creator",
+        "description",
+        "title"
+      ],
+      "title": "RecordingMetadata"
+    }
+  }
 }
