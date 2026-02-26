@@ -1,0 +1,93 @@
+#TODO need default midi mappings for rhythm game midi format - get difficulties, map from those midi notes
+#https://rockband.scorehero.com/forum/viewtopic.php?t=1711
+#https://www.scorehero.com/forum/viewtopic.php?t=1179
+# red, (Snare Drum)
+# yellow, (Hi-Hat)
+# blue, (Tom-Tom)
+# green (Crash Cymbols).
+# The kick pedal is colored orange (Bass Drum).
+# 60: guitar note GREEN, easy (C) 
+# 61: guitar note RED, easy (C#) 
+# 62: guitar note YELLOW, easy (D) 
+# 63: guitar note BLUE, easy (D#) 
+# 64: guitar note ORANGE, easy (E) 
+# 67: star power group, easy (G) 
+# 69: player 1 section, easy (A) 
+# 70: player 2 section, easy (A#) 
+# 72: guitar note GREEN, medium (C) 
+# 73: guitar note RED, medium (C#) 
+# 74: guitar note YELLOW, medium (D) 
+# 75: guitar note BLUE, medium (D#) 
+# 76: guitar note ORANGE, medium (E) and so on (60 + difficulty*12)
+
+easy:
+    HiHat          : [62]
+    Snare          : [61]
+    Kick           : [60]
+    Crash15        : []
+    Crash17        : [64]
+    FloorTom       : 
+        notes: [64]
+        toggle_note: 112
+    Ride17         : [63]
+    Ride20         : []
+    Tom1           : 
+        notes: [62]
+        toggle_note: 110
+    Tom2           : 
+        notes: [63]
+        toggle_note: 111
+
+medium:
+    HiHat          : [74]
+    Snare          : [73]
+    Kick           : [72]
+    Crash15        : []
+    Crash17        : [76]
+    FloorTom       : 
+        notes: [76]
+        toggle_note: 112
+    Ride17         : [75]
+    Ride20         : []
+    Tom1           : 
+        notes: [74]
+        toggle_note: 110
+    Tom2           : 
+        notes: [75]
+        toggle_note: 111
+
+hard:
+    HiHat          : [86]
+    Snare          : [85]
+    Kick           : [84]
+    Crash15        : []
+    Crash17        : [88]
+    FloorTom       : 
+        notes: [88]
+        toggle_note: 112
+    Ride17         : [87]
+    Ride20         : []
+    Tom1           : 
+        notes: [86]
+        toggle_note: 110
+    Tom2           : 
+        notes: [87]
+        toggle_note: 111
+
+expert:
+    HiHat          : [98]
+    Snare          : [97]
+    Kick           : [96]
+    Crash15        : []
+    Crash17        : [100]
+    FloorTom       : 
+        notes: [100]
+        toggle_note: 112
+    Ride17         : [99]
+    Ride20         : []
+    Tom1           : 
+        notes: [98]
+        toggle_note: 110
+    Tom2           : 
+        notes: [99]
+        toggle_note: 111

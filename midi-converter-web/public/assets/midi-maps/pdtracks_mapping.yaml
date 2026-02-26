@@ -1,0 +1,48 @@
+# The mapping used for the built-in Paradiddle audio tracks by ElNeax.
+easy:
+    HiHat          : [43, 45, 48]
+    Snare          : [26, 30]
+    Kick           : [24]
+    Crash15        : []
+    Crash17        : [62, 67, 75]
+    FloorTom       : [35, 37, 39]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : []
+    Tom2           : []
+
+medium:
+    HiHat          : [43, 45, 48]
+    Snare          : [26, 30]
+    Kick           : [24]
+    Crash15        : [62, 75]
+    Crash17        : [67]
+    FloorTom       : [35, 37, 39]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : []
+    Tom2           : []
+
+hard:
+    HiHat          : [43, 45, 48]
+    Snare          : [26, 30]
+    Kick           : [24]
+    Crash15        : [62, 75]
+    Crash17        : [67]
+    FloorTom       : [37, 39]
+    Ride17         : []
+    Ride20         : []
+    Tom1           : [35]
+    Tom2           : []
+
+expert:
+    HiHat          : [43, 45, 48]
+    Snare          : [26, 30]
+    Kick           : [24]
+    Crash15        : [62]
+    Crash17        : [67]
+    FloorTom       : [39]
+    Ride17         : [75]
+    Ride20         : []
+    Tom1           : [35]
+    Tom2           : [37]

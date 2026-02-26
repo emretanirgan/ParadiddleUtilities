@@ -1,0 +1,109 @@
+
+# Individual numbers and number ranges are both acceptable in the list.
+# For example, "HiHat" : [5-10, 13] will map all MIDI notes from 5 to 10 (inclusive), and note 13 to the HiHat.
+
+# If you leave the mapping for a given difficulty empty,
+# it'll use the mapping belonging to the highest difficulty before it.
+# For example:
+# 
+# hard:
+#     HiHat : [12, 14]
+# expert:
+# 
+# In this scenario, the expert mapping will just use the hard mapping.
+
+# Toggle Notes
+# Some rhythm game midi formats use special toggle notes to change the
+# meaning of a given midi note. For example, a toggle note can change a
+# midi note's meaning from a cymbal to a non-cymbal note. 
+# Toggle notes are supported in this midi mapping yaml format.
+# To specify one, you can define your mapping like this:
+#
+#     HiHat          : [98]
+#     Tom1           : 
+#         notes: [98]
+#         toggle_note: 110
+#
+# In this scenario, midi note 98 will trigger Tom1 only if midi note 110
+# is also actively playing. If midi note 110 isn't actively playing, midi
+# note 98 will trigger the HiHat by default instead.
+
+# Important: Don't change the names of the difficulties or the instruments!
+# Only modify the note numbers the list when creating your custom mapping.
+
+# TODO - put the default midi notes for all drums somewhere?
+# You can find a list of all valid instrument types in this empty mapping:
+# empty_mapping:
+#     HiHat          : []
+#     Snare          : []
+#     Kick           : []
+#     Crash13        : []
+#     Crash15        : []
+#     Crash17        : []
+#     China15        : []
+#     FloorTom       : []
+#     Ride17         : []
+#     Ride20         : []
+#     Tom1           : []
+#     Tom2           : []
+#     Timpani1       : []
+#     Timpani2       : []
+#     Timpani3       : []
+#     Triangle       : []
+#     BongoH         : []
+#     BongoL         : []
+#     Xylophone      : []
+#     Marimba        : []
+#     Glockenspiel   : []
+#     Gong           : []
+#     Tambourine1    : []
+#     Tambourine2    : []
+#     Cowbell        : []
+
+easy:
+    HiHat          : [42,46]
+    Snare          : [38]
+    Kick           : [35,36]
+    Crash15        : [49]
+    Crash17        : [57]
+    FloorTom       : [41,43]
+    Ride17         : [51,53]
+    Ride20         : [59]
+    Tom1           : [48,50]
+    Tom2           : [47]
+
+medium:
+    HiHat          : [42,46]
+    Snare          : [38]
+    Kick           : [35,36]
+    Crash15        : [49]
+    Crash17        : [57]
+    FloorTom       : [41,43]
+    Ride17         : [51,53]
+    Ride20         : [59]
+    Tom1           : [48,50]
+    Tom2           : [47]
+
+hard:
+    HiHat          : [42,46]
+    Snare          : [38]
+    Kick           : [35,36]
+    Crash15        : [49]
+    Crash17        : [57]
+    FloorTom       : [41,43]
+    Ride17         : [51,53]
+    Ride20         : [59]
+    Tom1           : [48,50]
+    Tom2           : [47]
+
+expert:
+    HiHat          : [42,46]
+    Snare          : [38]
+    Kick           : [35,36]
+    Crash15        : [49]
+    Crash17        : [57]
+    FloorTom       : [41,43]
+    Ride17         : [51,53]
+    Ride20         : [59]
+    Tom1           : [48,50]
+    Tom2           : [47]
