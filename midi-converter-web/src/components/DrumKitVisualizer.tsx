@@ -23,7 +23,7 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
     // Create Zdog illustration
     const illo = new Zdog.Illustration({
       element: canvas,
-      dragRotate: true,
+      // dragRotate: true,
       resize: true,
       rotate: {
         x: -0.5, // Tilt down to see from above
@@ -36,7 +36,9 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
     // Get drum color from name
     const getDrumColor = (drumName: string): string => {
       // Extract drum type from name (e.g., "BP_Kick_C" -> "Kick")
-      const cleanName = drumName.replace('BP_', '').replace('_C', '');
+      const cleanName = drumName.split('_')[1] || drumName; // Fallback to full name if unexpected format
+      console.log('Determining color for drum:', drumName, '->', cleanName);
+
       return DRUM_COLORS[cleanName] || '#64c8ff';
     };
 
@@ -67,32 +69,33 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
           z: -pos[0], // Unreal X (forward) → Zdog -Z (depth, inverted for viewing)
         },
         rotate: {
-          x: rot[0] * (Math.PI / 180) + Math.PI / 2, // Pitch + 90° to stand cylinders up
-          y: rot[1] * (Math.PI / 180), // Yaw
-          z: rot[2] * (Math.PI / 180), // Roll
+          x: -rot[1] * (Math.PI / 180) * 0 + Math.PI / 2 , // Pitch (rot[1]) → Zdog X (+ base offset to align cylinder axis)
+          y: rot[0] * (Math.PI / 180) * 0,               // Yaw (rot[2]) → Zdog -Y
+          z: -rot[2] * (Math.PI / 180)*0,               // Roll (rot[0]) → Zdog -Z
         },
       });
 
       const isCymbal = drumName.includes('HiHat') || drumName.includes('Crash') || drumName.includes('Ride');
 
       if (isCymbal) {
-        // Cymbals: Thin flat cylinders
-        new Zdog.Cylinder({
+        // Cymbals: Cones (Zdog typings are missing Cone, cast to any)
+        new (Zdog as any).Cone({
           addTo: drumGroup,
           diameter: diameter,
-          length: length,
+          length: length/3,
           stroke: false,
           color: color,
           backface: color,
+          frontface: color,
         });
       } else {
-        // Drums: Standard cylinders
-        new Zdog.Cylinder({
+        // Drums: Standard cylinders — colored drumhead on frontface, neutral shell
+        new (Zdog as any).Cylinder({
           addTo: drumGroup,
           diameter: diameter,
-          length: length,
+          length: length/1.5,
           stroke: false,
-          color: color,
+          color: '#444',
           backface: color,
         });
       }
@@ -115,10 +118,10 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
     let lastY = 0;
 
     const handleMouseDown = (e: MouseEvent) => {
-      isRotating = true;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      canvas.style.cursor = 'grabbing';
+      // isRotating = true;
+      // lastX = e.clientX;
+      // lastY = e.clientY;
+      // canvas.style.cursor = 'grabbing';
     };
 
     const handleMouseMove = (e: MouseEvent) => {

@@ -92,271 +92,281 @@ export function ConverterPage() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Left Column - File Inputs */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>1. Upload Files</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FileUploader
-                  label="MIDI File"
-                  accept={{ 'audio/midi': ['.mid', '.midi'] }}
-                  onFilesSelected={(files) => files[0] && midiStore.loadMidiFile(files[0])}
-                  currentFiles={midiStore.file ? [midiStore.file] : []}
-                  description="Required: Your MIDI drum track"
-                />
+        <div className="space-y-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Panel 1 - Metadata */}
+          <Card>
+            <CardHeader>
+              <CardTitle>1. Metadata</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MetadataForm />
+              <FileUploader
+                label="Cover Image"
+                accept={{ 'image/*': ['.png', '.jpg', '.jpeg'] }}
+                onFilesSelected={(files) => files[0] && audioStore.setCoverImage(files[0])}
+                currentFiles={audioStore.coverImage ? [audioStore.coverImage] : []}
+                onRemoveFile={() => audioStore.setCoverImage(null)}
+                description="Optional: Album/song artwork"
+              />
+            </CardContent>
+          </Card>
 
-                {midiStore.parsed && (
-                  <>
-                    <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mb-4 text-blue-300 text-sm">
-                      MIDI loaded: {midiStore.parsed.tracks.length} tracks, {midiStore.parsed.duration.toFixed(1)}s
-                    </div>
-                    {midiStore.parsed.tracks.length > 1 && (
-                      <div className="mb-4">
-                        <Label className="mb-2">Select Track</Label>
-                        <Select
-                          value={String(midiStore.selectedTrackIndex)}
-                          onValueChange={(value) => midiStore.selectTrack(Number(value))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {midiStore.parsed.tracks.map((track, idx) => (
-                              <SelectItem key={idx} value={String(idx)}>
-                                {track.name || `Track ${idx + 1}`} ({track.notes.length} notes)
-                                {idx === midiStore.parsed!.defaultTrackIndex ? ' * Auto-detected' : ''}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                    {noteStats && (
-                      <div className={cn(
-                        'p-3 rounded-md mb-4 text-sm',
-                        noteStats.unmappedCount > 0
-                          ? 'bg-amber-950/50 border border-amber-800/50'
-                          : 'bg-emerald-950/50 border border-emerald-800/50'
-                      )}>
-                        <div className={cn(
-                          'font-bold mb-1',
-                          noteStats.unmappedCount > 0 ? 'text-amber-300' : 'text-emerald-300'
-                        )}>
-                          Conversion Preview
-                        </div>
-                        <div className="text-slate-200">
-                          {noteStats.mappedNotes} of {noteStats.totalMidiNotes} MIDI notes will be converted
-                        </div>
-                        {noteStats.unmappedCount > 0 && (
-                          <div className="text-amber-300 mt-2 text-xs">
-                            {noteStats.unmappedCount} unmapped notes (MIDI: {noteStats.unmappedNoteNumbers.slice(0, 5).join(', ')}
-                            {noteStats.unmappedNoteNumbers.length > 5 ? `, +${noteStats.unmappedNoteNumbers.length - 5} more` : ''})
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <FileUploader
-                  label="Song Audio Tracks"
-                  accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
-                  maxFiles={5}
-                  onFilesSelected={(files) => files.forEach((f) => audioStore.addSongTrack(f))}
-                  currentFiles={audioStore.songTracks}
-                  onRemoveFile={(index) => audioStore.removeSongTrack(index)}
-                  description="Optional: Up to 5 backing tracks"
-                />
-
-                <FileUploader
-                  label="Drum Audio Tracks"
-                  accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
-                  maxFiles={4}
-                  onFilesSelected={(files) => files.forEach((f) => audioStore.addDrumTrack(f))}
-                  currentFiles={audioStore.drumTracks}
-                  onRemoveFile={(index) => audioStore.removeDrumTrack(index)}
-                  description="Optional: Up to 4 drum tracks"
-                />
-
-                <FileUploader
-                  label="Cover Image"
-                  accept={{ 'image/*': ['.png', '.jpg', '.jpeg'] }}
-                  onFilesSelected={(files) => files[0] && audioStore.setCoverImage(files[0])}
-                  currentFiles={audioStore.coverImage ? [audioStore.coverImage] : []}
-                  onRemoveFile={() => audioStore.setCoverImage(null)}
-                  description="Optional: Album/song artwork"
-                />
-
-                <FileUploader
-                  label="Song Preview"
-                  accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
-                  onFilesSelected={(files) => files[0] && audioStore.setSongPreview(files[0])}
-                  currentFiles={audioStore.songPreview ? [audioStore.songPreview] : []}
-                  onRemoveFile={() => audioStore.setSongPreview(null)}
-                  description="Optional: Short audio clip for song selection menu"
-                />
-              </CardContent>
-            </Card>
+          {/* Panel 2 - Audio Files */}
+          <Card>
+            <CardHeader>
+              <CardTitle>2. Audio Files</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploader
+                label="Song Audio Tracks"
+                accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
+                maxFiles={5}
+                onFilesSelected={(files) => files.forEach((f) => audioStore.addSongTrack(f))}
+                currentFiles={audioStore.songTracks}
+                onRemoveFile={(index) => audioStore.removeSongTrack(index)}
+                description="Optional: Up to 5 backing tracks"
+              />
+              <FileUploader
+                label="Drum Audio Tracks"
+                accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
+                maxFiles={4}
+                onFilesSelected={(files) => files.forEach((f) => audioStore.addDrumTrack(f))}
+                currentFiles={audioStore.drumTracks}
+                onRemoveFile={(index) => audioStore.removeDrumTrack(index)}
+                description="Optional: Up to 4 drum tracks"
+              />
+              <FileUploader
+                label="Song Preview"
+                accept={{ 'audio/*': ['.mp3', '.wav', '.ogg'] }}
+                onFilesSelected={(files) => files[0] && audioStore.setSongPreview(files[0])}
+                currentFiles={audioStore.songPreview ? [audioStore.songPreview] : []}
+                onRemoveFile={() => audioStore.setSongPreview(null)}
+                description="Optional: Short audio clip for song selection menu"
+              />
+            </CardContent>
+          </Card>
           </div>
 
-          {/* Right Column - Settings & Convert */}
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>2. Configure</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MetadataForm />
-                <DifficultySelector />
-
-                {/* MIDI Mapping */}
-                <div className="mt-6 mb-4">
-                  <h3 className="text-base font-bold text-foreground mb-2">MIDI Mapping</h3>
-                  <div className="flex gap-2 mb-3">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => mappingStore.useDefaultMapping()}
-                    >
-                      Use Default
-                    </Button>
-                    <Button
-                      variant={showMappingEditor ? 'default' : 'secondary'}
-                      size="sm"
-                      className="flex-1"
-                      disabled={!mappingStore.mapping}
-                      onClick={() => setShowMappingEditor(!showMappingEditor)}
-                    >
-                      {showMappingEditor ? 'Hide Editor' : 'Edit Mapping'}
-                    </Button>
-                  </div>
-                  <FileUploader
-                    label=""
-                    accept={{ 'text/yaml': ['.yaml', '.yml'] }}
-                    onFilesSelected={(files) => files[0] && mappingStore.loadMapping(files[0])}
-                    currentFiles={mappingStore.mappingFile ? [mappingStore.mappingFile] : []}
-                    onRemoveFile={() => mappingStore.useDefaultMapping()}
-                    description="Optional: Upload custom MIDI mapping YAML"
-                  />
-                  {mappingStore.mapping && !showMappingEditor && (
-                    <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mt-2 text-blue-300 text-sm">
-                      Mapping loaded: {mappingStore.mappingFile?.name || 'Default'}
-                    </div>
-                  )}
-                  {showMappingEditor && mappingStore.mapping && (
-                    <MappingEditor onClose={() => setShowMappingEditor(false)} />
-                  )}
-                </div>
-
-                {/* Drum Set */}
-                <div className="mt-6 mb-4">
-                  <h3 className="text-base font-bold text-foreground mb-2">Drum Set</h3>
-                  <div className="flex gap-2 mb-3">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => mappingStore.useDefaultDrumSet()}
-                    >
-                      Use Default
-                    </Button>
-                    <Button
-                      variant={showDrumKitVisualizer ? 'default' : 'secondary'}
-                      size="sm"
-                      className="flex-1"
-                      disabled={!mappingStore.drumSet}
-                      onClick={() => setShowDrumKitVisualizer(!showDrumKitVisualizer)}
-                    >
-                      {showDrumKitVisualizer ? 'Hide 3D' : 'View 3D'}
-                    </Button>
-                  </div>
-                  <FileUploader
-                    label=""
-                    accept={{ 'application/json': ['.json', '.rlrr'] }}
-                    onFilesSelected={(files) => files[0] && mappingStore.loadDrumSet(files[0])}
-                    currentFiles={mappingStore.drumSetFile ? [mappingStore.drumSetFile] : []}
-                    onRemoveFile={() => mappingStore.useDefaultDrumSet()}
-                    description="Optional: Upload custom drum set JSON"
-                  />
-                  {mappingStore.drumSet && !showDrumKitVisualizer && (
-                    <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mt-2 text-blue-300 text-sm">
-                      Drum set loaded: {mappingStore.drumSetFile?.name || 'Default'} ({mappingStore.drumSet.instruments.length} instruments)
-                    </div>
-                  )}
-                  {showDrumKitVisualizer && mappingStore.drumSet && (
-                    <DrumKitVisualizer onClose={() => setShowDrumKitVisualizer(false)} />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>3. Convert</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {conversionStore.error && (
-                  <div className="bg-red-950/50 border border-red-800/50 p-3 rounded-md mb-4 text-red-300 text-sm">
-                    <strong>Error:</strong> {conversionStore.error}
-                  </div>
-                )}
-
-                {conversionStore.result && (
-                  <div className="bg-emerald-950/50 border border-emerald-800/50 p-3 rounded-md mb-4 text-emerald-300 text-sm">
-                    <strong>Conversion successful!</strong>
-                    <div className="grid grid-cols-2 gap-1 mt-2 text-muted-foreground">
-                      <div>Events: {conversionStore.result.events.length}</div>
-                      <div>Instruments: {conversionStore.result.instruments.length}</div>
-                      <div>BPM Events: {conversionStore.result.bpmEvents.length}</div>
-                      <div>Duration: {conversionStore.result.recordingMetadata.length.toFixed(1)}s</div>
-                    </div>
-                  </div>
-                )}
-
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Panel 3 - Drum Set */}
+          <Card>
+            <CardHeader>
+              <CardTitle>3. Drum Set</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-3">
                 <Button
-                  className="w-full mb-3"
-                  size="lg"
-                  onClick={() => conversionStore.convert()}
-                  disabled={!canConvert || conversionStore.isConverting}
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => mappingStore.useDefaultDrumSet()}
                 >
-                  {conversionStore.isConverting ? 'Converting...' : 'Convert to RLRR'}
+                  Use Default
                 </Button>
+                <Button
+                  variant={showDrumKitVisualizer ? 'default' : 'secondary'}
+                  size="sm"
+                  className="flex-1"
+                  disabled={!mappingStore.drumSet}
+                  onClick={() => setShowDrumKitVisualizer(!showDrumKitVisualizer)}
+                >
+                  {showDrumKitVisualizer ? 'Hide 3D' : 'View 3D'}
+                </Button>
+              </div>
+              <FileUploader
+                label=""
+                accept={{ 'application/json': ['.json', '.rlrr'] }}
+                onFilesSelected={(files) => files[0] && mappingStore.loadDrumSet(files[0])}
+                currentFiles={mappingStore.drumSetFile ? [mappingStore.drumSetFile] : []}
+                onRemoveFile={() => mappingStore.useDefaultDrumSet()}
+                description="Optional: Upload custom drum set JSON"
+              />
+              {mappingStore.drumSet && !showDrumKitVisualizer && (
+                <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mt-2 text-blue-300 text-sm">
+                  Drum set loaded: {mappingStore.drumSetFile?.name || 'Default'} ({mappingStore.drumSet.instruments.length} instruments)
+                </div>
+              )}
+              {showDrumKitVisualizer && mappingStore.drumSet && (
+                <DrumKitVisualizer onClose={() => setShowDrumKitVisualizer(false)} />
+              )}
+            </CardContent>
+          </Card>
 
-                {!canConvert && (
-                  <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mb-3 text-blue-300 text-sm">
-                    {!midiStore.parsed && 'Upload a MIDI file'}
-                    {midiStore.parsed && !conversionStore.metadata.title && 'Enter a song title'}
+          {/* Panel 4 - MIDI */}
+          <Card>
+            <CardHeader>
+              <CardTitle>4. MIDI</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUploader
+                label="MIDI File"
+                accept={{ 'audio/midi': ['.mid', '.midi'] }}
+                onFilesSelected={(files) => files[0] && midiStore.loadMidiFile(files[0])}
+                currentFiles={midiStore.file ? [midiStore.file] : []}
+                description="Required: Your MIDI drum track"
+              />
+
+              {midiStore.parsed && (
+                <>
+                  <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mb-4 text-blue-300 text-sm">
+                    MIDI loaded: {midiStore.parsed.tracks.length} tracks, {midiStore.parsed.duration.toFixed(1)}s
+                  </div>
+                  {midiStore.parsed.tracks.length > 1 && (
+                    <div className="mb-4">
+                      <Label className="mb-2">Select Track</Label>
+                      <Select
+                        value={String(midiStore.selectedTrackIndex)}
+                        onValueChange={(value) => midiStore.selectTrack(Number(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {midiStore.parsed.tracks.map((track, idx) => (
+                            <SelectItem key={idx} value={String(idx)}>
+                              {track.name || `Track ${idx + 1}`} ({track.notes.length} notes)
+                              {idx === midiStore.parsed!.defaultTrackIndex ? ' * Auto-detected' : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  {noteStats && (
+                    <div className={cn(
+                      'p-3 rounded-md mb-4 text-sm',
+                      noteStats.unmappedCount > 0
+                        ? 'bg-amber-950/50 border border-amber-800/50'
+                        : 'bg-emerald-950/50 border border-emerald-800/50'
+                    )}>
+                      <div className={cn(
+                        'font-bold mb-1',
+                        noteStats.unmappedCount > 0 ? 'text-amber-300' : 'text-emerald-300'
+                      )}>
+                        Conversion Preview
+                      </div>
+                      <div className="text-slate-200">
+                        {noteStats.mappedNotes} of {noteStats.totalMidiNotes} MIDI notes will be converted
+                      </div>
+                      {noteStats.unmappedCount > 0 && (
+                        <div className="text-amber-300 mt-2 text-xs">
+                          {noteStats.unmappedCount} unmapped notes (MIDI: {noteStats.unmappedNoteNumbers.slice(0, 5).join(', ')}
+                          {noteStats.unmappedNoteNumbers.length > 5 ? `, +${noteStats.unmappedNoteNumbers.length - 5} more` : ''})
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <DifficultySelector />
+
+              <div className="mt-6">
+                <h3 className="text-base font-bold text-foreground mb-2">MIDI Mapping</h3>
+                <div className="flex gap-2 mb-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => mappingStore.useDefaultMapping()}
+                  >
+                    Use Default
+                  </Button>
+                  <Button
+                    variant={showMappingEditor ? 'default' : 'secondary'}
+                    size="sm"
+                    className="flex-1"
+                    disabled={!mappingStore.mapping}
+                    onClick={() => setShowMappingEditor(!showMappingEditor)}
+                  >
+                    {showMappingEditor ? 'Hide Editor' : 'Edit Mapping'}
+                  </Button>
+                </div>
+                <FileUploader
+                  label=""
+                  accept={{ 'text/yaml': ['.yaml', '.yml'] }}
+                  onFilesSelected={(files) => files[0] && mappingStore.loadMapping(files[0])}
+                  currentFiles={mappingStore.mappingFile ? [mappingStore.mappingFile] : []}
+                  onRemoveFile={() => mappingStore.useDefaultMapping()}
+                  description="Optional: Upload custom MIDI mapping YAML"
+                />
+                {mappingStore.mapping && !showMappingEditor && (
+                  <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mt-2 text-blue-300 text-sm">
+                    Mapping loaded: {mappingStore.mappingFile?.name || 'Default'}
                   </div>
                 )}
-
-                {conversionStore.result && (
-                  <div className="space-y-2">
-                    <Button
-                      className="w-full"
-                      variant="secondary"
-                      size="lg"
-                      onClick={() => conversionStore.downloadRLRR()}
-                    >
-                      Download ZIP Package
-                    </Button>
-
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      size="lg"
-                      onClick={() => conversionStore.downloadJSON()}
-                    >
-                      Download RLRR JSON Only
-                    </Button>
-                  </div>
+                {showMappingEditor && mappingStore.mapping && (
+                  <MappingEditor onClose={() => setShowMappingEditor(false)} />
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
           </div>
+
+          {/* Panel 5 - Convert */}
+          <Card>
+            <CardHeader>
+              <CardTitle>5. Convert</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {conversionStore.error && (
+                <div className="bg-red-950/50 border border-red-800/50 p-3 rounded-md mb-4 text-red-300 text-sm">
+                  <strong>Error:</strong> {conversionStore.error}
+                </div>
+              )}
+
+              {conversionStore.result && (
+                <div className="bg-emerald-950/50 border border-emerald-800/50 p-3 rounded-md mb-4 text-emerald-300 text-sm">
+                  <strong>Conversion successful!</strong>
+                  <div className="grid grid-cols-2 gap-1 mt-2 text-muted-foreground">
+                    <div>Events: {conversionStore.result.events.length}</div>
+                    <div>Instruments: {conversionStore.result.instruments.length}</div>
+                    <div>BPM Events: {conversionStore.result.bpmEvents.length}</div>
+                    <div>Duration: {conversionStore.result.recordingMetadata.length.toFixed(1)}s</div>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                className="w-full mb-3"
+                size="lg"
+                onClick={() => conversionStore.convert()}
+                disabled={!canConvert || conversionStore.isConverting}
+              >
+                {conversionStore.isConverting ? 'Converting...' : 'Convert to RLRR'}
+              </Button>
+
+              {!canConvert && (
+                <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mb-3 text-blue-300 text-sm">
+                  {!midiStore.parsed && 'Upload a MIDI file'}
+                  {midiStore.parsed && !conversionStore.metadata.title && 'Enter a song title'}
+                </div>
+              )}
+
+              {conversionStore.result && (
+                <div className="space-y-2">
+                  <Button
+                    className="w-full"
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => conversionStore.downloadRLRR()}
+                  >
+                    Download ZIP Package
+                  </Button>
+
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => conversionStore.downloadJSON()}
+                  >
+                    Download RLRR JSON Only
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
