@@ -10,6 +10,7 @@ import { VisualizationCanvas } from './VisualizationCanvas';
 import { AudioPlayerControls } from './AudioPlayerControls';
 import { MappingEditor } from './MappingEditor';
 import { DrumKitVisualizer } from './DrumKitVisualizer';
+import { DrumKitVisualizerThree } from './DrumKitVisualizerThree';
 import { MappingProcessor } from '../core/mapping-processor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +27,7 @@ import { cn } from '@/lib/utils';
 export function ConverterPage() {
   const [showMappingEditor, setShowMappingEditor] = useState(false);
   const [showDrumKitVisualizer, setShowDrumKitVisualizer] = useState(false);
+  const [showDrumKitVisualizerThree, setShowDrumKitVisualizerThree] = useState(false);
 
   const midiStore = useMidiStore();
   const mappingStore = useMappingStore();
@@ -171,7 +173,16 @@ export function ConverterPage() {
                   disabled={!mappingStore.drumSet}
                   onClick={() => setShowDrumKitVisualizer(!showDrumKitVisualizer)}
                 >
-                  {showDrumKitVisualizer ? 'Hide 3D' : 'View 3D'}
+                  {showDrumKitVisualizer ? 'Hide Zdog' : 'View Zdog'}
+                </Button>
+                <Button
+                  variant={showDrumKitVisualizerThree ? 'default' : 'secondary'}
+                  size="sm"
+                  className="flex-1"
+                  disabled={!mappingStore.drumSet}
+                  onClick={() => setShowDrumKitVisualizerThree(!showDrumKitVisualizerThree)}
+                >
+                  {showDrumKitVisualizerThree ? 'Hide Three.js' : 'View Three.js'}
                 </Button>
               </div>
               <FileUploader
@@ -182,13 +193,16 @@ export function ConverterPage() {
                 onRemoveFile={() => mappingStore.useDefaultDrumSet()}
                 description="Optional: Upload custom drum set JSON"
               />
-              {mappingStore.drumSet && !showDrumKitVisualizer && (
+              {mappingStore.drumSet && !showDrumKitVisualizer && !showDrumKitVisualizerThree && (
                 <div className="bg-blue-950/50 border border-blue-800/50 p-3 rounded-md mt-2 text-blue-300 text-sm">
                   Drum set loaded: {mappingStore.drumSetFile?.name || 'Default'} ({mappingStore.drumSet.instruments.length} instruments)
                 </div>
               )}
               {showDrumKitVisualizer && mappingStore.drumSet && (
                 <DrumKitVisualizer onClose={() => setShowDrumKitVisualizer(false)} />
+              )}
+              {showDrumKitVisualizerThree && mappingStore.drumSet && (
+                <DrumKitVisualizerThree onClose={() => setShowDrumKitVisualizerThree(false)} />
               )}
             </CardContent>
           </Card>

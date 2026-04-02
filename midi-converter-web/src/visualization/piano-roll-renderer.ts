@@ -22,18 +22,33 @@ export interface InstrumentLane {
   drumClass: string;
 }
 
-// Drum color mapping (from plan)
+// Drum color mapping (linear sRGB converted)
 export const DRUM_COLORS: Record<string, string> = {
-  Kick: '#ff6464',
-  Snare: '#ffff64',
-  HiHat: '#64ff64',
-  Crash17: '#ff9632',
-  Crash18: '#ff9632',
-  Crash19: '#ff9632',
-  Ride20: '#9664ff',
-  Tom1: '#64c8ff',
-  Tom2: '#64c8ff',
-  FloorTom: '#64c8ff',
+  Snare: '#96001c',
+  HiHat: '#389c9b',
+  Tom1: '#2a6265',
+  Tom2: '#0d3b00',
+  FloorTom: '#3b1c69',
+  Kick: '#222e76',
+  China: '#3dc54f',
+  Crash13: '#b89400',
+  Crash15: '#961c8e',
+  Crash17: '#e66945',
+  Ride17: '#ffff00',
+  Ride20: '#e97000',
+  BongoH: '#3b3596',
+  BongoL: '#6c4d35',
+  Timpani1: '#5a3b82',
+  Timp2: '#6a4b96',
+  Timp3: '#af6ec3',
+  Tambourine1: '#963547',
+  Tambourine2: '#965651',
+  Triangle: '#62966e',
+  Gong: '#9b564b',
+  Cowbell: '#712e16',
+  Xylophone: '#cc5565',
+  Marimba: '#4ba793',
+  Glockenspiel: '#dc8166',
 };
 
 export class PianoRollRenderer {
