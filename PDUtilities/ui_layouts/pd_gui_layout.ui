@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
+    <width>608</width>
     <height>455</height>
    </rect>
   </property>
@@ -48,7 +48,7 @@ QCheckBox {
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>591</width>
+      <width>611</width>
       <height>401</height>
      </rect>
     </property>
@@ -79,7 +79,7 @@ QCheckBox {
       <rect>
        <x>5</x>
        <y>0</y>
-       <width>590</width>
+       <width>601</width>
        <height>311</height>
       </rect>
      </property>
@@ -378,7 +378,7 @@ QCheckBox {
       <widget class="QLabel" name="difficultyLabel">
        <property name="geometry">
         <rect>
-         <x>340</x>
+         <x>300</x>
          <y>100</y>
          <width>81</width>
          <height>16</height>
@@ -396,7 +396,7 @@ QCheckBox {
       <widget class="QComboBox" name="difficultyComboBox">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>370</x>
          <y>100</y>
          <width>191</width>
          <height>22</height>
@@ -531,7 +531,7 @@ QCheckBox {
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string extracomment="Any notes above this velocity will be considered an accent note."/>
+             <string>Any notes above this velocity will be considered an accent note.</string>
             </property>
             <property name="toolTipDuration">
              <number>1</number>
@@ -547,7 +547,7 @@ QCheckBox {
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string extracomment="Any notes above this velocity will be considered an accent note."/>
+             <string>Any notes above this velocity will be considered an accent note.</string>
             </property>
             <property name="toolTipDuration">
              <number>0</number>
@@ -583,7 +583,7 @@ QCheckBox {
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string extracomment="Any notes below this velocity will be considered an accent note."/>
+             <string>Any notes below this velocity will be considered an accent note.</string>
             </property>
             <property name="text">
              <string>Velocity Threshold</string>
@@ -596,7 +596,7 @@ QCheckBox {
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string extracomment="Any notes below this velocity will be considered an accent note."/>
+             <string>Any notes below this velocity will be considered an accent note.</string>
             </property>
             <property name="maximum">
              <number>127</number>
@@ -851,7 +851,7 @@ QCheckBox {
         <rect>
          <x>10</x>
          <y>90</y>
-         <width>578</width>
+         <width>582</width>
          <height>205</height>
         </rect>
        </property>
@@ -980,6 +980,9 @@ QCheckBox {
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Preview track</string>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -1093,6 +1096,9 @@ QCheckBox {
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Preview track</string>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -1203,6 +1209,9 @@ QCheckBox {
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Preview track</string>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -1312,6 +1321,9 @@ QCheckBox {
                <width>30</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="toolTip">
+              <string>Preview track</string>
              </property>
              <property name="text">
               <string>&gt;</string>
@@ -1428,6 +1440,9 @@ QCheckBox {
                <width>30</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="toolTip">
+              <string>Preview track</string>
              </property>
              <property name="text">
               <string>&gt;</string>
@@ -1558,6 +1573,9 @@ QCheckBox {
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Preview track</string>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -1667,6 +1685,9 @@ QCheckBox {
                <width>30</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="toolTip">
+              <string>Preview track</string>
              </property>
              <property name="text">
               <string>&gt;</string>
@@ -1778,6 +1799,9 @@ QCheckBox {
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Preview track</string>
+             </property>
              <property name="text">
               <string>&gt;</string>
              </property>
@@ -1887,6 +1911,9 @@ QCheckBox {
                <width>30</width>
                <height>16777215</height>
               </size>
+             </property>
+             <property name="toolTip">
+              <string>Preview track</string>
              </property>
              <property name="text">
               <string>&gt;</string>
@@ -2197,7 +2224,7 @@ QCheckBox {
     <widget class="QPushButton" name="convertButton">
      <property name="geometry">
       <rect>
-       <x>120</x>
+       <x>50</x>
        <y>10</y>
        <width>131</width>
        <height>41</height>
@@ -2219,8 +2246,8 @@ QCheckBox {
     <widget class="QPushButton" name="setOutputButton">
      <property name="geometry">
       <rect>
-       <x>300</x>
-       <y>11</y>
+       <x>210</x>
+       <y>10</y>
        <width>131</width>
        <height>41</height>
       </rect>
@@ -2234,6 +2261,27 @@ QCheckBox {
       <string>Set Output Folder</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="clearAllTrackButton">
+     <property name="geometry">
+      <rect>
+       <x>370</x>
+       <y>10</y>
+       <width>131</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>-1</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Clear all selected files in Audio Tracks tab.</string>
+     </property>
+     <property name="text">
+      <string>Clear Audio Tracks</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -2241,8 +2289,8 @@ QCheckBox {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>602</width>
-     <height>37</height>
+     <width>608</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">

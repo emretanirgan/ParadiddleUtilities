@@ -29,6 +29,7 @@ class MidiConverter:
             'authoringTool': 'ParadiddleUtilities MidiConverter',
             'recordingMetadata' : {},
             'audioFileData' : {},
+            'highwaySettings' : {},
             'instruments' : [],
             'events' : []
         }
@@ -56,6 +57,18 @@ class MidiConverter:
         self.convert_track_index = 0
         self.note_to_drum_maps = [] # in order of difficulty
         self.toggle_to_drum_maps = [] # example: [{111: Snare, 110: HiHat}, {100: Kick}]
+        
+        self.ghost_notes_enabled = False
+        self.accent_notes_enabled = False
+        self.ghost_note_threshold = 20
+        self.accent_note_threshold = 110
+        
+        self.highwaySettings = {
+            'ghostNotes': False,
+            'accentNotes': False,
+            'ghostNoteThreshold': 20,
+            'accentNoteThreshold': 110,
+        }
 
         self.audio_file_data = {
             'songTracks' : [],
@@ -302,9 +315,8 @@ class MidiConverter:
             
             # Create reverse toggle map for lookup
             toggle_map_rev = {}
-            for note in toggle_map:
-                for drum in toggle_map[note]:
-                    toggle_map_rev[drum["drum"]] = note
+            for note, drum in toggle_map.items():
+                toggle_map_rev[drum] = note
                     
             track_to_convert = mid.tracks[self.convert_track_index]
             event_count = 0
@@ -396,10 +408,18 @@ class MidiConverter:
         print("Converting to rlrr...")
         if not self.midi_file:
             return "Please slect a MIDI file first."
+        target_rlrr_path = os.path.join(self.output_rlrr_dir, self.song_name, self.song_name + '_' + self.difficulty + '.rlrr')
+        if os.path.isfile(target_rlrr_path):
+            reply = QMessageBox.question(None, "Overwrite File?",
+                                            f"The output file already exists at:\n{target_rlrr_path}\nDo you want to overwrite it?",
+                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply != QMessageBox.Yes:
+                return "Aborted."
         self.analyze_midi_file()
         # Filter out empty strings from track lists
         flt_drum_tracks = [x for x in self.drum_tracks if x.strip()]
         flt_song_tracks = [x for x in self.song_tracks if x.strip()]
+        flt_song_preview_tracks = [self.song_preview_track.strip()]
 
         # use whichever is longer for our overall song length
         last_event_time = 0
@@ -430,6 +450,12 @@ class MidiConverter:
         self.audio_file_data['calibrationOffset'] = self.calibration_offset
         self.audio_file_data['songPreview'] = self.song_preview_track.split('/')[-1] if self.song_preview_track else ''
         self.out_dict["audioFileData"] = self.audio_file_data
+        
+        self.highwaySettings['ghostNotes'] = self.ghost_notes_enabled
+        self.highwaySettings['accentNotes'] = self.accent_notes_enabled
+        self.highwaySettings['ghostNoteThreshold'] = self.ghost_note_threshold
+        self.highwaySettings['accentNoteThreshold'] = self.accent_note_threshold
+        self.out_dict["highwaySettings"] = self.highwaySettings
 
         self.recording_metadata['title'] = self.song_name
         self.recording_metadata['description'] = self.recording_description
@@ -449,12 +475,16 @@ class MidiConverter:
                 print("Error creating directory:", str(e))
                 return f"Failed to create output directory `{output_folder_path}`"
 
-        all_tracks = flt_drum_tracks + flt_song_tracks
+        all_tracks = flt_drum_tracks + flt_song_tracks + flt_song_preview_tracks
         for track in all_tracks:
-            copyfile(track, output_folder_path + '/' + track.split('/')[-1])
+            target_path = os.path.join(output_folder_path, track.split('/')[-1])
+            if os.path.isfile(track) and not os.path.isfile(target_path):
+                copyfile(track, target_path)
         if self.cover_image_path:
-            copyfile(self.cover_image_path, output_folder_path + '/' + cover_image_short)
+            target_path = os.path.join(output_folder_path, cover_image_short)
+            if os.path.isfile(self.cover_image_path) and not os.path.isfile(target_path):
+                copyfile(self.cover_image_path, target_path)
 
-        with open(os.path.join(self.output_rlrr_dir,self.song_name) + '/' + self.song_name + '_' + self.difficulty + '.rlrr', 'w') as outfile:
+        with open(target_rlrr_path, 'w') as outfile:
             json.dump(self.out_dict, outfile, indent=4)
             return "Conversion done!"
