@@ -5,6 +5,8 @@
  * - Drag: Pan timeline
  */
 
+import { LABEL_WIDTH } from './piano-roll-renderer';
+
 export interface ZoomPanCallbacks {
   onZoomChange: (zoom: number) => void;
   onScrollChange: (offset: number) => void;
@@ -75,17 +77,19 @@ export class ZoomPanController {
   private handleWheel = (e: WheelEvent): void => {
     e.preventDefault();
 
-    const zoomSpeed = 0.001;
+    const zoomSpeed = 0.005;
     const delta = -e.deltaY * zoomSpeed;
-    const newZoom = Math.max(0.1, Math.min(10, this.zoom + delta));
+    const newZoom = Math.max(0.5, Math.min(10, this.zoom + delta));
 
-    // Zoom towards mouse position
+    // Zoom towards mouse position within the scrollable area (right of LABEL_WIDTH)
     const rect = this.canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
-    const mouseRatio = (mouseX + this.scrollOffset) / (this.canvas.width * this.zoom);
+    const scrollableWidth = this.canvas.getBoundingClientRect().width - LABEL_WIDTH;
+    const mouseInScrollable = mouseX - LABEL_WIDTH;
+    const mouseRatio = (mouseInScrollable + this.scrollOffset) / (scrollableWidth * this.zoom);
 
     // Adjust scroll offset to keep mouse position fixed during zoom
-    const newScrollOffset = mouseRatio * this.canvas.width * newZoom - mouseX;
+    const newScrollOffset = mouseRatio * scrollableWidth * newZoom - mouseInScrollable;
 
     this.zoom = newZoom;
     this.scrollOffset = Math.max(0, newScrollOffset);
@@ -100,6 +104,9 @@ export class ZoomPanController {
   private handleMouseDown = (e: MouseEvent): void => {
     const rect = this.canvas.getBoundingClientRect();
     this.lastMouseX = e.clientX - rect.left;
+
+    // Ignore clicks in the label column
+    if (this.lastMouseX < LABEL_WIDTH) return;
 
     if (e.button === 0) {
       // Left click

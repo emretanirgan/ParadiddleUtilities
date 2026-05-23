@@ -1,29 +1,116 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { useMappingStore } from '../stores/mapping-store';
-import { DRUM_COLORS } from '../visualization/piano-roll-renderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Converts an Unreal FRotator [pitch, yaw, roll] (degrees) to a Three.js Quaternion.
-// Uses the scalar path from UE source (FRotator3f::Quaternion()), then remaps axes:
-//   Unreal (LH, X=fwd, Y=right, Z=up) → Three.js (RH, X=right, Y=up, Z=toward viewer)
-// The coordinate transform has det=-1 (LH→RH), so the quaternion vector part is negated
-// after axis remapping: qx=-qyU, qy=-qzU, qz=qxU, qw=qwU.
-function unrealRotatorToThreeQuaternion(pitch: number, yaw: number, roll: number): THREE.Quaternion {
-  const halfDeg = Math.PI / 360;
-  const sp = Math.sin(pitch * halfDeg), cp = Math.cos(pitch * halfDeg);
-  const sy = Math.sin(yaw   * halfDeg), cy = Math.cos(yaw   * halfDeg);
-  const sr = Math.sin(roll  * halfDeg), cr = Math.cos(roll  * halfDeg);
+const CM_TO_M = 0.01;
 
-  // UE scalar formula (FRotator3f::Quaternion, non-SIMD path)
-  const qxU =  cr*sp*sy - sr*cp*cy;
-  const qyU = -cr*sp*cy - sr*cp*sy;
-  const qzU =  cr*cp*sy - sr*sp*cy;
-  const qwU =  cr*cp*cy + sr*sp*sy;
-  console.log(`UE FRotator (pitch, yaw, roll): (${pitch}, ${yaw}, ${roll}) → FQuat (qx, qy, qz, qw): (${qxU}, ${qyU}, ${qzU}, ${qwU})`);
-  // Remap to Three.js frame: negate vector part, then apply axis mapping
-  return new THREE.Quaternion(-qyU, qzU, -qxU, qwU).normalize();
+// Confirmed working position mapping:
+// Unreal [x, y, z] -> Three [y, z, -x]
+const BASIS_CHANGE = new THREE.Matrix4().set(
+   0, 1,  0, 0,
+   0, 0,  1, 0,
+  -1, 0,  0, 0,
+   0, 0,  0, 1
+);
+const BASIS_CHANGE_INV = BASIS_CHANGE.clone().invert();
+
+function degToRad(deg: number): number {
+  return THREE.MathUtils.degToRad(deg);
+}
+
+function isHiHatClass(className: string) { return className.includes('HiHat'); }
+function isKickClass(className: string)  { return className.includes('Kick'); }
+function isSnareClass(className: string) { return className.includes('Snare'); }
+function isFloorTomClass(className: string) { return className.includes('FloorTom'); }
+function isTomClass(className: string)   { return className.includes('Tom'); }
+function isCymbalClass(className: string) {
+  return className.includes('Crash') || className.includes('Ride') || className.includes('HiHat');
+}
+
+function createGeometryForInstrument(className: string): THREE.BufferGeometry {
+  if (isKickClass(className))      return new THREE.CylinderGeometry(0.28, 0.28, 0.45, 32);
+  if (isSnareClass(className))     return new THREE.CylinderGeometry(0.18, 0.18, 0.12, 32);
+  if (isFloorTomClass(className))  return new THREE.CylinderGeometry(0.22, 0.22, 0.16, 32);
+  if (isTomClass(className))       return new THREE.CylinderGeometry(0.16, 0.16, 0.14, 32);
+  if (isHiHatClass(className))     return new THREE.ConeGeometry(0.20, 0.03, 32, 1, true);
+  if (className.includes('Crash')) return new THREE.ConeGeometry(0.24, 0.035, 32, 1, true);
+  if (className.includes('Ride'))  return new THREE.ConeGeometry(0.26, 0.035, 32, 1, true);
+  return new THREE.BoxGeometry(0.1, 0.1, 0.1);
+}
+
+function createMaterialForInstrument(className: string): THREE.MeshLambertMaterial {
+  if (isCymbalClass(className)) return new THREE.MeshLambertMaterial({ color: 0xd6b24c, side: THREE.DoubleSide });
+  if (isKickClass(className))   return new THREE.MeshLambertMaterial({ color: 0x2b2b2b });
+  if (isSnareClass(className))  return new THREE.MeshLambertMaterial({ color: 0xbfc3c9 });
+  return new THREE.MeshLambertMaterial({ color: 0x7a4a25 });
+}
+
+function unrealLocationToThree(location: number[]): THREE.Vector3 {
+  const [x, y, z] = location;
+  return new THREE.Vector3(y * CM_TO_M, z * CM_TO_M, -x * CM_TO_M);
+}
+
+function unrealScaleToThree(scale: number[] | undefined): THREE.Vector3 {
+  const [sx, sy, sz] = scale ?? [1, 1, 1];
+  return new THREE.Vector3(sy, sz, sx);
+}
+
+// Rotation array format from .rlrr: [roll, pitch, yaw]
+function rotationArrayToUnrealQuat(rotationArray: number[]): THREE.Quaternion {
+  const [rollDeg, pitchDeg, yawDeg] = rotationArray;
+
+  const yaw   = new THREE.Matrix4().makeRotationZ(degToRad(yawDeg));
+  const pitch = new THREE.Matrix4().makeRotationY(degToRad(pitchDeg));
+  const roll  = new THREE.Matrix4().makeRotationX(degToRad(rollDeg));
+
+  const unrealRotMatrix = new THREE.Matrix4()
+    .multiply(yaw)
+    .multiply(pitch)
+    .multiply(roll);
+
+  const quat = new THREE.Quaternion();
+  unrealRotMatrix.decompose(new THREE.Vector3(), quat, new THREE.Vector3());
+  quat.normalize();
+
+  // Correction to match Unreal's printed quaternion values
+  quat.set(-quat.x, -quat.y, quat.z, quat.w).normalize();
+  return quat;
+}
+
+function unrealQuatToThreeQuat(unrealQuat: THREE.Quaternion): THREE.Quaternion {
+  const unrealRotMatrix = new THREE.Matrix4().makeRotationFromQuaternion(unrealQuat);
+
+  const threeRotMatrix = new THREE.Matrix4()
+    .multiplyMatrices(BASIS_CHANGE, unrealRotMatrix)
+    .multiply(BASIS_CHANGE_INV);
+
+  const quat = new THREE.Quaternion();
+  threeRotMatrix.decompose(new THREE.Vector3(), quat, new THREE.Vector3());
+  return quat.normalize();
+}
+
+function createDrumMesh(inst: { name: string; class: string; location?: number[]; rotation?: number[]; scale?: number[] }): THREE.Group {
+  const parent = new THREE.Group();
+  parent.name = inst.name;
+
+  const geometry = createGeometryForInstrument(inst.class);
+  const material = createMaterialForInstrument(inst.class);
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+
+  const unrealQuat = rotationArrayToUnrealQuat(inst.rotation ?? [0, 0, 0]);
+  const threeQuat  = unrealQuatToThreeQuat(unrealQuat);
+
+  parent.position.copy(unrealLocationToThree(inst.location ?? [0, 0, 0]));
+  parent.quaternion.copy(threeQuat);
+  parent.scale.copy(unrealScaleToThree(inst.scale));
+
+  parent.add(mesh);
+  return parent;
 }
 
 interface DrumKitVisualizerThreeProps {
@@ -42,15 +129,16 @@ export function DrumKitVisualizerThree({ onClose }: DrumKitVisualizerThreeProps)
     const height = 400;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f172a);
+    scene.background = new THREE.Color(0x1e1e22);
 
-    const axesHelper = new THREE.AxesHelper( 20 ); 
-    scene.add( axesHelper );
-
-    // const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 5000);
-    const camera = new THREE.OrthographicCamera(-width / 4, width / 4, height / 4, -height / 4, 0.1, 5000);
-    camera.position.set(250, 200, 250);
-    camera.lookAt(0, 50, 0);
+    // Camera in meter-scale scene; orbit radius ~3m
+    const camera = new THREE.OrthographicCamera(
+      -width / height * 2, width / height * 2, 2, -2, 0.01, 100
+    );
+    camera.position.set(3, 2, 3);
+    camera.lookAt(0, 0.5, 0);
+    camera.zoom = 1.5;
+    camera.updateProjectionMatrix();
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
@@ -59,63 +147,46 @@ export function DrumKitVisualizerThree({ onClose }: DrumKitVisualizerThreeProps)
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(100, 200, 100);
+    dirLight.position.set(2, 4, 2);
     scene.add(dirLight);
 
-    const getDrumColor = (name: string): number => {
-      const cleanName = name.replace('BP_', '').replace('_C', '').replace(/_\d+$/, '');
-      const hex = DRUM_COLORS[cleanName] || '#64c8ff';
-      return parseInt(hex.replace('#', ''), 16);
-    };
+    // Ground plane
+    const ground = new THREE.Mesh(
+      new THREE.CylinderGeometry(2, 2, 0.05, 32),
+      new THREE.MeshLambertMaterial({ color: 0x1e293b })
+    );
+    // ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
 
-    mappingStore.drumSet.instruments.forEach((instrument) => {
-      // if (!instrument.name.includes('Kick')) { return; } // TEMP: Only render kicks for now, to focus on debugging orientation/sizing
-      const pos = instrument.location || [0, 0, 0];
-      const rot = instrument.rotation || [0, 0, 0];
-      const scale = instrument.scale || [1, 1, 1];
+    const orbitTarget = new THREE.Vector3(0, 0.5, 0);
 
-      const drumName = instrument.name.replace('BP_', '').replace('_C', '').replace(/_\d+$/, '');
-      const baseSize = 30;
-      const radius = (baseSize * scale[0]) / 2;
-      const length = baseSize * scale[2];
-      const isCymbal = drumName.includes('HiHat') || drumName.includes('Crash') || drumName.includes('Ride');
-
-      // Position: Unreal (X=fwd, Y=right, Z=up) → Three.js (X=right, Y=up, Z=-fwd)
-      const position = new THREE.Vector3(pos[1], pos[2], -pos[0]);
-      const quaternion = unrealRotatorToThreeQuaternion(rot[1], rot[2], rot[0]);
-      console.log('Drum:', instrument.name, 'Position:', position, 'Rotation (Euler):', rot, 'Quaternion:', quaternion);
-      const color = getDrumColor(instrument.name);
-      const mat = new THREE.MeshLambertMaterial({ color });
-
-      let geo: THREE.BufferGeometry;
-      if (isCymbal) {
-        // ConeGeometry axis is along Y by default — points up, matching Unreal Z(up) after coord mapping
-        geo = new THREE.ConeGeometry(radius, length / 3, 32);
-      } else {
-        // CylinderGeometry axis is along Y by default — no orientation correction needed
-        geo = new THREE.CylinderGeometry(radius, radius, length / 1.5, 32);
+    for (const inst of mappingStore.drumSet.instruments) {
+      scene.add(createDrumMesh(inst));
+      //keep track of the snare position for later to center orbit around it
+      if (isSnareClass(inst.class) && inst.location) {
+        const snarePos = unrealLocationToThree(inst.location);
+        orbitTarget.copy(snarePos);
       }
+    }
 
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(position);
-      mesh.quaternion.copy(quaternion);
-      scene.add(mesh);
-    });
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(orbitTarget);
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.0;
+    // controls.enablePan = false;
+    controls.update();
 
-    // Slow orbit around the kit
-    let angle = Math.PI / 4;
     let animFrameId: number;
     function animate() {
       animFrameId = requestAnimationFrame(animate);
-      angle += 0.003;
-      camera.position.set(250 * Math.sin(angle), 200, 250 * Math.cos(angle));
-      camera.lookAt(0, 50, 0);
+      controls.update();
       renderer.render(scene, camera);
     }
     animate();
 
     return () => {
       cancelAnimationFrame(animFrameId);
+      controls.dispose();
       mount.removeChild(renderer.domElement);
       renderer.dispose();
     };
@@ -126,7 +197,7 @@ export function DrumKitVisualizerThree({ onClose }: DrumKitVisualizerThreeProps)
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle>3D Drum Kit Preview (Three.js)</CardTitle>
+        <CardTitle>3D Drum Kit Preview</CardTitle>
         <Button variant="secondary" size="sm" onClick={onClose}>
           Close
         </Button>

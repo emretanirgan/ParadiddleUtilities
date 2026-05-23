@@ -7,6 +7,12 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        futura: ['futura', 'sans-serif'],
+        'futura-book': ['futura-book', 'sans-serif'],
+        'futura-light': ['futura-light', 'sans-serif'],
+        'futura-heavy': ['futura-heavy', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

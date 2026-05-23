@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 type ViewMode = 'mapped' | 'raw';
 
-interface TrackToggles {
-  drums: boolean;
-  audio: boolean;
-  midi: boolean;
+interface PlaybackToggles {
+  songTracks: boolean;
+  drumTracks: boolean;
+  noteSounds: boolean;
 }
 
 interface UIStore {
@@ -14,7 +14,7 @@ interface UIStore {
   scrollOffset: number;
   currentTime: number;
   isPlaying: boolean;
-  trackToggles: TrackToggles;
+  playbackToggles: PlaybackToggles;
 
   setViewMode: (mode: ViewMode) => void;
   setZoom: (zoom: number) => void;
@@ -22,7 +22,7 @@ interface UIStore {
   setCurrentTime: (time: number) => void;
   togglePlayback: () => void;
   setPlaying: (isPlaying: boolean) => void;
-  toggleTrack: (track: keyof TrackToggles) => void;
+  togglePlaybackTrack: (track: keyof PlaybackToggles) => void;
   reset: () => void;
 }
 
@@ -32,10 +32,10 @@ export const useUIStore = create<UIStore>((set) => ({
   scrollOffset: 0,
   currentTime: 0,
   isPlaying: false,
-  trackToggles: {
-    drums: true,
-    audio: true,
-    midi: true,
+  playbackToggles: {
+    songTracks: true,
+    drumTracks: true,
+    noteSounds: true,
   },
 
   setViewMode: (mode: ViewMode) => {
@@ -62,11 +62,11 @@ export const useUIStore = create<UIStore>((set) => ({
     set({ isPlaying });
   },
 
-  toggleTrack: (track: keyof TrackToggles) => {
+  togglePlaybackTrack: (track: keyof PlaybackToggles) => {
     set((state) => ({
-      trackToggles: {
-        ...state.trackToggles,
-        [track]: !state.trackToggles[track],
+      playbackToggles: {
+        ...state.playbackToggles,
+        [track]: !state.playbackToggles[track],
       },
     }));
   },
@@ -78,10 +78,10 @@ export const useUIStore = create<UIStore>((set) => ({
       scrollOffset: 0,
       currentTime: 0,
       isPlaying: false,
-      trackToggles: {
-        drums: true,
-        audio: true,
-        midi: true,
+      playbackToggles: {
+        songTracks: true,
+        drumTracks: true,
+        noteSounds: true,
       },
     });
   },

@@ -77,16 +77,20 @@ export function AudioPlayerControls() {
       </div>
 
       <div className="flex items-center gap-2 mt-3 pt-3 border-t">
-        <span className="text-xs text-muted-foreground mr-2">Show:</span>
-        {(['midi', 'drums', 'audio'] as const).map((track) => (
+        <span className="text-xs text-muted-foreground mr-2">Play:</span>
+        {([
+          ['songTracks', 'Song Tracks'],
+          ['drumTracks', 'Drum Tracks'],
+          ['noteSounds', 'Note Sounds'],
+        ] as const).map(([key, label]) => (
           <Button
-            key={track}
+            key={key}
             size="sm"
-            variant={uiState.trackToggles[track] ? 'default' : 'outline'}
-            className={cn('text-xs px-3 h-7', !uiState.trackToggles[track] && 'text-muted-foreground')}
-            onClick={() => uiState.toggleTrack(track)}
+            variant={uiState.playbackToggles[key] ? 'default' : 'outline'}
+            className={cn('text-xs px-3 h-7', !uiState.playbackToggles[key] && 'text-muted-foreground')}
+            onClick={() => uiState.togglePlaybackTrack(key)}
           >
-            {track.charAt(0).toUpperCase() + track.slice(1)}
+            {label}
           </Button>
         ))}
       </div>

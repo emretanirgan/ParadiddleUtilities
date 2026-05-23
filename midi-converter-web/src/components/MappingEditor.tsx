@@ -172,7 +172,7 @@ export function MappingEditor({ onClose }: MappingEditorProps) {
 
                 return (
                   <TableRow key={drumName}>
-                    <TableCell className="font-semibold">{drumName}</TableCell>
+                    <TableCell>{drumName}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1 items-center">
                         {notes.map((note) => (

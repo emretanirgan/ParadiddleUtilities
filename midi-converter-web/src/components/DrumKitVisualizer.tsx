@@ -25,6 +25,7 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
       element: canvas,
       dragRotate: true,
       resize: true,
+      // @ts-expect-error zoom exists at runtime but is missing from Zdog type definitions
       zoom: 1.25,
       rotate: {
         x: -0.5, // Tilt down to see from above
@@ -49,6 +50,7 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
     };
 
       // Add a flat plane for ground reference
+      // @ts-expect-error Rect exists at runtime but is missing from Zdog type definitions
       new Zdog.Rect({
         addTo: illo,
         width: 200,
@@ -166,7 +168,6 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
     // Mouse drag controls
     let isRotating = false;
     let lastX = 0;
-    let lastY = 0;
 
     const handleMouseDown = (e: MouseEvent) => {
       // isRotating = true;
@@ -185,7 +186,6 @@ export function DrumKitVisualizer({ onClose }: DrumKitVisualizerProps) {
       // illo.rotate.x += deltaY * 0.01;
 
       lastX = e.clientX;
-      lastY = e.clientY;
     };
 
     const handleMouseUp = () => {

@@ -8,7 +8,7 @@ export function MetadataForm() {
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-bold mb-4 text-foreground">Song Metadata</h3>
+      <h3 className="text-lg mb-4 text-foreground">Song Metadata</h3>
 
       <div className="mb-4">
         <Label htmlFor="title">
