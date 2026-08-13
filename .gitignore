@@ -14,8 +14,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# Anchored to the repo root: these are Python build artifacts, and an unanchored
+# "lib/" also matches midi-converter-web/src/lib/ in the web app.
+/lib/
+/lib64/
 parts/
 sdist/
 var/
