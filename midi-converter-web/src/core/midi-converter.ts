@@ -1,6 +1,6 @@
 import type { MidiParseResult, MidiTrack } from '../types/midi.types';
 import type { MidiMapping, DrumSet, DrumMapping } from '../types/mapping.types';
-import type { RLRROutput, RecordingMetadata, BPMEvent, DrumEvent } from '../types/rlrr.types';
+import type { RLRROutput, RecordingMetadata, BPMEvent, DrumEvent, AudioFileData } from '../types/rlrr.types';
 import { MappingProcessor } from './mapping-processor';
 import { ToggleStateMachine } from './toggle-state-machine';
 
@@ -23,7 +23,8 @@ export class MidiConverter {
     drumSet: DrumSet,
     difficulty: Difficulty,
     metadata: RecordingMetadata,
-    trackIndex?: number
+    trackIndex?: number,
+    audioFileData?: AudioFileData
   ): Promise<RLRROutput> {
     // Use provided track index or default
     const selectedTrackIndex = trackIndex ?? midiParsed.defaultTrackIndex;
@@ -66,7 +67,7 @@ export class MidiConverter {
         ...metadata,
         length: songLength,
       },
-      audioFileData: {
+      audioFileData: audioFileData ?? {
         songTracks: [],
         drumTracks: [],
         songPreview: '',

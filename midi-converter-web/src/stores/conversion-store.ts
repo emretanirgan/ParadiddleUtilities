@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { RLRROutput, RecordingMetadata } from '../types/rlrr.types';
 import { MidiConverter } from '../core/midi-converter';
 import { FileHandler } from '../utils/file-handlers';
+import { resolveAudioFileNames } from '../utils/audio-file-names';
 import { useMidiStore } from './midi-store';
 import { useMappingStore } from './mapping-store';
 import { useAudioStore } from './audio-store';
@@ -47,6 +48,7 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
       // Get data from other stores
       const midiState = useMidiStore.getState();
       const mappingState = useMappingStore.getState();
+      const audioState = useAudioStore.getState();
 
       // Validate we have all required data
       if (!midiState.parsed) {
@@ -67,6 +69,15 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
         throw new Error('Please provide a song title.');
       }
 
+      // Resolve the names the audio/cover files will be written under, so the
+      // paths recorded in the RLRR match the files in the exported package.
+      const fileNames = resolveAudioFileNames({
+        songTracks: audioState.songTracks,
+        drumTracks: audioState.drumTracks,
+        songPreview: audioState.songPreview,
+        coverImage: audioState.coverImage,
+      });
+
       // Run conversion
       console.log('Starting MIDI to RLRR conversion...');
       const result = await MidiConverter.convert(
@@ -74,8 +85,14 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
         mappingState.mapping,
         mappingState.drumSet,
         mappingState.difficulty,
-        metadata,
-        midiState.selectedTrackIndex
+        { ...metadata, coverImagePath: fileNames.coverImage },
+        midiState.selectedTrackIndex,
+        {
+          songTracks: fileNames.songTracks,
+          drumTracks: fileNames.drumTracks,
+          songPreview: fileNames.songPreview,
+          calibrationOffset: audioState.calibrationOffset,
+        }
       );
 
       console.log('Conversion successful!', result);

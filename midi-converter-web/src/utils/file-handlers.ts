@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import type { RLRROutput } from '../types/rlrr.types';
+import { resolveAudioFileNames } from './audio-file-names';
 
 /**
  * File handling utilities for reading and packaging files.
@@ -68,38 +69,31 @@ export class FileHandler {
     const rlrrContent = JSON.stringify(rlrrData, null, 2);
     songFolder.file(rlrrFileName, rlrrContent);
 
-    // Add audio files
-    const audioFileNames: string[] = [];
+    // Add audio files under the same names the RLRR references
+    const fileNames = resolveAudioFileNames(audioFiles);
 
     // Song tracks
     for (let i = 0; i < audioFiles.songTracks.length; i++) {
-      const file = audioFiles.songTracks[i];
-      const buffer = await this.readAsArrayBuffer(file);
-      const fileName = `song_track_${i + 1}${this.getFileExtension(file.name)}`;
-      songFolder.file(fileName, buffer);
-      audioFileNames.push(fileName);
+      const buffer = await this.readAsArrayBuffer(audioFiles.songTracks[i]);
+      songFolder.file(fileNames.songTracks[i], buffer);
     }
 
     // Drum tracks
     for (let i = 0; i < audioFiles.drumTracks.length; i++) {
-      const file = audioFiles.drumTracks[i];
-      const buffer = await this.readAsArrayBuffer(file);
-      const fileName = `drum_track_${i + 1}${this.getFileExtension(file.name)}`;
-      songFolder.file(fileName, buffer);
+      const buffer = await this.readAsArrayBuffer(audioFiles.drumTracks[i]);
+      songFolder.file(fileNames.drumTracks[i], buffer);
     }
 
     // Song preview
     if (audioFiles.songPreview) {
       const buffer = await this.readAsArrayBuffer(audioFiles.songPreview);
-      const fileName = `preview${this.getFileExtension(audioFiles.songPreview.name)}`;
-      songFolder.file(fileName, buffer);
+      songFolder.file(fileNames.songPreview, buffer);
     }
 
     // Cover image
     if (audioFiles.coverImage) {
       const buffer = await this.readAsArrayBuffer(audioFiles.coverImage);
-      const fileName = `cover${this.getFileExtension(audioFiles.coverImage.name)}`;
-      songFolder.file(fileName, buffer);
+      songFolder.file(fileNames.coverImage, buffer);
     }
 
     // Generate ZIP
@@ -127,13 +121,5 @@ export class FileHandler {
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     this.downloadBlob(blob, filename);
-  }
-
-  /**
-   * Get file extension including the dot.
-   */
-  private static getFileExtension(filename: string): string {
-    const lastDot = filename.lastIndexOf('.');
-    return lastDot !== -1 ? filename.substring(lastDot) : '';
   }
 }
